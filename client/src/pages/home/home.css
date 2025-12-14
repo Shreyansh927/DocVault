@@ -1,0 +1,388 @@
+/* ---------- Base ---------- */
+.home-container {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0b0f19, #020617);
+  color: #e5e7eb;
+  padding: 24px;
+}
+
+/* ---------- Header ---------- */
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  margin-top: 20px;
+}
+
+.home-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+/* ---------- Grid ---------- */
+.folders {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+/* ---------- Folder Card ---------- */
+.folder-card {
+  position: relative;
+  background: rgba(15, 23, 42, 0.55); /* semi-transparent */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 16px;
+
+  padding: 20px;
+  padding-top: 10px;
+  cursor: pointer;
+  overflow: hidden;
+
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 10px 30px rgba(0, 0, 0, 0.35);
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.folder-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(59, 130, 246, 0.5);
+
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 20px 50px rgba(37, 99, 235, 0.35);
+}
+
+.folder-card h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.folder-card small {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Glow effect */
+.folder-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    180px circle at 50% 20%,
+    rgba(59, 130, 246, 0.25),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.folder-card:hover .folder-glow {
+  opacity: 1;
+}
+
+.folder-card:hover .folder-glow {
+  opacity: 1;
+}
+
+/* ---------- Floating Button ---------- */
+.fab-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+
+  background: linear-gradient(125deg, #062e63, #1650ff);
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: 200%;
+  cursor: pointer;
+
+  /* box-shadow: 0 12px 30px rgba(37, 99, 235, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15); */
+
+  transition: all 1s ease;
+}
+
+.fab-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75),
+    inset 0 0 0 1px rgba(113, 97, 97, 0.25);
+  background-position: 250%;
+}
+
+.fab-btn:active {
+  transform: scale(0.95);
+}
+
+.fab-plus {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+.fab-plus::before,
+.fab-plus::after {
+  content: "";
+  position: absolute;
+  background: white;
+  border-radius: 2px;
+}
+
+.fab-plus::before {
+  width: 100%;
+  height: 3px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.fab-plus::after {
+  height: 100%;
+  width: 3px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.25s ease;
+}
+
+.modal-card {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 26px;
+  width: 100%;
+  max-width: 420px;
+  animation: slideUp 0.3s ease;
+}
+
+.modal-card h2 {
+  margin-bottom: 16px;
+}
+
+/* ---------- Form ---------- */
+.folder-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.folder-form input {
+  padding: 14px;
+  background: #020617;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  color: white;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ---------- Buttons ---------- */
+.primary-btn {
+  background: #2563eb;
+  border: none;
+  padding: 10px 18px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  background: #111827;
+  border: 1px solid #1f2937;
+  padding: 10px 18px;
+  color: #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ---------- Search Bar ---------- */
+/* .search-wrapper {
+  position: relative;
+  width: 260px;
+} */
+
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  background: rgba(2, 6, 23, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  color: #e5e7eb;
+  font-size: 14px;
+  outline: none;
+  backdrop-filter: blur(10px);
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+/* ---------- Skeleton Base ---------- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #1e293b;
+  border-radius: 6px;
+}
+
+/* Shimmer effect */
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.4s infinite;
+}
+
+/* ---------- Skeleton Sizes ---------- */
+.skeleton-title {
+  width: 140px;
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-subtitle {
+  width: 90px;
+  height: 12px;
+  opacity: 0.7;
+}
+
+/* ---------- Icon Placeholder ---------- */
+.skeleton-icon {
+  color: rgba(148, 163, 184, 0.3);
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+/* ---------- Hover Lift ---------- */
+.skeleton-card {
+  cursor: default;
+}
+
+.skeleton-card:hover {
+  transform: translateY(-3px);
+}
+
+/* ---------- Animations ---------- */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+@media screen and (max-width: 1200px) {
+  .folders {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 600px) {
+  .search-wrapper {
+    width: 100%;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 800px) {
+  .home-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .fab-btn {
+    bottom: 20px;
+    right: 20px;
+  }
+  .folders {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media screen and (max-width: "480px") {
+  .folders {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+

@@ -1,0 +1,213 @@
+/* ---------- Logout Modal Overlay ---------- */
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.65);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
+}
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 22px;
+  padding-bottom: 10px;
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+}
+
+/* ---------- Header Separator ---------- */
+.header-separator {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(59, 130, 246, 0.35),
+    rgba(148, 163, 184, 0.35),
+    rgba(59, 130, 246, 0.35),
+    transparent
+  );
+  margin-bottom: 14px;
+}
+
+
+/* ---------- Modal ---------- */
+.logout-modal {
+  background: rgba(2, 6, 23, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  padding: 24px 26px;
+  width: 100%;
+  max-width: 380px;
+  color: #e5e7eb;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+.logout-modal h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* ---------- Logout Modal Buttons ---------- */
+.logout-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Cancel (No) */
+.logout-btn.cancel {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #e5e7eb;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+.logout-btn.cancel:hover {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+/* Confirm (Yes) */
+.logout-btn.confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.logout-btn.confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(239, 68, 68, 0.5);
+}
+/* ---------- Header Right Container ---------- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+}
+
+/* ---------- Base Button ---------- */
+.header-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- Users Button ---------- */
+.header-btn.secondary {
+  background: rgba(15, 23, 42, 0.8);
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.header-btn.secondary:hover {
+  background: rgba(30, 64, 175, 0.15);
+  border-color: #2563eb;
+  color: #dbeafe;
+}
+
+/* ---------- Logout Button ---------- */
+.header-btn.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.header-btn.danger:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 600px) {
+  .header-right {
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .header-btn {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .logout-actions {
+    flex-direction: column-reverse;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 480px) {
+  .logout-modal {
+    margin: 0 16px;
+  }
+}
