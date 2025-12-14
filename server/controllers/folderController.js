@@ -1,3 +1,4 @@
+import { useActionState } from "react";
 import { db } from "../db.js";
 
 export const addFolder = async (req, res) => {
@@ -42,5 +43,39 @@ export const addFolder = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Problem in adding folder" });
+  }
+};
+
+export const deleteFolder = async (req, res) => {
+  try {
+    const { email, folderId } = req.body;
+
+    if (!email || !folderId) {
+      return res.status(400).json({ error: "crecentials ara missing" });
+    }
+
+    const user = await db.query(`SELECT * FROM users WHERE email=$1`, [email]);
+    if (user.rows.length === 0) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    const userId = user.rows[0].id;
+    const folder = await db.query(
+      `SELECT id FROM folders WHERE id=$1 AND user_id=$2`,
+      [folderId, userId]
+    );
+
+    if (folder.rows.length === 0) {
+      return res.status(404).json({ error: "folder not exists" });
+    }
+    await db.query(`DELETE FROM folders WHERE id=$1 AND user_id=$2`, [
+      folderId,
+      userId,
+    ]);
+
+    return res.status(200).json({ message: "deleted successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: "error in deleting folder" });
   }
 };

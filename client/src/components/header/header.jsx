@@ -6,6 +6,7 @@ import "./header.css";
 const Header = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const user = JSON.parse(localStorage.getItem("currentUserName"));
 
   const logout = async () => {
     try {
@@ -41,7 +42,7 @@ const Header = () => {
             className="header-btn danger"
             onClick={() => setShowLogoutModal(true)}
           >
-            Logout
+            {user}
           </button>
         </div>
       </header>

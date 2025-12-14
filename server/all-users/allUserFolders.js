@@ -11,11 +11,12 @@ export const allUserFolders = async (req, res) => {
     }
 
     const userId = user.rows[0].id;
+    const userName = user.rows[0].name;
     const allFolders = await db.query(
       `SELECT * FROM folders WHERE user_id=$1 ORDER BY created_at DESC`,
       [userId]
     );
-    res.status(200).json({ allUserFolders: allFolders.rows, message: "DONE" });
+    res.status(200).json({ allUserFolders: allFolders.rows, message: "DONE", name: userName });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: "Cannot fetch all folders" });
