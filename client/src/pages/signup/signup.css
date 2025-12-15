@@ -1,0 +1,169 @@
+/* ===============================
+   GLOBAL
+================================ */
+.signup-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: radial-gradient(circle at top, #0b0f19, #020617);
+  color: #e5e7eb;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* ===============================
+   LEFT SECTION
+================================ */
+.signup-left {
+  background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.signup-left-content {
+  text-align: center;
+  max-width: 360px;
+}
+
+.signup-left h2 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.signup-left p {
+  font-size: 15px;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+/* ===============================
+   RIGHT SECTION
+================================ */
+.signup-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+/* ===============================
+   CARD
+================================ */
+.card {
+  width: 100%;
+  max-width: 400px;
+  padding: 28px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+}
+
+.card h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.card p {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 18px;
+}
+
+/* ===============================
+   INPUTS
+================================ */
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+/* ===============================
+   BUTTON
+================================ */
+.glow-btn {
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glow-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.6);
+}
+
+.glow-btn:active {
+  transform: scale(0.97);
+}
+
+/* ===============================
+   FOOTER TEXT
+================================ */
+.card span {
+  color: #60a5fa;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.card span:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 900px) {
+  .signup-page {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-left {
+    padding: 32px 20px;
+  }
+
+  .signup-left h2 {
+    font-size: 30px;
+  }
+
+  .signup-right {
+    padding: 32px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 22px;
+  }
+
+  .signup-left h2 {
+    font-size: 26px;
+  }
+}

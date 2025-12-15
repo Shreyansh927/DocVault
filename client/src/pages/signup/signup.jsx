@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "./signup.css";
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -9,12 +10,13 @@ export default function Signup() {
     password: "",
     phoneNumber: "",
   });
-  const [value, setValue] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const submit = async (e) => {
-    setValue(true);
     e.preventDefault();
+    setLoading(true);
+
     try {
       const res = await axios.post(
         "http://localhost:4000/api/auth/signup",
@@ -28,48 +30,35 @@ export default function Signup() {
       );
 
       alert(res.data.message);
-      setValue(false);
       navigate("/login");
     } catch (err) {
-      console.log(err);
-      alert(err);
+      console.error(err);
+      alert("Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          background: "linear-gradient(135deg,#6366f1,#06b6d4)",
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 40,
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <h2>Create account</h2>
-          <p>Join SafeCloud.</p>
+    <div className="signup-page">
+      {/* ---------- Left Section ---------- */}
+      <div className="signup-left">
+        <div className="signup-left-content">
+          <h2>Create your account</h2>
+          <p>
+            Securely store, manage, and access your files anywhere with
+            SafeCloud.
+          </p>
         </div>
       </div>
-      <div
-        style={{
-          padding: 40,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="card" style={{ width: 380 }}>
+
+      {/* ---------- Right Section ---------- */}
+      <div className="signup-right">
+        <div className="card">
           <h2>Sign up</h2>
-          <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
+          <p>Create your SafeCloud account</p>
+
+          <form onSubmit={submit} style={{ display: "grid", gap: 12 }}>
             <input
               className="input"
               placeholder="Full name"
@@ -80,11 +69,12 @@ export default function Signup() {
 
             <input
               className="input"
+              placeholder="Email address"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="Email"
               required
             />
+
             <input
               className="input"
               placeholder="Password"
@@ -93,21 +83,24 @@ export default function Signup() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
             />
+
             <input
-              type="text"
-              placeholder="Phone Number"
+              className="input"
+              placeholder="Phone number"
               value={form.phoneNumber}
               onChange={(e) =>
                 setForm({ ...form, phoneNumber: e.target.value })
               }
               required
             />
-            <button className="glow-btn" type="submit">
-              {!value ? "create account" : "creating"}
+
+            <button className="glow-btn" type="submit" disabled={loading}>
+              {loading ? "Creating account..." : "Create account"}
             </button>
+
             <p>
-              Already have an account{" "}
-              <span onClick={() => navigate("/login")}>LOGIN</span>
+              Already have an account?{" "}
+              <span onClick={() => navigate("/login")}>Login</span>
             </p>
           </form>
         </div>

@@ -2,13 +2,13 @@ import React from "react";
 import Folders from "./pages/folders";
 import Document from "./pages/document";
 import Header from "./components/header/header.jsx";
-import Signup from "./pages/signup";
-import Login from "./pages/login";
+import Signup from "./pages/signup/signup.jsx";
+import Login from "./pages/login/login.jsx";
 import Home from "./pages/home/home.jsx";
 import ProtectedRoute from "./components/protectedRoute";
-import ResetEmail from "./pages/reset-email";
-import OtpField from "./pages/otp-field";
-import SetPassword from "./pages/set-password.jsx";
+import ResetEmail from "./pages/reset-email/reset-email.jsx";
+import OtpField from "./pages/otp-field/otp-field.jsx";
+import SetPassword from "./pages/set-password/set-password.jsx";
 import OtherUsers from "./pages/others/other-users.jsx";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 

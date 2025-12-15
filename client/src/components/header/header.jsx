@@ -27,7 +27,11 @@ const Header = () => {
     <>
       <header className="app-header">
         <div className="header-left">
-          <h3 className="logo">SafeCloud</h3>
+          <img
+            src="https://png.pngtree.com/png-clipart/20250207/original/pngtree-cloud-storage-optimization-service-featuring-a-3d-icon-isolated-on-transparent-png-image_20375425.png"
+            alt="img"
+            style={{ height: "70px", width: "80px" }}
+          />
         </div>
 
         <div className="header-right">
