@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/header/header";
 import { MdOutlineNavigateNext, MdDelete } from "react-icons/md";
 import { Rings } from "react-loader-spinner";
+
 import axios from "axios";
 import "./home.css";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [toggleFolderForm, setToggleForm] = useState(false);
@@ -19,6 +21,8 @@ const Home = () => {
   const currentUserEmail = JSON.parse(
     localStorage.getItem("current-user-email")
   );
+
+  const navigate = useNavigate();
 
   /* ---------------- Fetch folders ---------------- */
   useEffect(() => {
@@ -144,6 +148,7 @@ const Home = () => {
                 key={folder.id}
                 className="folder-card"
                 style={{ display: "flex", justifyContent: "space-between" }}
+                onClick={() => navigate(`/files/${folder.id}`)}
               >
                 <div>
                   <div className="folder-glow" />

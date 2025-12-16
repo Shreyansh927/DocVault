@@ -15,7 +15,7 @@ export default function Login() {
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("jwtToken");
     if (token) navigate("/home");
   }, [navigate]);
 
@@ -34,7 +34,7 @@ export default function Login() {
       );
 
       localStorage.setItem("current-user-email", JSON.stringify(form.email));
-      alert(res.data.message);
+      // alert(res.data.message);
       navigate("/home");
     } catch (err) {
       console.error(err);
@@ -46,7 +46,6 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      {/* ---------- Left (Form) ---------- */}
       <div className="login-left">
         <div className="login-card">
           <h2>Welcome back</h2>
@@ -86,7 +85,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* ---------- Right (Brand) ---------- */}
       <div className="login-right">
         <div className="login-brand">
           <h1>SafeCloud</h1>

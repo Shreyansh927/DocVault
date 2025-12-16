@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./signup.css";
+import { useEffect } from "react";
+import Cookies from "js-cookie";
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -12,6 +14,13 @@ export default function Signup() {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = Cookies.get("jwtToken");
+    if (token) {
+      navigate("/home");
+    }
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -41,7 +50,6 @@ export default function Signup() {
 
   return (
     <div className="signup-page">
-      {/* ---------- Left Section ---------- */}
       <div className="signup-left">
         <div className="signup-left-content">
           <h2>Create your account</h2>
@@ -52,7 +60,6 @@ export default function Signup() {
         </div>
       </div>
 
-      {/* ---------- Right Section ---------- */}
       <div className="signup-right">
         <div className="card">
           <h2>Sign up</h2>

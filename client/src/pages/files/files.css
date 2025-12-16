@@ -1,0 +1,90 @@
+.files-container {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0b0f19, #020617);
+  color: #e5e7eb;
+  padding: 24px;
+}
+
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.upload-btn {
+  display: flex;
+  gap: 6px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.file-card {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.upload-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-modal {
+  width: 100%;
+  max-width: 420px;
+  background: #020617;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drop-zone {
+  margin-top: 16px;
+  padding: 30px;
+  border: 2px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.preview-list {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.progress-bar {
+  margin: 12px 0;
+  height: 6px;
+  background: #1f2937;
+  border-radius: 6px;
+}
+
+.progress-bar div {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 6px;
+}

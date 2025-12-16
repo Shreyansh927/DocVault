@@ -10,6 +10,7 @@ import ResetEmail from "./pages/reset-email/reset-email.jsx";
 import OtpField from "./pages/otp-field/otp-field.jsx";
 import SetPassword from "./pages/set-password/set-password.jsx";
 import OtherUsers from "./pages/others/other-users.jsx";
+import Files from "./pages/files/files.jsx";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 const App = () => {
@@ -22,11 +23,19 @@ const App = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/home" element={<Home />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/reset-email" element={<ResetEmail />} />
           <Route path="/otp-field" element={<OtpField />} />
           <Route path="/set-new-password" element={<SetPassword />} />
           <Route path="/others" element={<OtherUsers />} />
+          <Route path="/files/:folderId" element={<Files />} />
         </Routes>
       </BrowserRouter>
     </div>
