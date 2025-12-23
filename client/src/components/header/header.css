@@ -135,15 +135,29 @@
 
 /* ---------- Users Button ---------- */
 .header-btn.secondary {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(5, 27, 79, 0.8);
   color: #e5e7eb;
   border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 .header-btn.secondary:hover {
-  background: rgba(30, 64, 175, 0.15);
+  background: rgb(24, 115, 207);
   border-color: #2563eb;
   color: #dbeafe;
+  box-shadow: 0 8px 20px rgba(47, 137, 255, 0.4);
+}
+
+.header-btn.success {
+  background: rgba(16, 48, 18, 0.8);
+  color: #e5e7eb;
+  border: 1px solid rgba(23, 235, 69, 0.2);
+}
+
+.header-btn.success:hover {
+  background: rgb(13, 162, 13);
+  border-color: #39ff67;
+  color: #dbeafe;
+  box-shadow: 0 8px 20px rgba(47, 255, 85, 0.4);
 }
 
 /* ---------- Logout Button ---------- */
@@ -151,6 +165,7 @@
   background: rgba(239, 68, 68, 0.15);
   color: #fecaca;
   border: 1px solid rgba(239, 68, 68, 0.35);
+  
 }
 
 .header-btn.danger:hover {

@@ -1,0 +1,146 @@
+/* =========================================================
+   GLOBAL SAFETY
+========================================================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   ROOT LAYOUT
+========================================================= */
+.fileview-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 32px;
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #e5e7eb;
+  background:
+    radial-gradient(800px 400px at top right, rgba(99,102,241,0.18), transparent),
+    linear-gradient(180deg, #0f172a, #020617);
+}
+
+/* =========================================================
+   FILE CARD
+========================================================= */
+.file-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 28px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+/* =========================================================
+   FILE TITLE
+========================================================= */
+.file-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  word-break: break-word;       /* 🔑 prevents overflow */
+  overflow-wrap: anywhere;     /* 🔑 */
+}
+
+/* =========================================================
+   META
+========================================================= */
+.file-meta {
+  display: flex;
+  flex-wrap: wrap;             /* 🔑 wrap instead of overflow */
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-bottom: 28px;
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+.primary-btn {
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  border: none;
+  color: #020617;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+}
+
+.primary-btn:active {
+  transform: scale(0.96);
+}
+
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
+.summary-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  overflow-wrap: anywhere;     /* 🔑 long AI text wraps */
+}
+
+.summary-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+.summary-text {
+  line-height: 1.7;
+  font-size: 0.95rem;
+  color: #e5e7eb;
+}
+
+.summary-empty {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  font-style: italic;
+  text-align: center;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+.loading {
+  padding: 40px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* =========================================================
+   RESPONSIVE (MOST IMPORTANT)
+========================================================= */
+@media (max-width: 900px) {
+  .fileview-container {
+    grid-template-columns: 1fr; /* 🔑 stack vertically */
+  }
+}
+
+@media (max-width: 480px) {
+  .fileview-container {
+    padding: 20px;
+  }
+
+  .primary-btn {
+    width: 100%;
+  }
+}

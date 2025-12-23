@@ -1,17 +1,18 @@
-import { useActionState } from "react";
+import { use, useActionState } from "react";
 import { db } from "../db.js";
 
 export const addFolder = async (req, res) => {
   try {
-    const { folderName, email } = req.body;
+    const { folderName } = req.body;
+    const userEmail = req.user.email;
 
-    if (!folderName || !email) {
+    if (!folderName || !userEmail) {
       return res.status(400).json({ error: "Missing data" });
     }
 
     // get user id from email
     const userResult = await db.query(`SELECT id FROM users WHERE email=$1`, [
-      email,
+      userEmail,
     ]);
 
     if (!userResult.rows.length) {
@@ -48,7 +49,8 @@ export const addFolder = async (req, res) => {
 
 export const deleteFolder = async (req, res) => {
   try {
-    const { email, folderId } = req.body;
+    const { folderId } = req.body;
+    const email = req.user.email;
 
     if (!email || !folderId) {
       return res.status(400).json({ error: "crecentials ara missing" });

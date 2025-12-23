@@ -1,76 +1,85 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import http from "http";
+import { Server } from "socket.io";
+
 dotenv.config();
 
 import { initDB } from "./db.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
+import { apiLimiter } from "./middleware/rateLimiter.js";
 
 import authRoutes from "./routes/authRoutes.js";
-import folderRoute from "./routes/folderRoutes.js";
+import folderRoutes from "./routes/folderRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import forgotPasswordRoute from "./routes/forgotPasswordRoute.js";
+import personalRoute from "./routes/personalInfoRoutes.js";
+import connectionRoutes from "./routes/connectionRoute.js";
 
 import { allUsers } from "./all-users/allUsers.js";
 import { allUserFolders } from "./all-users/allUserFolders.js";
-import allFiles from "./all-users/all-folder-files.js";
+import { allFiles, trashFiles } from "./all-users/all-folder-files.js";
+
+import "./permanent-deletion-job.js";
 
 const app = express();
+const server = http.createServer(app);
 
-// ---------- Core Middlewares ----------
+/* ---------- CORE ---------- */
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
-// ---------- CORS ----------
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
-    credentials: true, // allow cookies
+    origin: "http://localhost:5173",
+    credentials: true,
   })
 );
 
-// ---------- Public Routes (NO AUTH REQUIRED) ----------
-
-// Auth (login, signup)
-app.use("/api/auth", authRoutes);
-
-// Forgot password (email-based reset)
-app.use("/api/forgot", forgotPasswordRoute);
-
-// Health check
-app.get("/", (req, res) => {
-  res.send("API is running...");
+/* ---------- SOCKET ---------- */
+export const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
 });
 
-// ---------- Protected Routes (AUTH REQUIRED) ----------
+io.on("connection", (socket) => {
+  socket.on("register", (userId) => {
+    socket.join(userId);
+  });
+});
 
-// Fetch all users (admin / internal usage)
-app.use("/all-users", authMiddleware, allUsers);
+// /* ---------- LIMITER ---------- */
+// app.use("/api", apiLimiter);
 
-// Fetch all folders of users
-app.use("/get-all-folders", authMiddleware, allUserFolders);
+/* ---------- ROUTES ---------- */
+app.use("/api/auth", authRoutes);
+app.use("/api/forgot", forgotPasswordRoute);
+app.use("/api/user-profile", authMiddleware, personalRoute);
 
-// Fetch all files of folders
-app.use("/get-all-files", authMiddleware, allFiles);
+app.get("/", (req, res) => {
+  res.send("API is running");
+});
 
-// Folder creation / access
-app.use("/folder-auth", authMiddleware, folderRoute);
+app.get("/api/get-all-folders", authMiddleware, allUserFolders);
+app.get("/api/get-all-files", authMiddleware, allFiles);
+app.get("/api/get-all-trash-files", authMiddleware, trashFiles);
 
-// File upload / access
-app.use("/files", authMiddleware, fileRoutes);
+app.use("/api/folder-auth", authMiddleware, folderRoutes);
+app.use("/api/files", authMiddleware, fileRoutes);
 
-// ---------- Start Server After DB Init ----------
+app.use("/api", connectionRoutes);
+app.get("/api/all-users", authMiddleware, allUsers);
+
+/* ---------- START ---------- */
 const PORT = process.env.PORT || 4000;
 
-initDB()
-  .then(() => {
-    console.log("✅ Database initialized");
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to initialize DB:", err);
+initDB().then(() => {
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
   });
+});

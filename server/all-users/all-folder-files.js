@@ -1,46 +1,74 @@
 import { db } from "../db.js";
 
-const allFiles = async (req, res) => {
+/* ================= GET FILES ================= */
+export const allFiles = async (req, res) => {
   try {
-    const { email, folderId } = req.query;
+    const { folderId } = req.query;
+    const userId = req.user.id;
 
-    if (!email || !folderId) {
-      return res.status(400).json({ error: "missing credentials" });
+    if (!folderId) {
+      return res.status(400).json({ error: "folderId missing" });
     }
-
-    // verify user
-    const user = await db.query(`SELECT * FROM users WHERE email=$1`, [email]);
-
-    if (!user.rows.length) {
-      return res.status(404).json({ error: "user not found" });
-    }
-
-    const userId = user.rows[0].id;
 
     // verify folder ownership
-
     const folder = await db.query(
-      `SELECT * FROM folders WHERE id=$1 AND user_id=$2`,
+      `SELECT id FROM folders WHERE id=$1 AND user_id=$2`,
       [folderId, userId]
     );
+
     if (!folder.rows.length) {
-      return res.status(404).json({ error: "folder not found" });
+      return res.status(403).json({ error: "Unauthorized folder access" });
     }
 
-    // fetching all files of the folder
-
     const files = await db.query(
-      `SELECT * FROM files WHERE folder_id=$1 ORDER BY created_at DESC`,
+      `SELECT * FROM files 
+       WHERE folder_id=$1 AND is_deleted=false 
+       ORDER BY created_at DESC`,
       [folderId]
     );
 
-    return res
-      .status(200)
-      .json({ message: "files fetched successfully", allFiles: files.rows });
+    res.status(200).json({
+      message: "Files fetched",
+      allFiles: files.rows,
+    });
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ error: "error in fetching files" });
+    console.error(err);
+    res.status(500).json({ error: "Error fetching files" });
   }
 };
 
-export default allFiles;
+/* ================= TRASH FILES ================= */
+export const trashFiles = async (req, res) => {
+  try {
+    const { folderId } = req.query;
+    const userId = req.user.id;
+
+    if (!folderId) {
+      return res.status(400).json({ error: "folderId missing" });
+    }
+
+    const folder = await db.query(
+      `SELECT id FROM folders WHERE id=$1 AND user_id=$2`,
+      [folderId, userId]
+    );
+
+    if (!folder.rows.length) {
+      return res.status(403).json({ error: "Unauthorized folder access" });
+    }
+
+    const trash = await db.query(
+      `SELECT * FROM files 
+       WHERE folder_id=$1 AND is_deleted=true 
+       ORDER BY deleted_at DESC`,
+      [folderId]
+    );
+
+    res.status(200).json({
+      message: "Trash files fetched",
+      allTrashFiles: trash.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error fetching trash files" });
+  }
+};

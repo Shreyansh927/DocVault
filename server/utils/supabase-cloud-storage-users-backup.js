@@ -23,17 +23,45 @@ export const usersBackup = async (user) => {
   }
 };
 
-/* ---------------- Upload Files ---------------- */
-const sanitizeFileName = (name) => {
-  return name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
+export const uploadProfileImageToSupabase = async (user, file) => {
+  if (!user || !file) {
+    throw new Error("Missing user or file");
+  }
+
+  const safeName = file.originalname
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9._-]/g, "");
+
+  const storagePath = `profile-images/user_${
+    user.public_id
+  }/${Date.now()}_${safeName}`;
+
+  const { error } = await supabase.storage
+    .from("project2-bucket")
+    .upload(storagePath, file.buffer, {
+      contentType: file.mimetype,
+      upsert: true,
+    });
+
+  if (error) throw error;
+
+  const { data } = supabase.storage
+    .from("project2-bucket")
+    .getPublicUrl(storagePath);
+
+  return data.publicUrl;
 };
+
+/* ---------------- Upload Files ---------------- */
+const sanitizeFileName = (name) =>
+  name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
+
 export const uploadFilesToSupabase = async (userId, folderId, file) => {
   if (!userId || !folderId || !file) {
     throw new Error("Missing data");
   }
-  const safeName = sanitizeFileName(file.originalname);
 
-  // Clean & valid storage path
+  const safeName = sanitizeFileName(file.originalname);
   const storagePath = `data/user_${userId}/folder_${folderId}/${Date.now()}_${safeName}`;
 
   const { error } = await supabase.storage
@@ -48,16 +76,11 @@ export const uploadFilesToSupabase = async (userId, folderId, file) => {
     throw error;
   }
 
-  //  Get public URL
   const { data } = supabase.storage
     .from("project2-bucket")
     .getPublicUrl(storagePath);
 
   return {
     publicUrl: data.publicUrl,
-    storagePath,
-    fileName: safeName,
-    mimeType: file.mimetype,
-    size: file.size,
   };
 };

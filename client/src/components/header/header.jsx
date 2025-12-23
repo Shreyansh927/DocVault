@@ -6,20 +6,33 @@ import "./header.css";
 const Header = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const user = JSON.parse(localStorage.getItem("currentUserName"));
+
+  // ✅ FIX 1: correct localStorage key
+  const userEmail = JSON.parse(localStorage.getItem("current-user-email"));
 
   const logout = async () => {
     try {
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:4000/api/auth/logout",
         {},
-        { withCredentials: true }
+        { withCredentials: true } // ✅ REQUIRED
       );
-      alert(res.data.message);
+
+      // ✅ FIX 2: clear client-side state
+      localStorage.removeItem("current-user-email");
+
+      setShowLogoutModal(false);
       navigate("/login");
     } catch (err) {
       console.error(err);
-      alert("Logout failed");
+
+      // ✅ FIX 3: handle auth failure gracefully
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        localStorage.removeItem("current-user-email");
+        navigate("/login");
+      } else {
+        alert("Logout failed. Try again.");
+      }
     }
   };
 
@@ -29,7 +42,7 @@ const Header = () => {
         <div className="header-left">
           <img
             src="https://png.pngtree.com/png-clipart/20250207/original/pngtree-cloud-storage-optimization-service-featuring-a-3d-icon-isolated-on-transparent-png-image_20375425.png"
-            alt="img"
+            alt="SafeCloud"
             style={{ height: "70px", width: "80px" }}
           />
         </div>
@@ -41,12 +54,36 @@ const Header = () => {
           >
             Users
           </button>
+          <button
+            className="header-btn success"
+            onClick={() => navigate("/dashboard")}
+          >
+            Dashboard
+          </button>
+          <button
+            className="header-btn success"
+            onClick={() => navigate("/notifications")}
+          >
+            Notifications
+          </button>
+          <button
+            className="header-btn success"
+            onClick={() => navigate("/connections")}
+          >
+            Connections
+          </button>
+          <button
+            className="header-btn success"
+            onClick={() => navigate("/access-control")}
+          >
+            Access Control
+          </button>
 
           <button
             className="header-btn danger"
             onClick={() => setShowLogoutModal(true)}
           >
-            {user}
+            {userEmail || "Account"}
           </button>
         </div>
       </header>

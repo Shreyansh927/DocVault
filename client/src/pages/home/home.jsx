@@ -43,8 +43,7 @@ const Home = () => {
 
   const fetchAllFolders = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/get-all-folders", {
-        params: { email: currentUserEmail },
+      const res = await axios.get("http://localhost:4000/api/get-all-folders", {
         withCredentials: true,
       });
 
@@ -52,7 +51,8 @@ const Home = () => {
       setSorted(res.data.allUserFolders || []);
 
       localStorage.setItem("currentUserName", JSON.stringify(res.data.name));
-    } catch {
+    } catch (err) {
+      console.error(err);
       setAllFolders([]);
     }
   };
@@ -64,8 +64,8 @@ const Home = () => {
 
     try {
       await axios.post(
-        "http://localhost:4000/folder-auth/add-folder",
-        { folderName, email: currentUserEmail },
+        "http://localhost:4000/api/folder-auth/add-folder",
+        { folderName },
         { withCredentials: true }
       );
 
@@ -81,9 +81,8 @@ const Home = () => {
   const confirmDeleteFolder = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:4000/folder-auth/delete-folder",
+        "http://localhost:4000/api/folder-auth/delete-folder",
         {
-          email: currentUserEmail,
           folderId: folderToDelete.id,
         },
         {
@@ -167,7 +166,8 @@ const Home = () => {
                         marginTop: "20px",
                         textAlign: "right",
                       }}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setFolderToDelete(folder);
                         setShowDeleteModal(true);
                       }}

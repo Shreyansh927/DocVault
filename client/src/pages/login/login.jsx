@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { socket } from "../../socket";
 import axios from "axios";
-import Cookies from "js-cookie";
 import { useNavigate, Link } from "react-router-dom";
 import "./login.css";
 
@@ -13,32 +13,34 @@ export default function Login() {
   });
 
   const [processing, setProcessing] = useState(false);
-
-  useEffect(() => {
-    const token = Cookies.get("jwtToken");
-    if (token) navigate("/home");
-  }, [navigate]);
+  const [error, setError] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
     setProcessing(true);
+    setError("");
 
     try {
       const res = await axios.post(
         "http://localhost:4000/api/auth/login",
         {
-          email: form.email,
+          email: form.email.trim(),
           password: form.password,
         },
         { withCredentials: true }
       );
 
-      localStorage.setItem("current-user-email", JSON.stringify(form.email));
-      // alert(res.data.message);
+      // ✅ user is guaranteed now
+      const user = res.data.user;
+
+      localStorage.setItem("current-user", JSON.stringify(user));
+
+      // socket registration
+      socket.emit("register", user.id);
+
       navigate("/home");
     } catch (err) {
-      console.error(err);
-      alert("Invalid credentials");
+      setError(err.response?.data?.error || "Login failed");
     } finally {
       setProcessing(false);
     }
@@ -54,6 +56,7 @@ export default function Login() {
           <form onSubmit={submit} className="login-form">
             <input
               className="input"
+              type="email"
               placeholder="Email address"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -62,12 +65,14 @@ export default function Login() {
 
             <input
               className="input"
-              placeholder="Password"
               type="password"
+              placeholder="Password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
             />
+
+            {error && <p className="error-text">{error}</p>}
 
             <button className="glow-btn" type="submit" disabled={processing}>
               {processing ? "Signing in..." : "Sign in"}
@@ -88,10 +93,7 @@ export default function Login() {
       <div className="login-right">
         <div className="login-brand">
           <h1>SafeCloud</h1>
-          <p>
-            Secure cloud storage to organize, protect, and access your files
-            anytime.
-          </p>
+          <p>Secure cloud storage for your files.</p>
         </div>
       </div>
     </div>

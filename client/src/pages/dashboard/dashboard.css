@@ -1,0 +1,294 @@
+/* App shell */
+.app-shell {
+  min-height: 100vh;
+  background: #020617;
+  color: #e5e7eb;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.content-area {
+  max-width: 1100px;
+  margin: auto;
+  padding: 64px 24px;
+}
+
+/* Card */
+.profile-card {
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(20px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 32px;
+}
+
+/* Header */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 36px;
+}
+
+.profile-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.profile-header p {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* Edit button */
+.edit-action {
+  border: 1px solid #334155;
+  background: transparent;
+  color: #e5e7eb;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.edit-action:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Profile view */
+.profile-body {
+  display: grid;
+  gap: 36px;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-xl {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #334155;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e293b;
+  font-size: 36px;
+}
+
+.identity h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.identity span {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* Meta */
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.meta label {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.meta p {
+  margin-top: 6px;
+  font-size: 15px;
+}
+
+/* Edit */
+.edit-layout {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 28px;
+}
+
+.edit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field label {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.field input {
+  background: #020617;
+  border: 1px solid #1e293b;
+  padding: 10px;
+  border-radius: 10px;
+  color: #e5e7eb;
+}
+
+.primary-btn {
+  margin-top: 12px;
+  background: #2563eb;
+  color: white;
+  border-radius: 12px;
+  padding: 12px;
+  border: none;
+  font-weight: 500;
+}
+
+.primary-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Preview */
+.preview-panel {
+  text-align: center;
+}
+
+.preview-panel span {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.preview-panel img {
+  margin-top: 10px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px dashed #334155;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .edit-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+button:focus {
+  outline: none;
+}
+
+
+/* Form container */
+.glass-form {
+  background: rgba(2, 6, 23, 0.6);
+  border-radius: 14px;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Sections */
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.form-section p {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 18px;
+}
+
+/* Floating field */
+.field {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.field input {
+  width: 100%;
+  padding: 14px 12px;
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.25);
+}
+
+/* Floating label */
+.field.floating label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  font-size: 13px;
+  color: #94a3b8;
+  background: #020617;
+  padding: 0 6px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: 0.2s ease;
+}
+
+.field.floating input:focus + label,
+.field.floating input:not(:placeholder-shown) + label {
+  top: -6px;
+  font-size: 11px;
+  color: #60a5fa;
+}
+
+/* Disabled */
+.field.disabled input {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Upload box */
+.upload-box {
+  border: 1px dashed #334155;
+  border-radius: 12px;
+  padding: 22px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.upload-box input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-box span {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .glass-form {
+    padding: 20px;
+  }
+}

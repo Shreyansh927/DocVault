@@ -1,0 +1,124 @@
+/* ===== Page Wrapper ===== */
+.access-wrapper {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #121212, #0a0a0a);
+  color: #eaeaea;
+}
+
+/* ===== Container ===== */
+.access-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+/* ===== Titles ===== */
+.access-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.access-subtitle {
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+/* ===== Grid ===== */
+.access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* ===== Card ===== */
+.access-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.access-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== User Info ===== */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6d83f2, #8fd3f4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #000;
+}
+
+.user-info h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.user-info p {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: #bbb;
+}
+
+/* ===== Action Area ===== */
+.action-area {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.btn.allow {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #051b0d;
+}
+
+.btn.allow:hover {
+  transform: scale(1.05);
+}
+
+.btn.deny {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #fff;
+}
+
+.btn.deny:hover {
+  transform: scale(1.05);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .access-title {
+    font-size: 1.7rem;
+  }
+
+  .access-card {
+    padding: 16px;
+  }
+}
