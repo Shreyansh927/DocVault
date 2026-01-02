@@ -22,7 +22,9 @@ export const initDB = async () => {
       profile_image TEXT,
       created_at TIMESTAMP DEFAULT NOW(),
       otp TEXT,
-      otp_expiry TIMESTAMP
+      otp_expiry TIMESTAMP,
+      failed_attempts INT DEFAULT 0,
+      locked_until TIMESTAMP DEFAULT null
     );
   `);
 
@@ -32,6 +34,7 @@ export const initDB = async () => {
       id SERIAL PRIMARY KEY,
       user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       folder_name TEXT NOT NULL,
+      category TEXT DEFAULT 'PRIVATE',
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
@@ -47,7 +50,11 @@ export const initDB = async () => {
       file_type TEXT,
       size INTEGER,
       storage TEXT,
-      created_at TIMESTAMP DEFAULT NOW()
+      ai_summary TEXT,
+      created_at TIMESTAMP DEFAULT NOW(),
+      deleted_at TIMESTAMP DEFAULT NULL,
+      permanent_expiry TIMESTAMP DEFAULT NULL
+
     );
   `);
 
@@ -58,7 +65,8 @@ export const initDB = async () => {
       user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       token TEXT UNIQUE NOT NULL,
       created_at TIMESTAMP DEFAULT NOW(),
-      expires_at TIMESTAMP NOT NULL
+      expires_at TIMESTAMP NOT NULL,
+      revoked BOOLEAN DEFAULT FALSE
     );
   `);
 
@@ -84,6 +92,7 @@ export const initDB = async () => {
       user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       friend_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       created_at TIMESTAMP DEFAULT NOW(),
+       show_folders BOOLEAN DEFAULT FALSE,
       PRIMARY KEY (user_id, friend_id)
     );
   `);
@@ -109,5 +118,5 @@ export const initDB = async () => {
     ON notifications(user_id);
   `);
 
-  console.log("✅ PostgreSQL connected & tables initialized");
+  console.log(" PostgreSQL connected & tables initialized");
 };

@@ -1,23 +1,36 @@
-import rateLimit from "express-rate-limit";
+import { redis } from "../redis.js";
 
-/* ---------- GENERAL API LIMITER ---------- */
-export const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 500,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    error: "Too many requests. Please slow down.",
-  },
-});
+export const rediAuthRateLimiter = ({
+  windowMs,
+  max,
+  keyPrefix,
+  message,
+}) => {
+  return async (req, res, next) => {
+    try {
+      const identifier =
+        req.ip || req.headers["x-forwarded-for"] || "unknown";
 
-/* ---------- AUTH (LOGIN / SIGNUP) ---------- */
-export const authLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    error: "Too many authentication attempts. Try again later.",
-  },
-});
+      const key = `${keyPrefix}:${identifier}`;
+
+      const current = await redis.incr(key);
+
+      if (current === 1) {
+        // first request → set TTL
+        await redis.expire(key, Math.ceil(windowMs / 1000));
+      }
+
+      if (current > max) {
+        return res.status(429).json({
+          error: message || "Too many requests",
+        });
+      }
+
+      next();
+    } catch (err) {
+      console.error("Redis rate limiter error:", err.message);
+      // Redis down → allow request (fail open)
+      next();
+    }
+  };
+};

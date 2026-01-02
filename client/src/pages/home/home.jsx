@@ -1,63 +1,72 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/header/header";
-import { MdOutlineNavigateNext, MdDelete } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
+import { IoMdSettings } from "react-icons/io";
 import { Rings } from "react-loader-spinner";
-
 import axios from "axios";
 import "./home.css";
 import { useNavigate } from "react-router-dom";
 
+/* ================= CONSTANTS ================= */
+const CATEGORIES = ["PUBLIC", "PRIVATE"];
+
 const Home = () => {
   const [toggleFolderForm, setToggleForm] = useState(false);
-  const [folderName, setFolderName] = useState("");
-  const [allFolders, setAllFolders] = useState([]);
-  const [sorted, setSorted] = useState([]);
-  const [search, setSearch] = useState("");
+  const [toggleFolderSettings, setToggleFolderSettings] = useState(false);
 
-  // delete popup state
+  const [folderName, setFolderName] = useState("");
+  const [category, setCategory] = useState("PUBLIC");
+
+  const [sorted, setSorted] = useState([]);
+  const [allFolders, setAllFolders] = useState([]);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
-
-  const currentUserEmail = JSON.parse(
-    localStorage.getItem("current-user-email")
-  );
+  const [folderToUpdate, setFolderToUpdate] = useState(null);
 
   const navigate = useNavigate();
 
-  /* ---------------- Fetch folders ---------------- */
+  /* ================= FETCH FOLDERS ================= */
   useEffect(() => {
     fetchAllFolders();
   }, []);
 
-  useEffect(() => {
-    if (!search.trim()) {
-      setAllFolders(sorted);
-    } else {
-      setAllFolders(
-        sorted.filter((f) =>
-          f.folder_name.toLowerCase().includes(search.toLowerCase())
-        )
-      );
-    }
-  }, [search]);
-
   const fetchAllFolders = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/get-all-folders", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        "http://localhost:4000/api/folder-auth/get-all-folders",
+        { withCredentials: true }
+      );
 
-      setAllFolders(res.data.allUserFolders || []);
-      setSorted(res.data.allUserFolders || []);
-
-      localStorage.setItem("currentUserName", JSON.stringify(res.data.name));
+      const folders = res.data.allUserFolders || [];
+      setSorted(folders);
+      setAllFolders(folders);
     } catch (err) {
       console.error(err);
       setAllFolders([]);
     }
   };
 
-  /* ---------------- Create folder ---------------- */
+  /* ================= FILTER ================= */
+  useEffect(() => {
+    let data = [...sorted];
+
+    if (activeCategory !== "All") {
+      data = data.filter((f) => f.category === activeCategory);
+    }
+
+    if (search.trim()) {
+      data = data.filter((f) =>
+        f.folder_name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setAllFolders(data);
+  }, [search, activeCategory, sorted]);
+
+  /* ================= CREATE FOLDER ================= */
   const submit = async (e) => {
     e.preventDefault();
     if (!folderName.trim()) return;
@@ -65,11 +74,12 @@ const Home = () => {
     try {
       await axios.post(
         "http://localhost:4000/api/folder-auth/add-folder",
-        { folderName },
+        { folderName, category },
         { withCredentials: true }
       );
 
       setFolderName("");
+      setCategory("PUBLIC");
       setToggleForm(false);
       fetchAllFolders();
     } catch (err) {
@@ -77,42 +87,58 @@ const Home = () => {
     }
   };
 
-  /* ---------------- Delete folder ---------------- */
-  const confirmDeleteFolder = async () => {
+  /* ================= UPDATE FOLDER ================= */
+  const updateFolder = async (e) => {
+    e.preventDefault();
+    if (!folderToUpdate) return;
+
     try {
-      const res = await axios.post(
-        "http://localhost:4000/api/folder-auth/delete-folder",
+      await axios.post(
+        "http://localhost:4000/api/folder-auth/update-folder",
         {
-          folderId: folderToDelete.id,
+          folderToUpdate: folderToUpdate.folder_name,
+          folderId: folderToUpdate.id,
+          category,
         },
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
-      alert(res.data.message);
+
+      setToggleFolderSettings(false);
+      setFolderToUpdate(null);
+      setCategory("PUBLIC");
       fetchAllFolders();
     } catch (err) {
-      console.log(err);
-      alert("error in deleting folder");
+      console.error(err.response?.data || err);
+      alert(err.response?.data?.error || "Update failed");
     }
-    // if (!folderToDelete) return;
+  };
 
-    // setAllFolders((prev) => prev.filter((f) => f.id !== folderToDelete.id));
-    // setSorted((prev) => prev.filter((f) => f.id !== folderToDelete.id));
+  /* ================= DELETE FOLDER ================= */
+  const confirmDeleteFolder = async () => {
+    try {
+      await axios.post(
+        "http://localhost:4000/api/folder-auth/delete-folder",
+        { folderId: folderToDelete.id },
+        { withCredentials: true }
+      );
 
-    // setFolderToDelete(null);
-    // setShowDeleteModal(false);
+      fetchAllFolders();
+      setShowDeleteModal(false);
+      setFolderToDelete(null);
+    } catch {
+      alert("Error deleting folder");
+    }
   };
 
   return (
     <div className="home-container">
       <Header />
 
-      {/* ---------- Header ---------- */}
+      {/* ================= HEADER ================= */}
       <div className="home-header">
         <h3>Your Folders</h3>
 
-        <div className="search-wrapper" style={{ display: "flex" }}>
+        <div className="search-wrapper">
           <Rings height="26" width="26" color="#2563eb" />
           <input
             type="text"
@@ -121,79 +147,70 @@ const Home = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <span className="search-icon">⌕</span>
         </div>
       </div>
 
-      {/* ---------- Folder Grid ---------- */}
+      {/* ================= CATEGORY FILTER ================= */}
+      <div className="category-filters">
+        {["All", ...CATEGORIES].map((c) => (
+          <button
+            key={c}
+            className={`category-pill ${activeCategory === c ? "active" : ""}`}
+            onClick={() => setActiveCategory(c)}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {/* ================= FOLDERS GRID ================= */}
       <div className="folders">
         {allFolders.length === 0
-          ? Array.from({ length: 11 }).map((_, index) => (
-              <div
-                key={index}
-                className="folder-card skeleton-card"
-                style={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <div>
-                  <div className="folder-glow" />
-                  <div className="skeleton skeleton-title" />
-                  <div className="skeleton skeleton-subtitle" />
-                </div>
-                <MdOutlineNavigateNext className="skeleton-icon" />
+          ? Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="folder-card skeleton-card">
+                <div className="skeleton skeleton-title" />
+                <div className="skeleton skeleton-subtitle" />
               </div>
             ))
           : allFolders.map((folder) => (
               <div
                 key={folder.id}
                 className="folder-card"
-                style={{ display: "flex", justifyContent: "space-between" }}
                 onClick={() => navigate(`/files/${folder.id}`)}
               >
                 <div>
-                  <div className="folder-glow" />
-                  <div style={{ marginBottom: "30px" }}>
-                    <h3>{folder.folder_name}</h3>
-                  </div>
-                  <small>CREATED AT</small>
+                  <h3>{folder.folder_name}</h3>
+                  <span className="folder-category">{folder.category}</span>
                 </div>
-                <div>
-                  <div style={{ textAlign: "right" }}>
-                    <MdDelete
-                      style={{
-                        color: "#ef4444",
-                        fontSize: "20px",
-                        cursor: "pointer",
-                        marginTop: "20px",
-                        textAlign: "right",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFolderToDelete(folder);
-                        setShowDeleteModal(true);
-                      }}
-                    />
-                  </div>
-                  <br />
-                  <small className="folder-date">
-                    {new Date(folder.created_at).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </small>
+
+                <div className="folder-actions">
+                  <MdDelete
+                    className="delete-icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFolderToDelete(folder);
+                      setShowDeleteModal(true);
+                    }}
+                  />
+                  <IoMdSettings
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setToggleFolderSettings(true);
+                      setFolderToUpdate(folder);
+                      setCategory(folder.category);
+                    }}
+                  />
                 </div>
               </div>
             ))}
       </div>
 
-      {/* ---------- Floating Add Button ---------- */}
-      {allFolders.length < 18 && (
-        <button className="fab-btn" onClick={() => setToggleForm(true)}>
-          <span className="fab-plus" />
-        </button>
-      )}
+      {/* ================= FAB ================= */}
+      <button className="fab-btn" onClick={() => setToggleForm(true)}>
+        <span className="fab-plus" />
+      </button>
 
-      {/* ---------- Create Folder Modal ---------- */}
+      {/* ================= CREATE MODAL ================= */}
       {toggleFolderForm && (
         <div className="modal-overlay" onClick={() => setToggleForm(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -202,11 +219,23 @@ const Home = () => {
             <form className="folder-form" onSubmit={submit}>
               <input
                 type="text"
-                value={folderName}
                 placeholder="Folder name"
+                value={folderName}
                 onChange={(e) => setFolderName(e.target.value)}
                 required
               />
+
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+
               <div className="modal-actions">
                 <button
                   type="button"
@@ -224,23 +253,16 @@ const Home = () => {
         </div>
       )}
 
-      {/* ---------- Delete Confirmation Modal ---------- */}
+      {/* ================= DELETE MODAL ================= */}
       {showDeleteModal && (
         <div
           className="delete-overlay"
           onClick={() => setShowDeleteModal(false)}
         >
           <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="delete-icon">🗑️</div>
-
             <h3>Delete Folder</h3>
             <p>
-              Are you sure you want to delete
-              <span className="delete-folder-name">
-                {" "}
-                “{folderToDelete?.folder_name}”
-              </span>
-              ?
+              Delete <strong>{folderToDelete?.folder_name}</strong>?
             </p>
 
             <div className="delete-actions">
@@ -257,6 +279,57 @@ const Home = () => {
                 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= UPDATE MODAL ================= */}
+      {toggleFolderSettings && folderToUpdate && (
+        <div
+          className="modal-overlay"
+          onClick={() => setToggleFolderSettings(false)}
+        >
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2>Update Folder</h2>
+
+            <form className="folder-form" onSubmit={updateFolder}>
+              <input
+                type="text"
+                placeholder="Folder name"
+                value={folderToUpdate.folder_name}
+                onChange={(e) =>
+                  setFolderToUpdate({
+                    ...folderToUpdate,
+                    folder_name: e.target.value,
+                  })
+                }
+                required
+              />
+
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => setToggleFolderSettings(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="primary-btn">
+                  Update
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

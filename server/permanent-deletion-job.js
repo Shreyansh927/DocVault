@@ -1,9 +1,12 @@
-// server/permanent-deletion-job.js
 import cron from "node-cron";
-import { deleteExpiredFiles } from "./controllers/fileController.js";
+import { deleteExpiredFilesService } from "./controllers/fileController.js";
 
-// Runs every minute
 cron.schedule("* * * * *", async () => {
-  console.log("Running minutely permanent delete job...");
-  await deleteExpiredFiles();
+  try {
+    console.log("Running minutely permanent delete job...");
+    await deleteExpiredFilesService();
+    console.log("Expired files permanently deleted");
+  } catch (err) {
+    console.error("Permanent deletion job failed:", err.message);
+  }
 });

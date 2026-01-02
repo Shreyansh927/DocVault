@@ -19,6 +19,7 @@ import Connections from "./pages/connections/connections.jsx";
 import Chats from "./pages/chats/chats.jsx";
 import SharedFolders from "./pages/shared-folders/shared-folders.jsx";
 import SharedFiles from "./pages/shared-folder-files/shared-folder-files.jsx";
+import SharedFileView from "./pages/shared-file-view/shared-file-view.jsx";
 import AccessControl from "./pages/access-control/access-control.jsx";
 
 const App = () => {
@@ -137,6 +138,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <SharedFiles />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/folder/files/file/shared/:friendId/:folderId/:fileId"
+            element={
+              <ProtectedRoute>
+                <SharedFileView />
               </ProtectedRoute>
             }
           />

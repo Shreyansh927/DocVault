@@ -1,86 +1,93 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import supabase from "../supabase.js";
 
-/* ---------------- User Backup ---------------- */
-export const usersBackup = async (user) => {
-  if (!user || !user.email) {
-    throw new Error("Invalid user data");
-  }
+/* ================= CONSTANTS ================= */
+const BUCKET_NAME = "project2-bucket";
 
-  const filePath = `users/user_${user.email}.json`;
+/* ================= HELPERS ================= */
+const sanitizeFileName = (name) =>
+  name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
+
+const assert = (condition, message) => {
+  if (!condition) throw new Error(message);
+};
+
+/* ================= USER JSON BACKUP ================= */
+export const usersBackup = async (user) => {
+  assert(user?.email, "Invalid user data");
+
+  const filePath = `users/user_${sanitizeFileName(user.email)}.json`;
 
   const { error } = await supabase.storage
-    .from("project2-bucket")
+    .from(BUCKET_NAME)
     .upload(filePath, JSON.stringify(user, null, 2), {
       contentType: "application/json",
       upsert: true,
     });
 
   if (error) {
-    console.error("Supabase storage backup failed:", error.message);
+    console.error("❌ Supabase user backup failed:", error.message);
     throw error;
   }
+
+  return true;
 };
 
+/* ================= PROFILE IMAGE UPLOAD ================= */
 export const uploadProfileImageToSupabase = async (user, file) => {
-  if (!user || !file) {
-    throw new Error("Missing user or file");
-  }
+  assert(user?.public_id, "Invalid user");
+  assert(file, "Missing file");
 
-  const safeName = file.originalname
-    .replace(/\s+/g, "_")
-    .replace(/[^a-zA-Z0-9._-]/g, "");
-
+  const safeName = sanitizeFileName(file.originalname);
   const storagePath = `profile-images/user_${
     user.public_id
   }/${Date.now()}_${safeName}`;
 
   const { error } = await supabase.storage
-    .from("project2-bucket")
-    .upload(storagePath, file.buffer, {
-      contentType: file.mimetype,
-      upsert: true,
-    });
-
-  if (error) throw error;
-
-  const { data } = supabase.storage
-    .from("project2-bucket")
-    .getPublicUrl(storagePath);
-
-  return data.publicUrl;
-};
-
-/* ---------------- Upload Files ---------------- */
-const sanitizeFileName = (name) =>
-  name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
-
-export const uploadFilesToSupabase = async (userId, folderId, file) => {
-  if (!userId || !folderId || !file) {
-    throw new Error("Missing data");
-  }
-
-  const safeName = sanitizeFileName(file.originalname);
-  const storagePath = `data/user_${userId}/folder_${folderId}/${Date.now()}_${safeName}`;
-
-  const { error } = await supabase.storage
-    .from("project2-bucket")
+    .from(BUCKET_NAME)
     .upload(storagePath, file.buffer, {
       contentType: file.mimetype,
       upsert: true,
     });
 
   if (error) {
-    console.error("Supabase upload failed:", error.message);
+    console.error("❌ Profile image upload failed:", error.message);
     throw error;
   }
 
-  const { data } = supabase.storage
-    .from("project2-bucket")
-    .getPublicUrl(storagePath);
+  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
+
+  return data.publicUrl;
+};
+
+/* ================= FILE UPLOAD (USER DATA) ================= */
+export const uploadFilesToSupabase = async (userId, folderId, file) => {
+  assert(userId, "Missing userId");
+  assert(folderId, "Missing folderId");
+  assert(file, "Missing file");
+
+  const safeName = sanitizeFileName(file.originalname);
+
+  const storagePath = `data/user_${userId}/folder_${folderId}/${Date.now()}_${safeName}`;
+
+  const { error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .upload(storagePath, file.buffer, {
+      contentType: file.mimetype,
+      upsert: true,
+    });
+
+  if (error) {
+    console.error("❌ Supabase file upload failed:", error.message);
+    throw error;
+  }
+
+  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
 
   return {
     publicUrl: data.publicUrl,
+    storagePath,
   };
 };

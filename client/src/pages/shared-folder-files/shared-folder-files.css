@@ -1,0 +1,176 @@
+/* ================= PAGE ================= */
+.shared-files-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0b0f19, #020617);
+  color: #e5e7eb;
+  padding: 24px;
+}
+
+/* ================= CONTAINER ================= */
+.shared-files-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ================= HEADER ================= */
+.shared-files-header {
+  margin-bottom: 24px;
+}
+
+.shared-files-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.shared-files-header p {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+/* ================= EMPTY ================= */
+.shared-empty {
+  margin-top: 80px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.shared-empty span {
+  font-size: 42px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* ================= GRID ================= */
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+/* ================= FILE CARD ================= */
+.file-card {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.file-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.35);
+}
+
+/* ================= ICON ================= */
+.file-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+/* ================= INFO ================= */
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-info h3 {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-info small {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* ================= ARROW ================= */
+.file-arrow {
+  font-size: 18px;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.file-card:hover .file-arrow {
+  transform: translateX(4px);
+  color: #c7d2fe;
+}
+
+/* ================= SKELETON ================= */
+.files-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.file-skeleton {
+  height: 70px;
+  border-radius: 16px;
+  background: #1e293b;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {
+  .shared-files-header h1 {
+    font-size: 22px;
+  }
+}
+@media (max-width: 400px) {
+  .shared-files-page {
+    padding: 16px;
+  }
+  .files-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 320px) {
+  .file-card {
+    padding: 14px;
+    gap: 10px;
+  }
+  .file-icon {
+    font-size: 24px;
+  }
+  .file-info h3 {
+    font-size: 13px;
+  }
+  .file-info small {
+    font-size: 11px;
+  }
+  .file-arrow {
+    font-size: 16px;
+  }
+}

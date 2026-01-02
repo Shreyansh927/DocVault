@@ -94,7 +94,7 @@ export const setNewPassword = async (req, res) => {
 
     const newHashedPassword = await bcrypt.hash(password, 10);
 
-    await db.query(`UPDATE users SET password=$1 WHERE email=$2`, [
+    await db.query(`UPDATE users SET password_hash=$1 WHERE email=$2`, [
       newHashedPassword,
       email,
     ]);

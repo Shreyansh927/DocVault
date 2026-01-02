@@ -2,15 +2,21 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { db } from "../db.js";
+import { usersBackup } from "../utils/supabase-cloud-storage-users-backup.js";
 
 /* ---------------- SIGNUP ---------------- */
+
 export const signup = async (req, res) => {
   try {
     const { name, email, password, phoneNumber } = req.body;
 
+    if (!name || !email || !password || !phoneNumber) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const exists = await db.query(
-      `SELECT 1 FROM users WHERE email=$1 OR phone_number=$2`,
-      [email, phoneNumber]
+      `SELECT * FROM users WHERE email=$1 OR phone_number=$2`,
+      [email, phoneNumber || null]
     );
 
     if (exists.rows.length) {
@@ -18,28 +24,25 @@ export const signup = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const publicId = crypto.randomUUID();
+    const phone = phoneNumber?.trim() || null;
 
-    const result = await db.query(
-      `INSERT INTO users (name, email, password, phone_number)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, name, email`,
-      [name, email, hashedPassword, phoneNumber]
+    const newUser = await db.query(
+      `INSERT INTO users 
+       (name, email, password_hash, phone_number, public_id)
+       VALUES ($1, $2, $3, $4, $5) 
+       RETURNING id, name, email, phone_number, public_id, created_at`,
+      [name, email, hashedPassword, phone, publicId]
     );
+    const user = newUser.rows[0];
 
-    const user = result.rows[0];
-    const publicId = `${user.name.toLowerCase().replace(/\s+/g, "")}-${
-      user.id
-    }`;
+    usersBackup(user);
 
-    await db.query(`UPDATE users SET public_id=$1 WHERE id=$2`, [
-      publicId,
-      user.id,
-    ]);
-
-    res.status(201).json({ message: "User registered successfully" });
+    return res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Signup failed" });
+    console.error("SIGNUP ERROR 👇");
+    console.error(err.stack || err);
+    return res.status(500).json({ error: err.message });
   }
 };
 
@@ -49,7 +52,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const userRes = await db.query(
-      `SELECT id, name, email, password FROM users WHERE email=$1`,
+      `SELECT id, name, email, password_hash FROM users WHERE email=$1`,
       [email]
     );
 
@@ -59,10 +62,26 @@ export const login = async (req, res) => {
 
     const user = userRes.rows[0];
 
-    const valid = await bcrypt.compare(password, user.password);
+    if (user.locked_until && user.locked_until > new Date()) {
+      return res
+        .status(403)
+        .json({ error: "Account blocked. try again later" });
+    }
+
+    const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
+      await db.query(
+        `UPDATE users SET failed_attempts = failed_attempts + 1, locked_until = CASE WHEN failed_attempts + 1 >= 5 THEN NOW() + INTERVAL '15 minutes' ELSE locked_until END WHERE id =$1`,
+        [user.id]
+      );
+
       return res.status(401).json({ error: "Invalid email or password" });
     }
+
+    await db.query(
+      `UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id =$1`,
+      [user.id]
+    );
 
     const payload = { id: user.id, email: user.email };
 
@@ -96,13 +115,7 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.cookie("csrfToken", crypto.randomUUID(), {
-      httpOnly: false,
-      sameSite: "lax",
-    });
-
-    // ✅ THIS FIXES YOUR BUG
-    return res.status(200).json({
+    res.status(200).json({
       message: "Login successful",
       user: {
         id: user.id,

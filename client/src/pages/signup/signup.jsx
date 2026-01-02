@@ -16,11 +16,9 @@ export default function Signup() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = Cookies.get("jwtToken");
-    if (token) {
-      navigate("/home");
-    }
-  }, []);
+    const token = Cookies.get("accessToken");
+    if (token) navigate("/home");
+  }, [navigate]);
 
   const submit = async (e) => {
     e.preventDefault();

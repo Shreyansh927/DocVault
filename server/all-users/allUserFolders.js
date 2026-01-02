@@ -1,29 +1,62 @@
 import { db } from "../db.js";
+import { redis } from "../redis.js";
+
+const CACHE_TTL = 300; // 5 minutes
 
 export const allUserFolders = async (req, res) => {
+  const userId = req.user?.id;
+  // const cacheKey = `userFolders:${userId}`;
+
+  // if (!userId) {
+  //   return res.status(401).json({ error: "Unauthorized" });
+  // }
+
+  /* ================= CACHE READ ================= */
+  // if (redis) {
+  //   try {
+  //     const cached = await redis.get(cacheKey);
+  //     if (cached) {
+  //       return res.status(200).json({
+  //         allUserFolders: JSON.parse(cached),
+  //         source: "cache",
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.warn("Redis read failed:", err.message);
+  //   }
+  // }
+
+  /* ================= DATABASE ================= */
   try {
-    const userId = req.user.id;
-
-    const userRes = await db.query(`SELECT name FROM users WHERE id=$1`, [
-      userId,
-    ]);
-
-    if (!userRes.rows.length) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const allFolders = await db.query(
-      `SELECT * FROM folders WHERE user_id=$1 ORDER BY created_at DESC`,
+    const foldersRes = await db.query(
+      `
+      SELECT 
+        id,
+        folder_name,
+        created_at,
+        category
+      FROM folders
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+      `,
       [userId]
     );
 
-    res.status(200).json({
-      allUserFolders: allFolders.rows,
-      name: userRes.rows[0].name,
-      message: "DONE",
+    /* ================= CACHE WRITE ================= */
+    // if (redis) {
+    //   try {
+    //     await redis.setEx(cacheKey, CACHE_TTL, JSON.stringify(foldersRes.rows));
+    //   } catch (err) {
+    //     console.warn("Redis write failed:", err.message);
+    //   }
+    // }
+
+    return res.status(200).json({
+      allUserFolders: foldersRes.rows,
+      source: "db",
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Cannot fetch all folders" });
+    console.error("Fetch folders error:", err.message);
+    return res.status(500).json({ error: "Failed to fetch folders" });
   }
 };

@@ -1,172 +1,177 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
-
-* {
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
-}
-
-body {
-  background-color: #0b0f19;
-  color: #e5e7eb;
-}
-
-/* Page */
+/* ================= PAGE ================= */
 .users-page {
-  margin: auto;
-  padding: 32px 20px;
-}
-
-/* Header */
-.users-header {
-  margin-bottom: 32px;
-}
-
-.users-header h1 {
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.users-header p {
-  font-size: 14px;
-  color: #9ca3af;
-  margin-bottom: 18px;
-}
-
-/* Search */
-.search-bar {
-  width: 100%;
-  max-width: 360px;
-  padding: 12px 14px;
-  background-color: #111827;
-  border: 1px solid #1f2937;
-  border-radius: 8px;
+  min-height: 100vh;
+  padding: 32px 40px;
+  background: radial-gradient(circle at top, #0f172a, #020617);
   color: #e5e7eb;
-  font-size: 14px;
+}
+
+/* ================= HEADER ================= */
+.users-page h2 {
+  font-size: 2rem;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+
+/* ================= SEARCH ================= */
+.search-input {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 16px;
+  margin-bottom: 32px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
   outline: none;
+  backdrop-filter: blur(12px);
+  transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
-.search-bar::placeholder {
-  color: #6b7280;
+.search-input::placeholder {
+  color: #9ca3af;
 }
 
-.search-bar:focus {
-  border-color: #3b82f6;
+.search-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
 }
 
-/* Grid */
+/* ================= GRID ================= */
 .users-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
 }
 
-/* Card */
+/* ================= CARD ================= */
 .user-card {
-  background-color: #0f172a;
-  border: 1px solid #1e293b;
-  border-radius: 12px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background 0.2s, border 0.2s;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.09),
+    rgba(255, 255, 255, 0.04)
+  );
+  border-radius: 22px;
+  padding: 28px 22px;
+  text-align: center;
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
 .user-card:hover {
-  background-color: #020617;
-  border-color: #334155;
+  transform: translateY(-6px);
+  box-shadow: 0 28px 65px rgba(0, 0, 0, 0.55);
 }
 
-/* Avatar */
+/* ================= AVATAR ================= */
 .avatar {
-  height: 44px;
-  width: 44px;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
   border-radius: 50%;
-  background-color: #1e40af;
-  color: #e5e7eb;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  margin-right: 30px;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #020617;
+  user-select: none;
 }
 
-/* User info */
-.user-info {
-  margin-left: 14px;
-}
-
-.user-info h3 {
-  font-size: 24px;
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.user-info p {
-  font-size: 12px;
-  color: #9ca3af;
-  word-break: break-all;
-}
-
-/* Button */
-.connect-btn {
-  background-color: #1e293b;
-  border: 1px solid #334155;
+/* ================= TEXT ================= */
+.user-card h3 {
+  font-size: 0.95rem;
+  margin-bottom: 20px;
   color: #e5e7eb;
-  padding: 8px 14px;
-  font-size: 13px;
-  border-radius: 6px;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* ================= BUTTON ================= */
+.connect-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
   cursor: pointer;
-  margin-left: 15px;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  color: #020617;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .connect-btn:hover {
-  background-color: #2563eb;
-  border-color: #2563eb;
+  transform: scale(1.04);
+  box-shadow: 0 12px 35px rgba(99, 102, 241, 0.45);
 }
 
-/* Mobile */
-@media screen and (max-width: 990px) {
-  /* .users-header h1 {
-    font-size: 22px;
-  } */
-  .users-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  /* .user-card {
-    padding: 14px;
-  } */
+.connect-btn:active {
+  transform: scale(0.98);
 }
 
-@media screen and (max-width: 750px) {
-  /* .users-header h1 {
-    font-size: 22px;
-  } */
-
-  .users-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  /* .user-card {
-    padding: 14px;
-  } */
+.connect-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
-@media screen and (max-width: 550px) {
-  .users-header h1 {
-    font-size: 22px;
+/* ================= SKELETON LOADER ================= */
+.skeleton {
+  pointer-events: none;
+}
+
+.skeleton-box,
+.skeleton-line,
+.skeleton-btn {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.16) 37%,
+    rgba(255, 255, 255, 0.08) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 14px;
+}
+
+.skeleton-box {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+}
+
+.skeleton-line {
+  height: 16px;
+  width: 82%;
+  margin: 0 auto 20px;
+}
+
+.skeleton-btn {
+  height: 44px;
+  width: 100%;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 640px) {
+  .users-page {
+    padding: 24px 20px;
   }
 
-  .user-card {
-    margin-left: 20%;
-    width: 110%;
-  }
-  .users-grid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
+  .users-page h2 {
+    font-size: 1.6rem;
   }
 }

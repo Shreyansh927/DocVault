@@ -2,26 +2,29 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/header/header";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
 import "./access-control.css";
 
-const Connections = () => {
+const AccessControl = () => {
   const [allConnections, setAllConnections] = useState([]);
-  const navigate = useNavigate();
-  const csrfToken = Cookies.get("csrf-token");
+  const [loading, setLoading] = useState(true);
+
+  // ✅ correct cookie name
+  const csrfToken = Cookies.get("csrfToken");
 
   useEffect(() => {
     fetchConnections();
-  });
+  }, []); // ✅ run once
 
   const fetchConnections = async () => {
     try {
       const res = await axios.get("http://localhost:4000/api/connections", {
         withCredentials: true,
       });
-      setAllConnections(res.data.connections);
+      setAllConnections(res.data.connections || []);
     } catch (err) {
-      console.error(err);
+      console.error("FETCH CONNECTIONS ERROR:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,9 +32,7 @@ const Connections = () => {
     try {
       await axios.post(
         "http://localhost:4000/api/allow-folder-access",
-        {
-          connectionId,
-        },
+        { connectionId },
         {
           withCredentials: true,
           headers: {
@@ -41,7 +42,7 @@ const Connections = () => {
       );
       fetchConnections();
     } catch (err) {
-      console.log(err);
+      console.error("ALLOW ACCESS ERROR:", err);
     }
   };
 
@@ -49,9 +50,7 @@ const Connections = () => {
     try {
       await axios.post(
         "http://localhost:4000/api/deny-folder-access",
-        {
-          connectionId,
-        },
+        { connectionId },
         {
           withCredentials: true,
           headers: {
@@ -59,58 +58,73 @@ const Connections = () => {
           },
         }
       );
-
       fetchConnections();
     } catch (err) {
-      console.log(err);
+      console.error("RESTRICT ACCESS ERROR:", err);
     }
   };
 
   return (
-    <div className="connections-wrapper">
+    <div className="acl-root">
       <Header />
 
-      <div className="connections-container">
-        <h1 className="connections-title">Access Controls</h1>
-        <p className="connections-subtitle">
-          Control who can view your folders. Access is one-way.
-        </p>
+      <section className="acl-shell">
+        <header className="acl-header">
+          <h1 className="acl-title">Access Controls</h1>
+          <p className="acl-description">
+            Control who can view your folders. Access is one-way.
+          </p>
+        </header>
 
-        <div className="connections-grid">
-          {allConnections.map((connection) => (
-            <div key={connection.id} className="connection-card">
-              <div className="connection-user">
-                <div className="connection-avatar">
-                  {connection.name.charAt(0).toUpperCase()}
+        {loading ? (
+          <p className="acl-status">Loading connections…</p>
+        ) : allConnections.length === 0 ? (
+          <p className="acl-status">No connections found</p>
+        ) : (
+          <div className="acl-grid">
+            {allConnections.map((connection) => (
+              <article key={connection.id} className="acl-card">
+                <div className="acl-user">
+                  <div className="acl-avatar">
+                    {connection.profile_image ? (
+                      <img
+                        src={connection.profile_image}
+                        alt={connection.name}
+                      />
+                    ) : (
+                      connection.name?.charAt(0).toUpperCase()
+                    )}
+                  </div>
+
+                  <div className="acl-meta">
+                    <h3 className="acl-name">{connection.name}</h3>
+                  </div>
                 </div>
 
-                <div>
-                  <h3>{connection.name}</h3>
-                  <p>{connection.email}</p>
+                <div className="acl-actions">
+                  {!connection.show_folders ? (
+                    <button
+                      className="acl-btn acl-allow"
+                      onClick={() => allowAccess(connection.id)}
+                    >
+                      Allow
+                    </button>
+                  ) : (
+                    <button
+                      className="acl-btn acl-deny"
+                      onClick={() => restrictAccess(connection.id)}
+                    >
+                      Revoke
+                    </button>
+                  )}
                 </div>
-              </div>
-
-              <div className="connection-actions">
-                <button
-                  className="btn folders"
-                  onClick={() => allowAccess(connection.id)}
-                >
-                  Yes
-                </button>
-
-                <button
-                  className="btn chat"
-                  onClick={() => restrictAccess(connection.id)}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };
 
-export default Connections;
+export default AccessControl;

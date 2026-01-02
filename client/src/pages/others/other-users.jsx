@@ -7,7 +7,8 @@ import "./other-users.css";
 const OtherUsers = () => {
   const [originalUsers, setOriginalUsers] = useState([]);
   const [search, setSearch] = useState("");
-  const [requestStatus, setRequestStatus] = useState("");
+  // const [requestStatus, setRequestStatus] = useState("");
+  const [loading, setLoading] = useState(false);
   const csrfToken = Cookies.get("csrfToken");
 
   const filterUsers = useMemo(() => {
@@ -32,8 +33,9 @@ const OtherUsers = () => {
       const res = await axios.get("http://localhost:4000/api/all-users", {
         withCredentials: true,
       });
-      
+      // alert(res.data.message);
       setOriginalUsers(res.data.otherUsers);
+      setLoading(false);
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
@@ -74,23 +76,28 @@ const OtherUsers = () => {
         className="search-input"
       />
       <div className="users-grid">
-        {filterUsers.map((user) => (
-          <div className="user-card" key={user.id}>
-            <div className="avatar">{user.name[0].toUpperCase()}</div>
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="user-card skeleton">
+                <div className="avatar skeleton-box" />
+                <div className="skeleton-line" />
+                <div className="skeleton-btn" />
+              </div>
+            ))
+          : filterUsers.map((user) => (
+              <div className="user-card" key={user.id}>
+                <div className="avatar">{user.name[0].toUpperCase()}</div>
 
-            <h3>{user.public_id}</h3>
-            {/* {sentRequestsId.has(user.id) ||
-            pendingRequestsRefs.current.has(user.id) ? (
-              <button className="connect-btn" disabled>
-                Request Sent
-              </button>
-            ) : ( */}
-            <button className="connect-btn" onClick={() => connect(user.id)}>
-              Connect
-            </button>
-            {/* )} */}
-          </div>
-        ))}
+                <h3>{user.public_id}</h3>
+
+                <button
+                  className="connect-btn"
+                  onClick={() => connect(user.id)}
+                >
+                  Connect
+                </button>
+              </div>
+            ))}
       </div>
     </div>
   );

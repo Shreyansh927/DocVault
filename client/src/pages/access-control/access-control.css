@@ -1,124 +1,173 @@
-/* ===== Page Wrapper ===== */
-.access-wrapper {
+/* ================= ROOT ================= */
+.acl-root {
   min-height: 100vh;
-  background: radial-gradient(circle at top, #121212, #0a0a0a);
-  color: #eaeaea;
+  background:
+    radial-gradient(900px 500px at top left, rgba(59,130,246,0.18), transparent),
+    radial-gradient(700px 400px at bottom right, rgba(14,165,233,0.12), transparent),
+    #020617;
+  color: #e5e7eb;
 }
 
-/* ===== Container ===== */
-.access-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 20px;
+/* ================= LAYOUT ================= */
+.acl-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 18px 72px;
 }
 
-/* ===== Titles ===== */
-.access-title {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 8px;
+.acl-header {
+  margin-bottom: 32px;
 }
 
-.access-subtitle {
-  color: #aaa;
-  margin-bottom: 30px;
+.acl-title {
+  font-size: clamp(1.7rem, 2.8vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
 }
 
-/* ===== Grid ===== */
-.access-grid {
+.acl-description {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #94a3b8;
+}
+
+/* ================= STATES ================= */
+.acl-status {
+  text-align: center;
+  padding: 56px 0;
+  color: #64748b;
+}
+
+/* ================= GRID ================= */
+.acl-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 20px;
 }
 
-/* ===== Card ===== */
-.access-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
-  border-radius: 14px;
+/* ================= CARD ================= */
+.acl-card {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.9),
+    rgba(2, 6, 23, 0.85)
+  );
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 16px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
-.access-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+.acl-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(59, 130, 246, 0.35);
 }
 
-/* ===== User Info ===== */
-.user-info {
+/* ================= USER ================= */
+.acl-user {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
-.avatar {
+.acl-avatar {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6d83f2, #8fd3f4);
+  background: linear-gradient(
+    135deg,
+    rgba(59,130,246,0.45),
+    rgba(15,23,42,0.9)
+  );
+  border: 1px solid rgba(59,130,246,0.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: #000;
+  font-weight: 600;
+  color: #f8fafc;
+  overflow: hidden;
 }
 
-.user-info h3 {
-  margin: 0;
-  font-size: 1.05rem;
+.acl-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.user-info p {
-  margin: 2px 0 0;
-  font-size: 0.85rem;
-  color: #bbb;
+.acl-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #f8fafc;
 }
 
-/* ===== Action Area ===== */
-.action-area {
+/* ================= ACTIONS ================= */
+.acl-actions {
   margin-top: 18px;
   display: flex;
   justify-content: flex-end;
 }
 
-/* ===== Buttons ===== */
-.btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
+/* ================= BUTTONS ================= */
+.acl-btn {
+  padding: 9px 20px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.25s ease, transform 0.2s ease;
+  border: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
-.btn.allow {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #051b0d;
+/* Allow */
+.acl-allow {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
 }
 
-.btn.allow:hover {
-  transform: scale(1.05);
+.acl-allow:hover {
+  box-shadow: 0 12px 32px rgba(59,130,246,0.6);
 }
 
-.btn.deny {
-  background: linear-gradient(135deg, #ef4444, #b91c1c);
-  color: #fff;
+/* Deny */
+.acl-deny {
+  background: rgba(254, 74, 74, 0.85);
+  color: #e5e7eb;
 }
 
-.btn.deny:hover {
-  transform: scale(1.05);
+.acl-deny:hover {
+  background: rgba(51, 65, 85, 0.9);
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 600px) {
-  .access-title {
-    font-size: 1.7rem;
+/* ================= INTERACTION ================= */
+.acl-btn:active {
+  transform: scale(0.94);
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 640px) {
+  .acl-shell {
+    padding: 24px 14px 60px;
   }
 
-  .access-card {
-    padding: 16px;
+  .acl-actions {
+    justify-content: stretch;
+  }
+
+  .acl-btn {
+    width: 100%;
   }
 }
