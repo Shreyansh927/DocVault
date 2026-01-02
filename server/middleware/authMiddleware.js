@@ -98,15 +98,15 @@ export const authMiddleware = async (req, res, next) => {
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd ? "true" : "false",
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd ? "true" : "false",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
