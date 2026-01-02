@@ -27,16 +27,13 @@ const app = express();
 const server = http.createServer(app);
 
 /* ---------- CORE ---------- */
-// app.set("trust proxy", 1);
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL,
-      "https://your-future-frontend.onrender.com",
-    ],
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
