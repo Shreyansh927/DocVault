@@ -1,5 +1,10 @@
 import axios from "axios";
+
 const base_url = import.meta.env.VITE_API_BASE_URL;
+
+if (!base_url) {
+  console.error("❌ VITE_API_BASE_URL is not defined");
+}
 
 const api = axios.create({
   baseURL: base_url,
@@ -9,9 +14,13 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const status = err.response?.status;
+    const path = window.location.pathname;
+
+    if (status === 401 && path !== "/login") {
       window.location.href = "/login";
     }
+
     return Promise.reject(err);
   }
 );
