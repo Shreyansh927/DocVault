@@ -6,12 +6,14 @@ import Header from "../../components/header/header.jsx";
 import "./notification.css";
 
 const Notifications = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [notifications, setNotifications] = useState([]);
   const [sharedFolders, setSharedFolders] = useState([]);
   const csrfToken = Cookies.get("csrfToken");
 
   const fetchNotifications = async () => {
-    const res = await axios.get("http://localhost:4000/api/notifications", {
+    const res = await axios.get(`${API_BASE_URL}/api/notifications`, {
       withCredentials: true,
     });
     setNotifications(res.data.notifications);
@@ -55,7 +57,7 @@ const Notifications = () => {
 
   const accept = async (senderId) => {
     await axios.post(
-      "http://localhost:4000/api/accept",
+      `${API_BASE_URL}/api/accept`,
       { senderId },
       { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
     );
@@ -64,7 +66,7 @@ const Notifications = () => {
 
   const deny = async (senderId) => {
     await axios.post(
-      "http://localhost:4000/api/deny",
+      `${API_BASE_URL}/api/deny`,
       { senderId },
       { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
     );

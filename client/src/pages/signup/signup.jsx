@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import Cookies from "js-cookie";
 
 export default function Signup() {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -26,7 +28,7 @@ export default function Signup() {
 
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/auth/signup",
+        `${API_BASE_URL}/api/auth/signup`,
         {
           name: form.name,
           email: form.email,

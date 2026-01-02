@@ -5,11 +5,13 @@ import Cookies from "js-cookie";
 import "./other-users.css";
 
 const OtherUsers = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [originalUsers, setOriginalUsers] = useState([]);
   const [search, setSearch] = useState("");
   // const [requestStatus, setRequestStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const csrfToken = Cookies.get("csrfToken");
+  // const csrfToken = Cookies.get("csrfToken");
 
   const filterUsers = useMemo(() => {
     if (!search.trim()) return originalUsers;
@@ -30,7 +32,7 @@ const OtherUsers = () => {
 
   const fetchAllUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/all-users", {
+      const res = await axios.get(`${API_BASE_URL}/api/all-users`, {
         withCredentials: true,
       });
       // alert(res.data.message);
@@ -51,7 +53,7 @@ const OtherUsers = () => {
       const csrfToken = Cookies.get("csrfToken");
 
       await axios.post(
-        "http://localhost:4000/api/connect",
+        `${API_BASE_URL}/api/connect`,
         { receiverId },
         {
           withCredentials: true,

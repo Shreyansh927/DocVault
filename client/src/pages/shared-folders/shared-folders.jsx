@@ -5,6 +5,8 @@ import Header from "../../components/header/header";
 import "./shared-folders.css";
 
 const SharedFolders = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const { userId } = useParams();
   const navigate = useNavigate();
 
@@ -19,7 +21,7 @@ const SharedFolders = () => {
   const fetchSharedFolders = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:4000/api/folders/shared/${userId}`,
+        `${API_BASE_URL}/api/folders/shared/${userId}`,
         { withCredentials: true }
       );
       setAllSharedFolders(res.data.sharedFolders || []);

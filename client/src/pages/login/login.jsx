@@ -5,6 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 import "./login.css";
 
 export default function Login() {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -22,7 +24,7 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/auth/login",
+        `${API_BASE_URL}/api/auth/login`,
         {
           email: form.email.trim(),
           password: form.password,

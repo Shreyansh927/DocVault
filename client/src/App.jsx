@@ -1,6 +1,4 @@
 import React from "react";
-import Folders from "./pages/folders";
-import Document from "./pages/document";
 import Header from "./components/header/header.jsx";
 import Signup from "./pages/signup/signup.jsx";
 import Login from "./pages/login/login.jsx";
@@ -27,23 +25,7 @@ const App = () => {
     <div>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Folders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/document/:id"
-            element={
-              <ProtectedRoute>
-                <Document />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route

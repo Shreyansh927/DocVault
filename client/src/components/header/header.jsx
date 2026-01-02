@@ -7,13 +7,15 @@ const Header = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  const base_url = import.meta.env.VITE_API_BASE_URL;
+
   // ✅ FIX 1: correct localStorage key
   const userEmail = JSON.parse(localStorage.getItem("current-user-email"));
 
   const logout = async () => {
     try {
       await axios.post(
-        "http://localhost:4000/api/auth/logout",
+        `${base_url}/api/auth/logout`,
         {},
         { withCredentials: true } // ✅ REQUIRED
       );

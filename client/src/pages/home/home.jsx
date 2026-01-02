@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 const CATEGORIES = ["PUBLIC", "PRIVATE"];
 
 const Home = () => {
+  const base_url = import.meta.env.VITE_API_BASE_URL;
+
   const [toggleFolderForm, setToggleForm] = useState(false);
   const [toggleFolderSettings, setToggleFolderSettings] = useState(false);
 
@@ -36,7 +38,7 @@ const Home = () => {
   const fetchAllFolders = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:4000/api/folder-auth/get-all-folders",
+        `${base_url}/api/folder-auth/get-all-folders`,
         { withCredentials: true }
       );
 
@@ -73,7 +75,7 @@ const Home = () => {
 
     try {
       await axios.post(
-        "http://localhost:4000/api/folder-auth/add-folder",
+        `${base_url}/api/folder-auth/add-folder`,
         { folderName, category },
         { withCredentials: true }
       );
@@ -94,7 +96,7 @@ const Home = () => {
 
     try {
       await axios.post(
-        "http://localhost:4000/api/folder-auth/update-folder",
+        `${base_url}/api/folder-auth/update-folder`,
         {
           folderToUpdate: folderToUpdate.folder_name,
           folderId: folderToUpdate.id,
@@ -117,7 +119,7 @@ const Home = () => {
   const confirmDeleteFolder = async () => {
     try {
       await axios.post(
-        "http://localhost:4000/api/folder-auth/delete-folder",
+        `${base_url}/api/folder-auth/delete-folder`,
         { folderId: folderToDelete.id },
         { withCredentials: true }
       );

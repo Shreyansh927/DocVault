@@ -8,6 +8,8 @@ const AccessControl = () => {
   const [allConnections, setAllConnections] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const base_url = import.meta.env.VITE_API_BASE_URL;
+
   // ✅ correct cookie name
   const csrfToken = Cookies.get("csrfToken");
 
@@ -17,7 +19,7 @@ const AccessControl = () => {
 
   const fetchConnections = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/connections", {
+      const res = await axios.get(`${base_url}/api/connections`, {
         withCredentials: true,
       });
       setAllConnections(res.data.connections || []);
@@ -31,7 +33,7 @@ const AccessControl = () => {
   const allowAccess = async (connectionId) => {
     try {
       await axios.post(
-        "http://localhost:4000/api/allow-folder-access",
+        `${base_url}/api/allow-folder-access`,
         { connectionId },
         {
           withCredentials: true,
@@ -49,7 +51,7 @@ const AccessControl = () => {
   const restrictAccess = async (connectionId) => {
     try {
       await axios.post(
-        "http://localhost:4000/api/deny-folder-access",
+        `${base_url}/api/deny-folder-access`,
         { connectionId },
         {
           withCredentials: true,

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
+
 import Header from "../../components/header/header";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./connections.css";
 
 const Connections = () => {
+  const base_url = import.meta.env.VITE_API_BASE_URL;
+
   const [allConnections, setAllConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -15,7 +18,7 @@ const Connections = () => {
 
   const fetchConnections = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/connections", {
+      const res = await axios.get(`${base_url}/api/connections`, {
         withCredentials: true,
       });
       setAllConnections(res.data.connections || []);
@@ -29,7 +32,7 @@ const Connections = () => {
   const revokeConnection = async (removeFriend) => {
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/cancel-connection",
+        `${base_url}/api/cancel-connection`,
         {
           removeFriend,
         },
@@ -38,8 +41,8 @@ const Connections = () => {
         }
       );
 
-      console.log(res.data.message)
-      fetchConnections()
+      console.log(res.data.message);
+      fetchConnections();
     } catch (err) {
       console.log(err);
     }

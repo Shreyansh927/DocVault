@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
+      process.env.CLIENT_URL,
       "https://your-future-frontend.onrender.com",
     ],
     credentials: true,
@@ -44,7 +44,7 @@ app.use(
 /* ---------- SOCKET ---------- */
 export const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: process.env.CLIENT_URL,
     credentials: true,
   },
 });

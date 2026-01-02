@@ -1,19 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./dashboard.css";
-import { useState } from "react";
-import { useEffect } from "react";
 import Header from "../../components/header/header.jsx";
 import axios from "axios";
-const Dashboard = () => {
-  const [userInfo, setUserInfo] = useState({});
 
+const Dashboard = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const [userInfo, setUserInfo] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [preview, setPreview] = useState("");
+
   const [form, setForm] = useState({
-    name: userInfo.name,
-    email: userInfo.email,
-    phoneNumber: userInfo.phone_number,
-    profileImg: userInfo.profile_image,
+    name: "",
+    email: "",
+    phoneNumber: "",
+    profileImg: null,
   });
 
   useEffect(() => {
@@ -22,19 +23,21 @@ const Dashboard = () => {
 
   const fetchUserPersonalInfo = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/user-profile/me", {
+      const res = await axios.get(`${API_BASE_URL}/api/user-profile/me`, {
         withCredentials: true,
       });
-      setUserInfo(res.data.userPersonalInfoObj);
+
+      const user = res.data.userPersonalInfoObj;
+      setUserInfo(user);
 
       setForm({
-        name: res.data.userPersonalInfoObj.name,
-        email: res.data.userPersonalInfoObj.email,
-        phoneNumber: res.data.userPersonalInfoObj.phone_number,
+        name: user.name || "",
+        email: user.email || "",
+        phoneNumber: user.phone_number || "",
         profileImg: null,
       });
     } catch (err) {
-      console.error(err);
+      console.error("FETCH PROFILE ERROR:", err);
     }
   };
 
@@ -51,7 +54,7 @@ const Dashboard = () => {
       }
 
       const res = await axios.post(
-        "http://localhost:4000/api/user-profile/edit",
+        `${API_BASE_URL}/api/user-profile/edit`,
         formData,
         {
           withCredentials: true,
@@ -62,15 +65,18 @@ const Dashboard = () => {
       alert(res.data.message);
       fetchUserPersonalInfo();
       setEditMode(false);
+      setPreview("");
     } catch (err) {
-      console.error(err);
+      console.error("UPDATE PROFILE ERROR:", err);
       alert("Update failed");
     }
   };
 
+  if (!userInfo) return null;
+
   return (
     <>
-      <Header style={{ margin: "40px" }} />
+      <Header />
       <div className="app-shell">
         <div className="content-area">
           <section className="profile-card">
@@ -89,11 +95,11 @@ const Dashboard = () => {
               </button>
             </header>
 
-            {/* Body */}
+            {/* View mode */}
             {!editMode ? (
               <div className="profile-body">
                 <div className="identity">
-                  {userInfo?.profile_image ? (
+                  {userInfo.profile_image ? (
                     <img
                       src={userInfo.profile_image}
                       alt="profile"
@@ -123,11 +129,14 @@ const Dashboard = () => {
                   <div className="meta">
                     <label>Joined</label>
                     <p>
-                      {new Date().toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {new Date(userInfo.created_at).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
                     </p>
                   </div>
                 </div>
@@ -144,7 +153,6 @@ const Dashboard = () => {
                         type="text"
                         value={form.name}
                         required
-                        placeholder=""
                         onChange={(e) =>
                           setForm({ ...form, name: e.target.value })
                         }
@@ -153,7 +161,7 @@ const Dashboard = () => {
                     </div>
 
                     <div className="field floating disabled">
-                      <input value={userInfo.email} />
+                      <input value={form.email} disabled />
                       <label>Email address</label>
                     </div>
 
@@ -164,7 +172,6 @@ const Dashboard = () => {
                         onChange={(e) =>
                           setForm({ ...form, phoneNumber: e.target.value })
                         }
-                        placeholder=""
                       />
                       <label>Phone number</label>
                     </div>

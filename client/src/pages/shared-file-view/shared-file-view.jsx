@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom";
 import "./shared-file-view.css";
 
 const SharedFileView = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const { friendId, folderId, fileId } = useParams();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,7 @@ const SharedFileView = () => {
   const fetchFileData = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:4000/api/folders/files/file/shared/${friendId}/${folderId}/${fileId}`,
+        `${API_BASE_URL}/api/folders/files/file/shared/${friendId}/${folderId}/${fileId}`,
         { withCredentials: true }
       );
 

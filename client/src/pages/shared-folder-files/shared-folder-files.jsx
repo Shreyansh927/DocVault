@@ -5,6 +5,8 @@ import Header from "../../components/header/header";
 import "./shared-folder-files.css";
 
 const SharedFiles = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const { friendId, folderId } = useParams();
   const [sharedFiles, setSharedFiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +20,7 @@ const SharedFiles = () => {
   const fetchSharedFiles = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:4000/api/folders/files/shared/${friendId}/${folderId}`,
+        `${API_BASE_URL}/api/folders/files/shared/${friendId}/${folderId}`,
         { withCredentials: true }
       );
       setSharedFiles(res.data.sharedFiles || []);

@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./set-password.css";
 
 const SetPassword = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +26,7 @@ const SetPassword = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/forgot/set-new-password",
+        `${API_BASE_URL}/api/forgot/set-new-password`,
         { email, password },
         { withCredentials: true }
       );

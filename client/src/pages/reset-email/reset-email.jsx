@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./reset-email.css";
 
 const ResetEmail = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ const ResetEmail = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/forgot/reset-password",
+        `${API_BASE_URL}/api/forgot/reset-password`,
         { email },
         { withCredentials: true }
       );

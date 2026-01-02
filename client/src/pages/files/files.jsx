@@ -8,6 +8,8 @@ import { TbRestore } from "react-icons/tb";
 import Cookies from "js-cookie";
 
 const Files = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const { folderId } = useParams();
   const navigate = useNavigate();
   const currentUser = JSON.parse(localStorage.getItem("current-user-email"));
@@ -48,7 +50,7 @@ const Files = () => {
   const fetchAllFiles = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:4000/api/get-all-files", {
+      const res = await axios.get(`${API_BASE_URL}/api/get-all-files`, {
         params: { folderId },
         withCredentials: true,
       });
@@ -64,13 +66,10 @@ const Files = () => {
   const fetchAllTrashFiles = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        "http://localhost:4000/api/get-all-trash-files",
-        {
-          params: { folderId },
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(`${API_BASE_URL}/api/get-all-trash-files`, {
+        params: { folderId },
+        withCredentials: true,
+      });
       setAllFiles(res.data.allTrashFiles || []);
     } catch (err) {
       console.error(err);
@@ -92,7 +91,7 @@ const Files = () => {
     formData.append("folderId", folderId);
 
     try {
-      await axios.post("http://localhost:4000/api/files/upload", formData, {
+      await axios.post(`${API_BASE_URL}/api/files/upload`, formData, {
         withCredentials: true,
         headers: { "x-csrf-token": csrfToken },
         onUploadProgress: (p) =>
@@ -113,7 +112,7 @@ const Files = () => {
   /* ---------- Delete ---------- */
   const deleteFile = async () => {
     await axios.post(
-      "http://localhost:4000/api/files/delete-file",
+      `${API_BASE_URL}/api/files/delete-file`,
       { folderId, fileId: fileToDelete.id },
       { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
     );
@@ -123,7 +122,7 @@ const Files = () => {
 
   const deleteAll = async () => {
     await axios.post(
-      "http://localhost:4000/api/files/delete-all-files",
+      `${API_BASE_URL}/api/files/delete-all-files`,
       { folderId },
       { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
     );
@@ -133,7 +132,7 @@ const Files = () => {
   /* ---------- Restore ---------- */
   const restoreFile = async (file) => {
     await axios.post(
-      "http://localhost:4000/api/files/restore-file",
+      `${API_BASE_URL}/api/files/restore-file`,
       { folderId, fileId: file.id },
       { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
     );
@@ -142,7 +141,7 @@ const Files = () => {
 
   const restoreAllFiles = async () => {
     await axios.post(
-      "http://localhost:4000/api/files/restore-all-files",
+      `${API_BASE_URL}/api/files/restore-all-files`,
       { folderId },
       { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
     );

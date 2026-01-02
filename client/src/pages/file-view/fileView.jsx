@@ -8,6 +8,9 @@ const FileView = () => {
   const navigate = useNavigate();
   const [fileData, setFileData] = useState(null);
 
+  // ✅ backend base url from env
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     fetchFileData();
   }, [folderId, fileId]);
@@ -15,12 +18,12 @@ const FileView = () => {
   const fetchFileData = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:4000/api/files/${folderId}/${fileId}`,
+        `${API_BASE_URL}/api/files/${folderId}/${fileId}`,
         { withCredentials: true }
       );
       setFileData(res.data.file);
     } catch (err) {
-      console.error(err);
+      console.error("FETCH FILE ERROR:", err);
       navigate("/home");
     }
   };
@@ -33,11 +36,12 @@ const FileView = () => {
       <div className="file-card">
         <div className="file-header">
           <h3 className="file-title">{fileData.filename}</h3>
+
           <button
             className="primary-btn"
             onClick={() =>
               window.open(
-                `http://localhost:4000/api/files/${fileId}/download`,
+                `${API_BASE_URL}/api/files/${fileId}/download`,
                 "_blank"
               )
             }
@@ -57,7 +61,6 @@ const FileView = () => {
               year: "numeric",
             })}
           </span>
-      
         </div>
       </div>
 
