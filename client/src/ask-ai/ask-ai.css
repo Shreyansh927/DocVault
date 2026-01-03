@@ -1,0 +1,91 @@
+/* Floating Button */
+.ai-fab {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  background-image: linear-gradient(145deg,rgb(144, 0, 0), rgb(72, 72, 193), rgb(42, 0, 42));
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+/* Widget */
+.ai-widget {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 360px;
+  max-height: 520px;
+  background: rgb(13, 1, 1);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+/* Header */
+.ai-header {
+  padding: 14px 16px;
+  background: #192f5f;
+  color: white;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Body */
+.ai-body {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ai-placeholder {
+  color: #6b7280;
+}
+
+.ai-answer {
+  color: #111827;
+  line-height: 1.5;
+}
+
+/* Input */
+.ai-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.ai-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  outline: none;
+}
+
+.ai-input button {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .ai-widget {
+    right: 10px;
+    left: 10px;
+    width: auto;
+    bottom: 90px;
+  }
+}
