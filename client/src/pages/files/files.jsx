@@ -31,8 +31,10 @@ const Files = () => {
   /* ---------- Derived ---------- */
   const filteredFiles = useMemo(() => {
     if (!searchFile.trim()) return allFiles;
-    return allFiles.filter((f) =>
-      f.filename.toLowerCase().includes(searchFile.toLowerCase())
+    return allFiles.filter(
+      (f) =>
+        f.filename?.toLowerCase().includes(searchFile.toLowerCase()) ||
+        f.ai_summary?.toLowerCase().includes(searchFile.toLowerCase())
     );
   }, [searchFile, allFiles]);
 
@@ -164,7 +166,7 @@ const Files = () => {
         <div className="files-top-right">
           <input
             className="search-input"
-            placeholder="Search files…"
+            placeholder="Search files by name or content…"
             value={searchFile}
             onChange={(e) => setSearchFile(e.target.value)}
           />

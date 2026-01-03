@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./dashboard.css";
 import Header from "../../components/header/header.jsx";
 import axios from "axios";
+import AskAi from "../../ask-ai/ask-ai.jsx";
 
 const Dashboard = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -78,6 +79,7 @@ const Dashboard = () => {
     <>
       <Header />
       <div className="app-shell">
+        <AskAi />
         <div className="content-area">
           <section className="profile-card">
             {/* Header */}

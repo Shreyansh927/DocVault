@@ -16,7 +16,7 @@ export const authMiddleware = async (req, res, next) => {
     }
   }
 
-  /* ================= NO REFRESH TOKEN ================= */
+  /* == NO REFRESH TOKEN = */
   if (!refreshToken) {
     return res.status(401).json({ error: "Session expired" });
   }

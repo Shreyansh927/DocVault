@@ -101,7 +101,8 @@ export const trashFiles = async (req, res) => {
         filename,
         file_type,
         size,
-        deleted_at
+        deleted_at,
+        ai_summary
       FROM files
       WHERE folder_id=$1 AND is_deleted=true
       ORDER BY deleted_at DESC

@@ -6,6 +6,7 @@ import { Rings } from "react-loader-spinner";
 import axios from "axios";
 import "./home.css";
 import { useNavigate } from "react-router-dom";
+import AskAi from "../../ask-ai/ask-ai";
 
 /* ================= CONSTANTS ================= */
 const CATEGORIES = ["PUBLIC", "PRIVATE"];
@@ -135,6 +136,7 @@ const Home = () => {
   return (
     <div className="home-container">
       <Header />
+      <AskAi />
 
       {/* ================= HEADER ================= */}
       <div className="home-header">

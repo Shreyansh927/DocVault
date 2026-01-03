@@ -4,15 +4,12 @@ import { uploadFilesToSupabase } from "../utils/supabase-cloud-storage-users-bac
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import officeParser from "officeparser";
 
-/* ================= ENV SAFETY ================= */
-
-/* ================= ENV SAFETY ================= */
 if (!process.env.GEMINI_API_KEY) {
-  throw new Error("❌ GEMINI_API_KEY is missing in environment variables");
+  throw new Error("GEMINI_API_KEY is missing in environment variables");
 }
 
-/* ================= GEMINI SETUP ================= */
-const genAI = new GoogleGenerativeAI("AIzaSyB02wkG9cnqfxLT7qJxnhyjRWG1pkKlVoI");
+/* = GEMINI SETUP == */
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /* ================= TEXT EXTRACTION ================= */
 const extractTextFromFile = async (file) => {
@@ -35,25 +32,50 @@ const extractTextFromFile = async (file) => {
   }
 };
 
-/* ================= AI SUMMARIZATION ================= */
+/*  AI SUMMARIZATION*/
 export const summarizeFileWithAI = async (file) => {
   try {
+    if (!file) return null;
+
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
     });
 
     /* ---------- PDF ---------- */
     if (file.mimetype === "application/pdf") {
-      if (file.size > 2 * 1024 * 1024) return null;
+      if (file.size > 10 * 1024 * 1024) return null;
 
       const base64PDF = file.buffer.toString("base64");
 
       const result = await model.generateContent([
-        "Summarize this document in 3 concise sentences.",
+        {
+          text: "Summarize this document in 3 concise sentences.",
+        },
         {
           inlineData: {
             mimeType: "application/pdf",
             data: base64PDF,
+          },
+        },
+      ]);
+
+      return result.response.text();
+    }
+
+    /* ---------- IMAGE ---------- */
+    if (file.mimetype.startsWith("image/")) {
+      if (file.size > 5 * 1024 * 1024) return null;
+
+      const base64Image = file.buffer.toString("base64");
+
+      const result = await model.generateContent([
+        {
+          text: "Describe and summarize the contents of this image clearly in detail.",
+        },
+        {
+          inlineData: {
+            mimeType: file.mimetype, // image/png, image/jpeg, etc.
+            data: base64Image,
           },
         },
       ]);
@@ -68,12 +90,12 @@ export const summarizeFileWithAI = async (file) => {
     const safeText = extractedText.slice(0, 12_000);
 
     const result = await model.generateContent(
-      `Summarize the following content in 3 concise sentences:\n\n${safeText}`
+      `Summarize the following content in detail:\n\n${safeText}`
     );
 
     return result.response.text();
   } catch (err) {
-    console.error("AI summary failed:", err.message);
+    console.error("AI summary failed:", err);
     return null;
   }
 };

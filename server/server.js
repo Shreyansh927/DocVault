@@ -22,6 +22,7 @@ import { allUserFolders } from "./all-users/allUserFolders.js";
 import { allFiles, trashFiles } from "./all-users/all-folder-files.js";
 
 import "./permanent-deletion-job.js";
+import aiResponseRouter from "./routes/ai-query-response-route.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -33,7 +34,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: [process.env.CLIENT_URL, "http://localhost:5173"],
     credentials: true,
   })
 );
@@ -41,7 +42,7 @@ app.use(
 /* ---------- SOCKET ---------- */
 export const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: [process.env.CLIENT_URL, "http://localhost:5173"],
     credentials: true,
   },
 });
@@ -59,6 +60,8 @@ io.on("connection", (socket) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/forgot", forgotPasswordRoute);
 app.use("/api/user-profile", authMiddleware, personalRoute);
+
+app.use("/ai-query-response", aiResponseRouter);
 
 app.get("/", (req, res) => {
   res.send("API is running");
