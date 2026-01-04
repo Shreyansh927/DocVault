@@ -161,7 +161,6 @@ export const uploadFiles = async (req, res) => {
   }
 };
 
-/* ================= DOWNLOAD FILE ================= */
 export const downloadFile = async (req, res) => {
   try {
     const { fileId } = req.params;
@@ -181,12 +180,13 @@ export const downloadFile = async (req, res) => {
       return res.status(404).json({ error: "File not found" });
     }
 
-    return res.redirect(result.rows[0].encrypted_link);
+    return res.json({ url: result.rows[0].encrypted_link });
   } catch (err) {
     console.error("DOWNLOAD ERROR:", err.message);
     return res.status(500).json({ error: "Cannot download file" });
   }
 };
+
 
 /* ================= SOFT DELETE SINGLE FILE ================= */
 export const deleteFile = async (req, res) => {

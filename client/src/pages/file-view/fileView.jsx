@@ -15,16 +15,16 @@ const FileView = () => {
     fetchFileData();
   }, [folderId, fileId]);
 
-  const fetchFileData = async () => {
+  const handleDownload = async () => {
     try {
       const res = await axios.get(
-        `${API_BASE_URL}/api/files/${folderId}/${fileId}`,
+        `${API_BASE_URL}/api/files/${fileId}/download`,
         { withCredentials: true }
       );
-      setFileData(res.data.file);
+
+      window.open(res.data.url, "_blank");
     } catch (err) {
-      console.error("FETCH FILE ERROR:", err);
-      navigate("/home");
+      console.error("DOWNLOAD ERROR:", err);
     }
   };
 
@@ -37,15 +37,7 @@ const FileView = () => {
         <div className="file-header">
           <h3 className="file-title">{fileData.filename}</h3>
 
-          <button
-            className="primary-btn"
-            onClick={() =>
-              window.open(
-                `${API_BASE_URL}/api/files/${fileId}/download`,
-                "_blank"
-              )
-            }
-          >
+          <button className="primary-btn" onClick={handleDownload}>
             Open / Download
           </button>
         </div>

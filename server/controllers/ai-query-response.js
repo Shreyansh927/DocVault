@@ -37,10 +37,10 @@ export const aiQueryResponse = async (req, res) => {
       });
     }
 
-    /* ---------- COMBINE SUMMARIES ---------- */
+    /* - COMBINE SUMMARIES - */
     const combinedText = result.rows.map((row) => row.ai_summary).join("\n");
 
-    // safety cap (Gemini token control)
+    
     const safeText = combinedText.slice(0, 12000);
 
     /* ---------- GEMINI SETUP ---------- */
