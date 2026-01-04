@@ -8,13 +8,26 @@ const FileView = () => {
   const navigate = useNavigate();
   const [fileData, setFileData] = useState(null);
 
-  // ✅ backend base url from env
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchFileData();
   }, [folderId, fileId]);
 
+  const fetchFileData = async () => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/files/${folderId}/${fileId}`,
+        { withCredentials: true }
+      );
+      setFileData(res.data.file);
+    } catch (err) {
+      console.error("FETCH FILE ERROR:", err);
+      navigate("/home");
+    }
+  };
+
+  /* ✅ FINAL DOWNLOAD HANDLER */
   const handleDownload = async () => {
     try {
       const res = await axios.get(
@@ -22,7 +35,8 @@ const FileView = () => {
         { withCredentials: true }
       );
 
-      window.open(res.data.url, "_blank");
+      // axios follows redirect → get final cloud URL
+      window.open(res.request.responseURL, "_blank");
     } catch (err) {
       console.error("DOWNLOAD ERROR:", err);
     }
