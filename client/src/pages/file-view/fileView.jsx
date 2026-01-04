@@ -36,7 +36,7 @@ const FileView = () => {
       );
 
       // axios follows redirect → get final cloud URL
-      window.open(res.request.responseURL, "_blank");
+      window.open(res.data.url, "_blank");
     } catch (err) {
       console.error("DOWNLOAD ERROR:", err);
     }
