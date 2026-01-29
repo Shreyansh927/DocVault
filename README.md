@@ -48,6 +48,20 @@ It avoids embedding-based AI quotas and prioritizes cost-safe architectural deci
 making it ideal for students and independent developers.
 </p>
 
+
+## 📸 Screenshots
+
+### Dashboard
+<img width="820" height="1080" alt="Screenshot 2026-01-29 220426" src="https://github.com/user-attachments/assets/75ef80da-435e-46cb-9855-bd4adb1a4857" />
+
+
+### Document Management
+![Documents](./screenshots/documents.png)
+
+### AI Querying
+![AI Query](./screenshots/ai-query.png)
+
+
 <h1>🏗️ Tech Stack</h1>
 
 <h3>Frontend</h3>
