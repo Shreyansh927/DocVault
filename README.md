@@ -51,15 +51,18 @@ making it ideal for students and independent developers.
 
 ## 📸 Screenshots
 
-### Dashboard
-<img width="820" height="1080" alt="Screenshot 2026-01-29 220426" src="https://github.com/user-attachments/assets/75ef80da-435e-46cb-9855-bd4adb1a4857" />
+### Auth Section
+<img width="1000" height="700" alt="Screenshot 2026-01-30 001619" src="https://github.com/user-attachments/assets/91bd581c-ad91-4df7-bd17-ae74a52b22bb" />
 
 
-### Document Management
-![Documents](./screenshots/documents.png)
+### Home Page
+<img width="1000" height="700" alt="Screenshot 2026-01-29 230151" src="https://github.com/user-attachments/assets/6716ad96-5b98-4b8c-af6d-1fb647096da1" />
 
-### AI Querying
-![AI Query](./screenshots/ai-query.png)
+
+### Real Time Collaboration
+<img width="1000" height="700" alt="Screenshot 2026-01-30 001352" src="https://github.com/user-attachments/assets/f8b347b4-5d97-453d-8f7a-081de7b59ab2" />
+
+
 
 
 <h1>🏗️ Tech Stack</h1>
