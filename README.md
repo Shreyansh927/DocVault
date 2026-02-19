@@ -41,6 +41,28 @@ Context size is carefully limited to improve efficiency, and a graceful fallback
 message is returned when the requested information is not found.
 </p>
 
+🧠 Vector Embedding & Semantic Search
+
+Implemented semantic document search using 1536-dimensional vector embeddings.
+
+Stored embeddings in PostgreSQL using pgvector.
+
+Used cosine similarity (<->) for top-K nearest neighbor retrieval.
+
+Built a Retrieval-Augmented Generation (RAG) pipeline for context-aware AI responses.
+
+Optimized performance with ANN indexing (ivfflat) and Redis embedding caching.
+
+🌐 Offline Retry Messaging
+
+Designed an offline-first messaging system.
+
+Failed messages are stored locally and automatically retried on network reconnection.
+
+Uses browser online event to trigger queued message delivery.
+
+Ensures no message loss during temporary connectivity issues.
+
 <h3>💸 Free-Tier Friendly Architecture</h3>
 <p>
 The system is designed to run without mandatory paid cloud services.
