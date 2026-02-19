@@ -41,7 +41,7 @@ Context size is carefully limited to improve efficiency, and a graceful fallback
 message is returned when the requested information is not found.
 </p>
 
-🧠 Vector Embedding & Semantic Search
+<h3>🧠 Vector Embedding & Semantic Search</h3>
 
 Implemented semantic document search using 1536-dimensional vector embeddings.
 
@@ -53,7 +53,7 @@ Built a Retrieval-Augmented Generation (RAG) pipeline for context-aware AI respo
 
 Optimized performance with ANN indexing (ivfflat) and Redis embedding caching.
 
-🌐 Offline Retry Messaging
+<h3>🌐 Offline Retry Messaging</h3>
 
 Designed an offline-first messaging system.
 
