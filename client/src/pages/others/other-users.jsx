@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import Header from "../../components/header/header";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 import "./other-users.css";
 
 const OtherUsers = () => {
@@ -9,100 +10,67 @@ const OtherUsers = () => {
 
   const [originalUsers, setOriginalUsers] = useState([]);
   const [search, setSearch] = useState("");
-  // const [requestStatus, setRequestStatus] = useState("");
-  const [loading, setLoading] = useState(false);
-  // const csrfToken = Cookies.get("csrfToken");
+  const pendingRequests = useRef(new Set());
 
-  const filterUsers = useMemo(() => {
-    if (!search.trim()) return originalUsers;
+  useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/api/all-users`, { withCredentials: true })
+      .then((res) => setOriginalUsers(res.data.otherUsers));
+  }, []);
+
+  const filtered = useMemo(() => {
     return originalUsers.filter((u) =>
       u.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [search, originalUsers]);
 
-  // const sentRequestsId = useMemo(() => {
-  //   return new Set(filterUsers.map((user) => user.id));
-  // }, [filterUsers]);
+  const connect = async (receiverId, name) => {
+    if (pendingRequests.current.has(receiverId)) return;
 
-  const pendingRequestsRefs = useRef(new Set());
-
-  useEffect(() => {
-    fetchAllUsers();
-  }, []);
-
-  const fetchAllUsers = async () => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/all-users`, {
+    pendingRequests.current.add(receiverId);
+    await axios.post(
+      `${API_BASE_URL}/api/connect`,
+      { receiverId },
+      {
         withCredentials: true,
-      });
-      // alert(res.data.message);
-      setOriginalUsers(res.data.otherUsers);
-      setLoading(false);
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-    }
+        headers: { "x-csrf-token": Cookies.get("csrfToken") },
+      }
+    );
+    toast.success(`Request sent to ${name}`);
   };
 
-  const connect = async (receiverId) => {
-    if (pendingRequestsRefs.current.has(receiverId)) {
-      return;
-    }
+return (
+  <div className="users-page">
+    <Header />
 
-    pendingRequestsRefs.current.add(receiverId);
-    try {
-      const csrfToken = Cookies.get("csrfToken");
+    <h2>Discover Users</h2>
 
-      await axios.post(
-        `${API_BASE_URL}/api/connect`,
-        { receiverId },
-        {
-          withCredentials: true,
-          headers: { "x-csrf-token": csrfToken },
-        }
-      );
-      setP(true);
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-    }
-  };
+    {/* Search */}
+    <input
+      className="search-input"
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Search users..."
+    />
 
-  return (
-    <div className="users-page">
-      <Header />
-      <h2>Other Users</h2>
-      <input
-        type="text"
-        placeholder="Search users..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="search-input"
-      />
-      <div className="users-grid">
-        {loading
-          ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="user-card skeleton">
-                <div className="avatar skeleton-box" />
-                <div className="skeleton-line" />
-                <div className="skeleton-btn" />
-              </div>
-            ))
-          : filterUsers.map((user) => (
-              <div className="user-card" key={user.id}>
-                <div className="avatar">{user.name[0].toUpperCase()}</div>
+    {/* Users Grid */}
+    <div className="users-grid">
+      {filtered.map((u) => (
+        <div key={u.id} className="user-card">
+          <div className="avatar">{u.name[0]}</div>
 
-                <h3>{user.public_id}</h3>
+          <h3>{u.public_id.slice(0, 10)}...</h3>
 
-                <button
-                  className="connect-btn"
-                  onClick={() => connect(user.id)}
-                >
-                  Connect
-                </button>
-              </div>
-            ))}
-      </div>
+          <button className="connect-btn" onClick={() => connect(u.id, u.name)}>
+            Connect
+          </button>
+        </div>
+      ))}
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default OtherUsers;

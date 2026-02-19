@@ -5,18 +5,33 @@ export const authMiddleware = async (req, res, next) => {
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
 
-  /* ================= ACCESS TOKEN ================= */
+  /* ---------- ACCESS TOKEN ---------- */
   if (accessToken) {
     try {
       const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
-      req.user = { id: decoded.id, email: decoded.email };
+
+      const userRes = await db.query(
+        `SELECT id, email, auth_uuid FROM users WHERE id = $1`,
+        [decoded.id]
+      );
+
+      if (!userRes.rows.length) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      req.user = {
+        id: userRes.rows[0].id, // INTEGER
+        auth_uuid: userRes.rows[0].auth_uuid, // UUID
+        email: userRes.rows[0].email,
+      };
+
       return next();
     } catch {
-      // expired → try refresh token
+      // expired → try refresh
     }
   }
 
-  /* == NO REFRESH TOKEN = */
+  /* ---------- REFRESH TOKEN ---------- */
   if (!refreshToken) {
     return res.status(401).json({ error: "Session expired" });
   }
@@ -24,55 +39,31 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
 
-    /* ================= CHECK TOKEN IN DB ================= */
     const tokenRes = await db.query(
       `
-      SELECT id, user_id, revoked
+      SELECT id, revoked
       FROM refresh_tokens
-      WHERE token = $1 AND expires_at > NOW()
+      WHERE token=$1 AND expires_at > NOW()
       `,
       [refreshToken]
     );
 
-    //  Token not found → reuse detected
-    if (!tokenRes.rows.length) {
-      // revoke ALL sessions of this user
-      await db.query(`DELETE FROM refresh_tokens WHERE user_id = $1`, [
+    if (!tokenRes.rows.length || tokenRes.rows[0].revoked) {
+      await db.query(`DELETE FROM refresh_tokens WHERE user_id=$1`, [
         decoded.id,
       ]);
 
       res.clearCookie("accessToken");
       res.clearCookie("refreshToken");
 
-      return res.status(401).json({
-        error: "Refresh token reuse detected. All sessions revoked.",
-      });
+      return res.status(401).json({ error: "Session invalidated" });
     }
 
-    const storedToken = tokenRes.rows[0];
-
-    //  Token already revoked → reuse attack
-    if (storedToken.revoked) {
-      await db.query(`DELETE FROM refresh_tokens WHERE user_id = $1`, [
-        decoded.id,
-      ]);
-
-      res.clearCookie("accessToken");
-      res.clearCookie("refreshToken");
-
-      return res.status(401).json({
-        error: "Session compromised. Please login again.",
-      });
-    }
-
-    /* ================= ROTATE TOKENS ================= */
-
-    // 1️ Revoke old refresh token
-    await db.query(`UPDATE refresh_tokens SET revoked = TRUE WHERE id = $1`, [
-      storedToken.id,
+    /* ---------- ROTATE TOKENS ---------- */
+    await db.query(`UPDATE refresh_tokens SET revoked=true WHERE id=$1`, [
+      tokenRes.rows[0].id,
     ]);
 
-    // 2️ Create new refresh token
     const newRefreshToken = jwt.sign(
       { id: decoded.id, email: decoded.email },
       process.env.JWT_SECRET,
@@ -82,12 +73,11 @@ export const authMiddleware = async (req, res, next) => {
     await db.query(
       `
       INSERT INTO refresh_tokens (user_id, token, expires_at)
-      VALUES ($1, $2, NOW() + INTERVAL '7 days')
+      VALUES ($1,$2,NOW()+INTERVAL '7 days')
       `,
       [decoded.id, newRefreshToken]
     );
 
-    // 3️ Create new access token
     const newAccessToken = jwt.sign(
       { id: decoded.id, email: decoded.email },
       process.env.JWT_SECRET,
@@ -110,17 +100,26 @@ export const authMiddleware = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    req.user = { id: decoded.id, email: decoded.email };
+    const userRes = await db.query(
+      `SELECT id, email, auth_uuid FROM users WHERE id=$1`,
+      [decoded.id]
+    );
+
+    req.user = {
+      id: userRes.rows[0].id,
+      auth_uuid: userRes.rows[0].auth_uuid,
+      email: userRes.rows[0].email,
+    };
+
     next();
-  } catch (err) {
+  } catch {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
-
     return res.status(401).json({ error: "Invalid refresh token" });
   }
 };
 
-/* ---------- CSRF ---------- */
+/* ================= CSRF ================= */
 export const csrfMiddleware = (req, res, next) => {
   if (req.method === "GET") return next();
 

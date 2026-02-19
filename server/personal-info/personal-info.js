@@ -9,7 +9,7 @@ export const personalInfo = async (req, res) => {
     const userRes = await db.query(
       `SELECT id, name, email, phone_number, profile_image, public_id, created_at
        FROM users WHERE id=$1`,
-      [userId]
+      [userId],
     );
 
     if (!userRes.rows.length) {
@@ -37,11 +37,16 @@ export const editUserProfile = async (req, res) => {
     }
 
     let profileImageUrl = null;
+    const user = await db.query(`SELECT public_id FROM users WHERE id=$1`, [
+      userId,
+    ]);
+    const publicId = user.rows[0]?.public_id;
 
+    
     if (req.file) {
       profileImageUrl = await uploadProfileImageToSupabase(
-        { id: userId },
-        req.file
+        { public_id: publicId },
+        req.file,
       );
     }
 
@@ -51,7 +56,7 @@ export const editUserProfile = async (req, res) => {
            phone_number=$2,
            profile_image=COALESCE($3, profile_image)
        WHERE id=$4`,
-      [name, phoneNumber, profileImageUrl, userId]
+      [name, phoneNumber, profileImageUrl, userId],
     );
 
     res.status(200).json({ message: "Profile updated successfully" });

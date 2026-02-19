@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { socket } from "../../socket";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./login.css";
+import { useEffect } from "react";
 
 export default function Login() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -16,6 +16,21 @@ export default function Login() {
 
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(`${API_BASE_URL}/api/auth/me`, {
+          withCredentials: true,
+        });
+        navigate("/home", { replace: true });
+      } catch {
+        // Not logged in → stay on login page
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -31,14 +46,9 @@ export default function Login() {
         },
         { withCredentials: true }
       );
-
-      // ✅ user is guaranteed now
       const user = res.data.user;
 
       localStorage.setItem("current-user", JSON.stringify(user));
-
-      // socket registration
-      socket.emit("register", user.id);
 
       navigate("/home");
     } catch (err) {
@@ -86,7 +96,7 @@ export default function Login() {
               Forgot password?
             </span>
             <p>
-              New here? <Link to="/signup">Create an account</Link>
+              New here? <span onClick={() => navigate('/signup')}>Create an account</span>
             </p>
           </div>
         </div>

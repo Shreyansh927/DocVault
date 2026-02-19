@@ -1,80 +1,135 @@
 import { db } from "../db.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
+
+const TOP_K = 20;
+const MAX_CONTEXT_CHARS = 200000;
 
 export const aiQueryResponse = async (req, res) => {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY is missing");
-    }
-
     const userId = req.user.id;
     const { q } = req.query;
 
-    if (!q) {
+    if (!q || q.trim().length === 0) {
       return res.status(400).json({ error: "Query is required" });
     }
 
-    const userName = await db.query(`SELECT name FROM users WHERE id=$1`, [
-      userId,
-    ]);
-    console.log(userName.rows[0].name);
+    const genAI = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    });
 
-    /* ---------- FETCH USER FILE SUMMARIES ---------- */
-    const result = await db.query(
+    /* =====================================================
+       STEP 1: Generate Embedding for User Query (NEW SDK)
+
+    ===================================================== */
+    const generateEmbedding = async (text) => {
+      try {
+        const result = await genAI.models.embedContent({
+          model: "gemini-embedding-001",
+          contents: [
+            {
+              role: "user",
+              parts: [{ text }],
+            },
+          ],
+        });
+
+        return result.embeddings[0].values.slice(0, 1536);
+      } catch (err) {
+        console.error("Gemini embedding failed:", err);
+        return null;
+      }
+    };
+
+    const queryEmbedding = await generateEmbedding(q);
+
+    if (!queryEmbedding) {
+      return res.status(500).json({ error: "Embedding failed" });
+    }
+
+    /* =====================================================
+       STEP 2: Vector Search (pgvector similarity)
+    ===================================================== */
+    const { rows } = await db.query(
       `
-      SELECT files.ai_summary
-      FROM files
-      JOIN folders ON folders.id = files.folder_id
-      WHERE folders.user_id = $1
-        AND files.ai_summary IS NOT NULL
+      SELECT f.filename, f.ai_summary, f.embedding, fo.folder_name
+      FROM files f
+      JOIN folders fo ON fo.id = f.folder_id
+      WHERE fo.user_id = $1
+        AND f.deleted_at IS NULL
+        AND f.embedding IS NOT NULL
+      ORDER BY f.embedding <-> $2
+      LIMIT $3
       `,
-      [userId]
+      [userId, `[${queryEmbedding.join(",")}]`, TOP_K],
     );
 
-    if (result.rows.length === 0) {
+    if (!rows.length) {
       return res.json({
-        answer: "No documents found to answer your question.",
+        answer: "I could not find this information in your documents.",
       });
     }
 
-    /* - COMBINE SUMMARIES - */
-    const combinedText = result.rows.map((row) => row.ai_summary).join("\n");
+    /* =====================================================
+       STEP 3: Build Context
+    ===================================================== */
+    let context = "";
+    let totalChars = 0;
 
-    
-    const safeText = combinedText.slice(0, 12000);
-
-    /* ---------- GEMINI SETUP ---------- */
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-    });
-
-    /* ---------- PROMPT (Q&A, NOT SUMMARY) ---------- */
-    const prompt = `
-You are answering questions using ONLY the user's uploaded document content.
-
-Rules:
-- if i used keywords like my in the query then treat the person as ${userName} and ans query according to him.
-
-- If the answer is not present, say "I could not find this information in your documents."
-- Do NOT guess or invent information.
-- Be concise and clear.
-
-User Question:
-"${q}"
-
-Document Content:
-${safeText}
+    for (const row of rows) {
+      const chunk = `
+File: ${row.filename}
+Content:
+${row.ai_summary}
+embedding: ${row.embedding}
+Folder: ${row.folder_name}
+---
 `;
 
-    const aiResponse = await model.generateContent(prompt);
+      totalChars += chunk.length;
+      if (totalChars > MAX_CONTEXT_CHARS) break;
+
+      context += chunk;
+    }
+
+    /* =====================================================
+       STEP 4: Generate Final Answer (NEW SDK)
+    ===================================================== */
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `
+You are an AI assistant.
+
+Answer strictly using the document context below.
+If the information is not present, respond exactly with:
+"I could not find this information in your documents."
+
+User Question:
+${q}
+
+Document Context:
+${context}
+`,
+            },
+          ],
+        },
+      ],
+    });
+
+    const answer = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     return res.json({
-      answer: aiResponse.response.text(),
+      answer:
+        answer && answer.length > 0
+          ? answer
+          : "I could not find this information in your documents.",
     });
   } catch (err) {
-    console.error("AI QUERY ERROR:", err);
-
+    console.error("AI QUERY ERROR:", err.message);
     return res.status(500).json({
       error: "Error generating AI response",
     });

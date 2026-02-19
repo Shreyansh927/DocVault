@@ -10,17 +10,23 @@ export const db = new Pool({
 });
 
 export const initDB = async () => {
+  /* ---------- ENABLE VECTOR EXTENSION ---------- */
+  await db.query(`
+    CREATE EXTENSION IF NOT EXISTS vector;
+  `);
+
   /* ---------- USERS ---------- */
   await db.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       public_id TEXT UNIQUE NOT NULL,
+      auth_uuid UUID UNIQUE,
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       phone_number TEXT UNIQUE,
       profile_image TEXT,
-      created_at TIMESTAMP DEFAULT NOW(),
+      created_at TIMESTAMP DEFAULT NOW() ,
       otp TEXT,
       otp_expiry TIMESTAMP,
       failed_attempts INT DEFAULT 0,
@@ -32,18 +38,20 @@ export const initDB = async () => {
   await db.query(`
     CREATE TABLE IF NOT EXISTS folders (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      user_id INTEGER,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
       folder_name TEXT NOT NULL,
       category TEXT DEFAULT 'PRIVATE',
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
 
-  /* ---------- FILES ---------- */
+  /* ---------- FILES (WITH VECTOR EMBEDDING) ---------- */
   await db.query(`
     CREATE TABLE IF NOT EXISTS files (
       id SERIAL PRIMARY KEY,
-      folder_id INTEGER REFERENCES folders(id) ON DELETE CASCADE,
+      folder_id INTEGER,
+      FOREIGN KEY(folder_id) REFERENCES folders(id) ON DELETE CASCADE,
       filename TEXT NOT NULL,
       encrypted_name TEXT NOT NULL,
       encrypted_link TEXT NOT NULL,
@@ -51,11 +59,21 @@ export const initDB = async () => {
       size INTEGER,
       storage TEXT,
       ai_summary TEXT,
+
+      embedding vector(1536), --pgvector added here
+
       created_at TIMESTAMP DEFAULT NOW(),
       deleted_at TIMESTAMP DEFAULT NULL,
       permanent_expiry TIMESTAMP DEFAULT NULL
-
     );
+  `);
+
+  /* ---------- VECTOR INDEX (IMPORTANT) ---------- */
+  await db.query(`
+    CREATE INDEX IF NOT EXISTS idx_files_embedding
+    ON files
+    USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
   `);
 
   /* ---------- REFRESH TOKENS ---------- */
@@ -81,8 +99,8 @@ export const initDB = async () => {
       id SERIAL PRIMARY KEY,
       sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       receiver_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-      created_at TIMESTAMP DEFAULT NOW(),
-      UNIQUE(sender_id, receiver_id)
+      created_at TIMESTAMP DEFAULT NOW()
+      
     );
   `);
 
@@ -92,7 +110,7 @@ export const initDB = async () => {
       user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       friend_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       created_at TIMESTAMP DEFAULT NOW(),
-       show_folders BOOLEAN DEFAULT FALSE,
+      show_folders BOOLEAN DEFAULT FALSE,
       PRIMARY KEY (user_id, friend_id)
     );
   `);
@@ -101,16 +119,53 @@ export const initDB = async () => {
   await db.query(`
     CREATE TABLE IF NOT EXISTS notifications (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+
+      user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
       sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+
       sender_name TEXT NOT NULL,
       sender_profile_image TEXT,
       type TEXT NOT NULL,
-      status TEXT DEFAULT 'pending',
+      status TEXT DEFAULT 'PENDING',
       seen BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP DEFAULT NOW(),
+
       UNIQUE (user_id, sender_id, type)
     );
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS chats (
+    id SERIAL PRIMARY KEY,
+  chat_id INTEGER ,
+  FOREIGN KEY (chat_id) REFERENCES connections(id) ON DELETE CASCADE,
+  user1_id INTEGER,
+  FOREIGN KEY( user1_id) REFERENCES users(id) ON DELETE CASCADE,
+  user2_id INTEGER,
+  FOREIGN KEY( user2_id) REFERENCES users(id) ON DELETE CASCADE,
+  
+  created_at TIMESTAMP DEFAULT NOW()
+  
+
+
+
+    )
+    `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS messages (
+  id SERIAL PRIMARY KEY,
+  chat_id INTEGER,
+  FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+  
+  sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  sender_name TEXT NOT NULL,
+  
+  content TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+
   `);
 
   await db.query(`
@@ -118,5 +173,5 @@ export const initDB = async () => {
     ON notifications(user_id);
   `);
 
-  console.log(" PostgreSQL connected & tables initialized");
+  console.log(" PostgreSQL connected & tables initialized (pgvector enabled)");
 };

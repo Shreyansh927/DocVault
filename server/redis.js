@@ -12,5 +12,5 @@ redis.on("error", (err) => {
   console.error("Redis error:", err);
 });
 
-// IMPORTANT: connect ONCE
+// Connect to Redis immediately on server startup
 await redis.connect();

@@ -20,120 +20,140 @@ import SharedFiles from "./pages/shared-folder-files/shared-folder-files.jsx";
 import SharedFileView from "./pages/shared-file-view/shared-file-view.jsx";
 import AccessControl from "./pages/access-control/access-control.jsx";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const App = () => {
   return (
-    <div>
-      <BrowserRouter>
-        <Routes>
-          <Route path="*" element={<Navigate to="/home" replace />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/reset-email" element={<ResetEmail />} />
-          <Route path="/otp-field" element={<OtpField />} />
-          <Route path="/set-new-password" element={<SetPassword />} />
-          <Route
-            path="/others"
-            element={
-              <ProtectedRoute>
-                <OtherUsers />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/files/:folderId"
-            element={
-              <ProtectedRoute>
-                <Files />
-              </ProtectedRoute>
-            }
-          />
+    <BrowserRouter>
+      <Routes>
+        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/file-view/:folderId/:fileId"
-            element={
-              <ProtectedRoute>
-                <FileView />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <Notifications />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/connections"
-            element={
-              <ProtectedRoute>
-                <Connections />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/chats/:friendId/:friendName"
-            element={
-              <ProtectedRoute>
-                <Chats />
-              </ProtectedRoute>
-            }
-          />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/folders/shared/:userId"
-            element={
-              <ProtectedRoute>
-                <SharedFolders />
-              </ProtectedRoute>
-            }
-          />
+        <Route path="/reset-email" element={<ResetEmail />} />
+        <Route path="/otp-field" element={<OtpField />} />
+        <Route path="/set-new-password" element={<SetPassword />} />
 
-          <Route
-            path="/access-control"
-            element={
-              <ProtectedRoute>
-                <AccessControl />
-              </ProtectedRoute>
-            }
-          />
+        <Route
+          path="/others"
+          element={
+            <ProtectedRoute>
+              <OtherUsers />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/folder/files/shared/:friendId/:folderId"
-            element={
-              <ProtectedRoute>
-                <SharedFiles />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/folder/files/file/shared/:friendId/:folderId/:fileId"
-            element={
-              <ProtectedRoute>
-                <SharedFileView />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </div>
+        <Route
+          path="/files/:folderId"
+          element={
+            <ProtectedRoute>
+              <Files />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/file-view/:folderId/:fileId"
+          element={
+            <ProtectedRoute>
+              <FileView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/connections"
+          element={
+            <ProtectedRoute>
+              <Connections />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/chats/:friendId/:friendName/:connectionId"
+          element={
+            <ProtectedRoute>
+              <Chats />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/folders/shared/:userId"
+          element={
+            <ProtectedRoute>
+              <SharedFolders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/access-control"
+          element={
+            <ProtectedRoute>
+              <AccessControl />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/folder/files/shared/:friendId/:folderId"
+          element={
+            <ProtectedRoute>
+              <SharedFiles />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/folder/files/file/shared/:friendId/:folderId/:fileId"
+          element={
+            <ProtectedRoute>
+              <SharedFileView />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+      />
+    </BrowserRouter>
   );
 };
 

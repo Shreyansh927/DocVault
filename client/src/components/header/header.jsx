@@ -6,35 +6,42 @@ import "./header.css";
 const Header = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const base_url = import.meta.env.VITE_API_BASE_URL;
 
-  // ✅ FIX 1: correct localStorage key
-  const userEmail = JSON.parse(localStorage.getItem("current-user-email"));
+  const userEmail = JSON.parse(
+    localStorage.getItem("current-user"),
+  ).name.toUpperCase();
+
+  const userProfileImage = JSON.parse(
+    localStorage.getItem("current-user"),
+  ).profile_image;
 
   const logout = async () => {
     try {
       await axios.post(
         `${base_url}/api/auth/logout`,
         {},
-        { withCredentials: true } // ✅ REQUIRED
+        { withCredentials: true },
       );
 
-      // ✅ FIX 2: clear client-side state
-      localStorage.removeItem("current-user-email");
+      localStorage.removeItem("current-user");
 
       setShowLogoutModal(false);
+      setLoggingOut(true);
       navigate("/login");
     } catch (err) {
       console.error(err);
 
-      // ✅ FIX 3: handle auth failure gracefully
       if (err.response?.status === 401 || err.response?.status === 403) {
         localStorage.removeItem("current-user-email");
         navigate("/login");
       } else {
         alert("Logout failed. Try again.");
       }
+    } finally {
+      setLoggingOut(false);
     }
   };
 
@@ -81,12 +88,22 @@ const Header = () => {
             Access Control
           </button>
 
-          <button
-            className="header-btn danger"
-            onClick={() => setShowLogoutModal(true)}
-          >
-            {userEmail || "Account"}
-          </button>
+          {userProfileImage ? (
+            <img
+              src={userProfileImage}
+              alt="Profile"
+              className="profile-image"
+              onClick={() => setShowLogoutModal(true)}
+              style={{ height: "50px", width: "50px", borderRadius: "50%", cursor: "pointer", objectFit: "cover", marginLeft: "12px" }}
+            />
+          ) : (
+            <button
+              className="header-btn danger"
+              onClick={() => setShowLogoutModal(true)}
+            >
+              {userEmail || "Account"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -111,7 +128,7 @@ const Header = () => {
               </button>
 
               <button className="logout-btn confirm" onClick={logout}>
-                Yes, Logout
+                {loggingOut ? "Logging out..." : "Yes, Logout"}
               </button>
             </div>
           </div>

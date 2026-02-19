@@ -20,7 +20,11 @@ fileRoutes.post(
   uploadFiles
 );
 
-fileRoutes.get("/:fileId/download", authMiddleware, downloadFile);
+fileRoutes.get(
+  "/:fileId/download",
+  authMiddleware,
+  downloadFile
+);
 fileRoutes.get("/:folderId/:fileId", authMiddleware, viewIndividualFile);
 
 fileRoutes.post("/delete-file", authMiddleware, deleteFile);

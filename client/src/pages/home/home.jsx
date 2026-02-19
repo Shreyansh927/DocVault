@@ -257,7 +257,7 @@ const Home = () => {
         </div>
       )}
 
-      {/* ================= DELETE MODAL ================= */}
+      {/* == DELETE MODAL */}
       {showDeleteModal && (
         <div
           className="delete-overlay"
@@ -287,7 +287,7 @@ const Home = () => {
         </div>
       )}
 
-      {/* ================= UPDATE MODAL ================= */}
+      {/* == UPDATE MODAL = */}
       {toggleFolderSettings && folderToUpdate && (
         <div
           className="modal-overlay"

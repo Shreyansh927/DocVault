@@ -4,6 +4,8 @@ import Header from "../../components/header/header";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./connections.css";
+import { supabase } from "../../supabaseClient";
+import { toast } from "react-toastify";
 
 const Connections = () => {
   const base_url = import.meta.env.VITE_API_BASE_URL;
@@ -11,10 +13,46 @@ const Connections = () => {
   const [allConnections, setAllConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  /* ================= FETCH AUTH USER ================= */
 
   useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/api/auth/me`, { withCredentials: true })
+      .then((res) => setUser(res.data))
+      .catch(() => toast.error("Auth failed"));
+  }, []);
+
+  /* ================= REALTIME ================= */
+  useEffect(() => {
+    if (!user?.id) return;
+
     fetchConnections();
-  }, []); // ✅ run once
+
+    const channel = supabase
+      .channel("friends-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "friends",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log("New connection change:", payload);
+          toast.info("New connection added");
+          fetchConnections();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const fetchConnections = async () => {
     try {
@@ -38,7 +76,7 @@ const Connections = () => {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       console.log(res.data.message);
@@ -101,7 +139,9 @@ const Connections = () => {
                   <button
                     className="btn chat"
                     onClick={() =>
-                      navigate(`/chats/${connection.id}/${connection.name}`)
+                      navigate(
+                        `/chats/${connection.id}/${connection.name}/${connection.connection_id}`,
+                      )
                     }
                   >
                     Chat

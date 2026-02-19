@@ -6,6 +6,7 @@ import axios from "axios";
 import { MdUpload, MdClose, MdDelete } from "react-icons/md";
 import { TbRestore } from "react-icons/tb";
 import Cookies from "js-cookie";
+import AskAi from "../../ask-ai/ask-ai";
 
 const Files = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -25,7 +26,7 @@ const Files = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [trashMode, setTrashMode] = useState(
-    JSON.parse(localStorage.getItem("trash")) || false
+    JSON.parse(localStorage.getItem("trash")) || false,
   );
 
   /* ---------- Derived ---------- */
@@ -34,13 +35,13 @@ const Files = () => {
     return allFiles.filter(
       (f) =>
         f.filename?.toLowerCase().includes(searchFile.toLowerCase()) ||
-        f.ai_summary?.toLowerCase().includes(searchFile.toLowerCase())
+        f.ai_summary?.toLowerCase().includes(searchFile.toLowerCase()),
     );
   }, [searchFile, allFiles]);
 
   const totalFolderSize = useMemo(
     () => allFiles.reduce((sum, f) => sum + f.size, 0),
-    [allFiles]
+    [allFiles],
   );
 
   /* ---------- Fetch ---------- */
@@ -116,7 +117,7 @@ const Files = () => {
     await axios.post(
       `${API_BASE_URL}/api/files/delete-file`,
       { folderId, fileId: fileToDelete.id },
-      { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
+      { withCredentials: true, headers: { "x-csrf-token": csrfToken } },
     );
     setShowDeleteModal(false);
     fetchAllFiles();
@@ -126,7 +127,7 @@ const Files = () => {
     await axios.post(
       `${API_BASE_URL}/api/files/delete-all-files`,
       { folderId },
-      { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
+      { withCredentials: true, headers: { "x-csrf-token": csrfToken } },
     );
     fetchAllFiles();
   };
@@ -136,7 +137,7 @@ const Files = () => {
     await axios.post(
       `${API_BASE_URL}/api/files/restore-file`,
       { folderId, fileId: file.id },
-      { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
+      { withCredentials: true, headers: { "x-csrf-token": csrfToken } },
     );
     fetchAllTrashFiles();
   };
@@ -145,7 +146,7 @@ const Files = () => {
     await axios.post(
       `${API_BASE_URL}/api/files/restore-all-files`,
       { folderId },
-      { withCredentials: true, headers: { "x-csrf-token": csrfToken } }
+      { withCredentials: true, headers: { "x-csrf-token": csrfToken } },
     );
     fetchAllTrashFiles();
   };
@@ -153,6 +154,7 @@ const Files = () => {
   return (
     <div className="files-container">
       <Header />
+      <AskAi />
 
       {/* ===== Top Bar ===== */}
       <div className="files-top-bar">
@@ -215,14 +217,14 @@ const Files = () => {
           </div>
         ) : (
           filteredFiles.map((file) => (
-            <div className="file-card" key={file.id}>
+            <div title={file.filename} className="file-card" key={file.id}>
               <div
                 className="file-main"
                 onClick={() =>
                   !trashMode && navigate(`/file-view/${folderId}/${file.id}`)
                 }
               >
-                <h4>{file.filename}</h4>
+                <h4>{file.filename.slice(0, 7)}...</h4>
                 <small>{(file.size / 1024).toFixed(1)} KB</small>
               </div>
 

@@ -1,8 +1,6 @@
 import { db } from "../db.js";
-import { redis } from "../redis.js";
-import { io } from "../server.js";
 
-/* ================= SEND FRIEND REQUEST ================= */
+/* ================= SEND REQUEST ================= */
 export const sendRequest = async (req, res) => {
   try {
     const senderId = req.user.id;
@@ -18,106 +16,95 @@ export const sendRequest = async (req, res) => {
       VALUES ($1,$2)
       ON CONFLICT DO NOTHING
       `,
-      [senderId, receiverId]
+      [senderId, receiverId],
     );
 
-    const senderRes = await db.query(
-      `SELECT name, profile_image FROM users WHERE id=$1`,
-      [senderId]
+    await db.query(
+      `INSERT INTO chats (user1_id, user2_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [senderId, receiverId],
     );
 
-    const sender = senderRes.rows[0];
+    const sender = (
+      await db.query(`SELECT name, profile_image FROM users WHERE id=$1`, [
+        senderId,
+      ])
+    ).rows[0];
 
-    // invalidate receiver notification cache
-    await redis?.del(`notifications:user:${receiverId}`);
+    const receiverAuthUUID = (
+      await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [receiverId])
+    ).rows[0].auth_uuid;
 
-    const notifRes = await db.query(
+    await db.query(
       `
       INSERT INTO notifications
       (user_id, sender_id, sender_name, sender_profile_image, type, status)
       VALUES ($1,$2,$3,$4,'FRIEND_REQUEST','PENDING')
-      RETURNING id, created_at
+      ON CONFLICT DO NOTHING
       `,
-      [receiverId, senderId, sender.name, sender.profile_image]
+      [receiverAuthUUID, senderId, sender.name, sender.profile_image],
     );
-
-    io.to(String(receiverId)).emit("friend-request", {
-      id: notifRes.rows[0].id,
-      senderId,
-      name: sender.name,
-      profile_image: sender.profile_image,
-      status: "PENDING",
-      created_at: notifRes.rows[0].created_at,
-    });
-
-    return res.status(200).json({ success: true });
+    console.log("REQ.USER:", req.user);
+    res.json({ success: true });
   } catch (err) {
     console.error("SEND REQUEST ERROR:", err.message);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
 /* ================= ACCEPT FRIEND REQUEST ================= */
 export const acceptRequest = async (req, res) => {
-  const receiverId = req.user.id;
+  const receiverId = req.user.id; // INTEGER
   const senderId = Number(req.body.senderId);
-
-  if (!senderId) {
-    return res.status(400).json({ error: "Invalid senderId" });
-  }
 
   try {
     await db.query("BEGIN");
 
+    /* ---------- FETCH AUTH UUIDS ---------- */
+    const receiver = await db.query(
+      `SELECT auth_uuid, name, profile_image FROM users WHERE id=$1`,
+      [receiverId],
+    );
+
+    const sender = await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [
+      senderId,
+    ]);
+
+    /* ---------- UPDATE RECEIVER NOTIFICATION ---------- */
     await db.query(
       `
       UPDATE notifications
       SET status='ACCEPTED'
       WHERE user_id=$1 AND sender_id=$2 AND type='FRIEND_REQUEST'
       `,
-      [receiverId, senderId]
+      [receiver.rows[0].auth_uuid, senderId],
     );
 
-    const receiverRes = await db.query(
-      `SELECT name, profile_image FROM users WHERE id=$1`,
-      [receiverId]
-    );
-
-    const receiver = receiverRes.rows[0];
-
-    const senderNotif = await db.query(
+    /* ---------- INSERT SENDER NOTIFICATION ---------- */
+    await db.query(
       `
       INSERT INTO notifications
       (user_id, sender_id, sender_name, sender_profile_image, type, status)
       VALUES ($1,$2,$3,$4,'FRIEND_REQUEST_ACCEPTED','ACCEPTED')
-      RETURNING id, created_at
       `,
-      [senderId, receiverId, receiver.name, receiver.profile_image]
+      [
+        sender.rows[0].auth_uuid, // 🔥 UUID
+        receiverId,
+        receiver.rows[0].name,
+        receiver.rows[0].profile_image,
+      ],
     );
 
+    /* ---------- FRIEND RELATION ---------- */
     await db.query(
       `
       INSERT INTO friends (user_id, friend_id)
       VALUES ($1,$2), ($2,$1)
       ON CONFLICT DO NOTHING
       `,
-      [receiverId, senderId]
+      [receiverId, senderId],
     );
 
     await db.query("COMMIT");
-
-    // await redis?.del(`notifications:user:${senderId}`);
-    // await redis?.del(`connections:${senderId}`);
-    // await redis?.del(`connections:${receiverId}`);
-
-    io.to(String(senderId)).emit("friend-request-response", {
-      id: senderNotif.rows[0].id,
-      type: "FRIEND_REQUEST_ACCEPTED",
-      senderId: receiverId,
-      name: receiver.name,
-      profile_image: receiver.profile_image,
-      created_at: senderNotif.rows[0].created_at,
-    });
 
     return res.status(200).json({ success: true });
   } catch (err) {
@@ -132,47 +119,37 @@ export const denyRequest = async (req, res) => {
   const receiverId = req.user.id;
   const senderId = Number(req.body.senderId);
 
-  if (!senderId) {
-    return res.status(400).json({ error: "Invalid senderId" });
-  }
-
   try {
+    const receiver = await db.query(
+      `SELECT auth_uuid, name, profile_image FROM users WHERE id=$1`,
+      [receiverId],
+    );
+
+    const sender = await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [
+      senderId,
+    ]);
+
     await db.query(
       `
       DELETE FROM notifications
       WHERE user_id=$1 AND sender_id=$2 AND type='FRIEND_REQUEST'
       `,
-      [receiverId, senderId]
+      [receiver.rows[0].auth_uuid, senderId],
     );
 
-    const receiverRes = await db.query(
-      `SELECT name, profile_image FROM users WHERE id=$1`,
-      [receiverId]
-    );
-
-    const senderNotif = await db.query(
+    await db.query(
       `
       INSERT INTO notifications
       (user_id, sender_id, sender_name, sender_profile_image, type, status)
       VALUES ($1,$2,$3,$4,'FRIEND_REQUEST_REJECTED','REJECTED')
-      RETURNING id, created_at
       `,
       [
-        senderId,
+        sender.rows[0].auth_uuid, // 🔥 UUID
         receiverId,
-        receiverRes.rows[0].name,
-        receiverRes.rows[0].profile_image,
-      ]
+        receiver.rows[0].name,
+        receiver.rows[0].profile_image,
+      ],
     );
-
-    await redis?.del(`notifications:user:${senderId}`);
-
-    io.to(String(senderId)).emit("friend-request-response", {
-      id: senderNotif.rows[0].id,
-      type: "FRIEND_REQUEST_REJECTED",
-      senderId: receiverId,
-      created_at: senderNotif.rows[0].created_at,
-    });
 
     return res.status(200).json({ success: true });
   } catch (err) {
@@ -183,8 +160,8 @@ export const denyRequest = async (req, res) => {
 
 export const removeFriend = async (req, res) => {
   try {
-    const removeFriendId = req.body.removeFriend;
-    const currentUserId = req.user.id;
+    const removeFriendId = Number(req.body.removeFriend);
+    const currentUserId = Number(req.user.id);
 
     await db.query(`DELETE FROM friends WHERE user_id=$1 AND friend_id=$2`, [
       currentUserId,
@@ -196,7 +173,7 @@ export const removeFriend = async (req, res) => {
       DELETE FROM notifications
       WHERE user_id=$1 AND sender_id=$2
       `,
-      [removeFriendId, currentUserId]
+      [removeFriendId, currentUserId],
     );
 
     return res
@@ -230,12 +207,14 @@ export const getConnections = async (req, res) => {
         u.id,
         u.name,
         u.profile_image,
-        f.show_folders
-      FROM friends f
-      JOIN users u ON u.id = f.friend_id
-      WHERE f.user_id = $1
+        f.show_folders, 
+        c.id as connection_id
+      FROM connections c
+      JOIN users u ON (u.id = c.sender_id AND c.receiver_id = $1)
+                   OR (u.id = c.receiver_id AND c.sender_id = $1)
+      JOIN friends f ON f.user_id = u.id AND f.friend_id = $1
       `,
-      [userId]
+      [userId],
     );
 
     // await redis?.setEx(cacheKey, 300, JSON.stringify(result.rows));
@@ -261,7 +240,7 @@ export const allowShowFolder = async (req, res) => {
     SET show_folders = TRUE
     WHERE user_id = $1 AND friend_id = $2
     `,
-    [friendId, ownerId]
+    [friendId, ownerId],
   );
   await db.query(
     `
@@ -269,7 +248,7 @@ export const allowShowFolder = async (req, res) => {
     SET show_folders = TRUE
     WHERE user_id = $1 AND friend_id = $2
     `,
-    [ownerId, friendId]
+    [ownerId, friendId],
   );
 
   return res.json({ success: true });
@@ -285,7 +264,7 @@ export const restrictShowFolder = async (req, res) => {
     SET show_folders = FALSE
     WHERE user_id = $1 AND friend_id = $2
     `,
-    [friendId, ownerId]
+    [friendId, ownerId],
   );
   await db.query(
     `
@@ -293,7 +272,7 @@ export const restrictShowFolder = async (req, res) => {
     SET show_folders = FALSE
     WHERE user_id = $1 AND friend_id = $2
     `,
-    [ownerId, friendId]
+    [ownerId, friendId],
   );
 
   return res.json({ success: true });
@@ -316,7 +295,7 @@ export const getSharedFoldersPractice = async (req, res) => {
         AND fr.show_folders = true
         AND fo.category = 'PUBLIC'
       `,
-      [ownerId, viewerId]
+      [ownerId, viewerId],
     );
 
     res.json({ sharedFolders: result.rows });
@@ -346,7 +325,7 @@ export const getSharedFiles = async (req, res) => {
         AND fr.show_folders = true
         AND f.is_deleted = false
       `,
-      [folderId, ownerId, viewerId]
+      [folderId, ownerId, viewerId],
     );
 
     res.json({ sharedFiles: result.rows });
@@ -378,7 +357,7 @@ export const getSharedFileView = async (req, res) => {
         AND fr.show_folders = true
         AND f.is_deleted = false
       `,
-      [fileId, folderId, ownerId, viewerId]
+      [fileId, folderId, ownerId, viewerId],
     );
 
     if (!result.rows.length) {
@@ -405,7 +384,7 @@ export const checkFolderAccess = async (req, res, next) => {
       AND friend_id = $2
       AND show_folders = TRUE
     `,
-    [ownerId, viewerId]
+    [ownerId, viewerId],
   );
 
   if (!result.rows.length) {

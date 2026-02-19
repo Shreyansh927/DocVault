@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { db } from "../db.js";
+import jwt from "jsonwebtoken";
+import { supabaseAdmin } from "../supabaseAdmin.js";
 import { usersBackup } from "../utils/supabase-cloud-storage-users-backup.js";
-
-/* ---------------- SIGNUP ---------------- */
+import { profile } from "console";
 
 export const signup = async (req, res) => {
   try {
@@ -14,55 +14,71 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    /* ---------- CHECK DUPLICATES ---------- */
     const exists = await db.query(
-      `SELECT * FROM users WHERE email=$1 OR phone_number=$2`,
-      [email, phoneNumber || null]
+      `SELECT 1 FROM users WHERE email=$1 OR phone_number=$2`,
+      [email, phoneNumber],
     );
-
     if (exists.rows.length) {
       return res.status(400).json({ error: "Email or phone already exists" });
     }
 
+    /* ---------- CREATE SUPABASE AUTH USER ---------- */
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    const authUuid = data.user.id;
+
+    /* ---------- CREATE APP USER ---------- */
     const hashedPassword = await bcrypt.hash(password, 10);
-    const publicId = crypto.randomUUID();
-    const phone = phoneNumber?.trim() || null;
+    const publicId = `${name}_${crypto.randomUUID()}`;
 
-    const newUser = await db.query(
-      `INSERT INTO users 
-       (name, email, password_hash, phone_number, public_id)
-       VALUES ($1, $2, $3, $4, $5) 
-       RETURNING id, name, email, phone_number, public_id, created_at`,
-      [name, email, hashedPassword, phone, publicId]
+    const result = await db.query(
+      `
+      INSERT INTO users
+      (auth_uuid, name, email, password_hash, phone_number, public_id)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      RETURNING id, auth_uuid, name, email, phone_number, public_id, created_at
+      `,
+      [authUuid, name, email, hashedPassword, phoneNumber, publicId],
     );
-    const user = newUser.rows[0];
 
-    usersBackup(user);
+    const user = result.rows[0];
 
-    return res.status(201).json({ message: "User registered successfully" });
+    await usersBackup(user);
+
+    res.status(201).json({
+      message: "User registered successfully",
+      user,
+    });
   } catch (err) {
-    console.error("SIGNUP ERROR 👇");
-    console.error(err.stack || err);
-    return res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Signup failed" });
   }
 };
 
-/* ---------------- LOGIN ---------------- */
+/* -- LOGIN ----- */
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const userRes = await db.query(
-      `SELECT id, name, email, password_hash FROM users WHERE email=$1`,
-      [email]
+      `SELECT id, name, email, password_hash, profile_image FROM users WHERE email=$1`,
+      [email],
     );
 
     if (!userRes.rows.length) {
-      return res.status(401).json({ error: "Invalid email or password" });
+      return res.status(401).json({ error: "user not found" });
     }
 
     const user = userRes.rows[0];
 
-    if (user.locked_until && user.locked_until > new Date()) {
+    if (user.locked_until > new Date()) {
       return res
         .status(403)
         .json({ error: "Account blocked. try again later" });
@@ -72,7 +88,7 @@ export const login = async (req, res) => {
     if (!valid) {
       await db.query(
         `UPDATE users SET failed_attempts = failed_attempts + 1, locked_until = CASE WHEN failed_attempts + 1 >= 5 THEN NOW() + INTERVAL '15 minutes' ELSE locked_until END WHERE id =$1`,
-        [user.id]
+        [user.id],
       );
 
       return res.status(401).json({ error: "Invalid email or password" });
@@ -80,7 +96,7 @@ export const login = async (req, res) => {
 
     await db.query(
       `UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id =$1`,
-      [user.id]
+      [user.id],
     );
 
     const payload = { id: user.id, email: user.email };
@@ -96,21 +112,21 @@ export const login = async (req, res) => {
     await db.query(
       `INSERT INTO refresh_tokens (user_id, token, expires_at)
        VALUES ($1,$2,NOW() + INTERVAL '7 days')`,
-      [user.id, refreshToken]
+      [user.id, refreshToken],
     );
 
     const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax", // ✅ FIX
-      secure: isProd, // ✅ REQUIRED with SameSite=None
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax", // ✅ FIX
+      sameSite: isProd ? "none" : "lax",
       secure: isProd,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -121,6 +137,7 @@ export const login = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        profile_image: user.profile_image,
       },
     });
   } catch (err) {
@@ -129,12 +146,14 @@ export const login = async (req, res) => {
   }
 };
 
-/* ---------------- LOGOUT ---------------- */
+/* -- LOGOUT -- */
 export const logout = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
+  const accessToken = req.cookies.accessToken;
 
-  if (refreshToken) {
+  if (refreshToken || accessToken) {
     await db.query(`DELETE FROM refresh_tokens WHERE token=$1`, [refreshToken]);
+    await db.query(`DELETE FROM refresh_tokens WHERE token=$1`, [accessToken]);
   }
 
   res.clearCookie("accessToken");
