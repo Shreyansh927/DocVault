@@ -1,36 +1,19 @@
-import { redis } from "../redis.js";
+import rateLimit from "express-rate-limit";
 
-export const rediAuthRateLimiter = ({
-  windowMs,
-  max,
-  keyPrefix,
-  message,
-}) => {
-  return async (req, res, next) => {
-    try {
-      const identifier =
-        req.ip || req.headers["x-forwarded-for"] || "unknown";
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: "Too many attempts. Try again later.",
+});
 
-      const key = `${keyPrefix}:${identifier}`;
-
-      const current = await redis.incr(key);
-
-      if (current === 1) {
-        // first request → set TTL
-        await redis.expire(key, Math.ceil(windowMs / 1000));
-      }
-
-      if (current > max) {
-        return res.status(429).json({
-          error: message || "Too many requests",
-        });
-      }
-
-      next();
-    } catch (err) {
-      console.error("Redis rate limiter error:", err.message);
-      // Redis down → allow request (fail open)
-      next();
-    }
-  };
-};
+export const aiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 1,
+  message: "Too many attempts. Try again later.",
+  handler: (req, res) => {
+    console.log("Rate limit triggered for IP:", req.ip);
+    res.status(429).json({
+      message: "Too many AI requests. Try again later.",
+    });
+  },
+});

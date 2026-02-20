@@ -15,6 +15,7 @@ import forgotPasswordRoute from "./routes/forgotPasswordRoute.js";
 import personalRoute from "./routes/personalInfoRoutes.js";
 import connectionRoutes from "./routes/connectionRoute.js";
 import messageRouter from "./routes/messagesRoutes.js";
+import { authLimiter, aiLimiter } from "./middleware/rateLimiter.js";
 
 import { allUsers } from "./all-users/allUsers.js";
 import { allFiles, trashFiles } from "./all-users/all-folder-files.js";
@@ -41,7 +42,7 @@ app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/forgot", forgotPasswordRoute);
 app.use("/api/user-profile", authMiddleware, personalRoute);
 
@@ -54,7 +55,7 @@ app.use("/api/folder-auth", authMiddleware, folderRoutes);
 app.use("/api/files", authMiddleware, fileRoutes);
 
 app.use("/api", authMiddleware, connectionRoutes);
-app.use("/api/messages", messageRouter);
+app.use("/api/messages", authMiddleware, messageRouter);
 app.get("/api/all-users", authMiddleware, allUsers);
 
 /* ---------- START ---------- */

@@ -23,7 +23,7 @@ const AskAi = () => {
       setAnswer(res.data.answer);
       setQuery("");
     } catch {
-      setAnswer("Something went wrong. Try again.");
+      setAnswer("Too many requests try after 1 min...");
     } finally {
       setLoading(false);
     }
