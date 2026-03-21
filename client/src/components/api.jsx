@@ -18,9 +18,10 @@ api.interceptors.response.use(
 
     if (status === 401) {
       try {
-        
-        await api.get("/api/auth/me");
-        return api(err.config); 
+        // 🔥 CALL REFRESH ENDPOINT (NOT /me)
+        await api.post("/api/auth/refresh");
+
+        return api(err.config); // retry original request
       } catch {
         window.location.href = "/login";
       }

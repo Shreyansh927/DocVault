@@ -12,7 +12,7 @@ export const authMiddleware = async (req, res, next) => {
 
       const userRes = await db.query(
         `SELECT id, email, auth_uuid FROM users WHERE id = $1`,
-        [decoded.id]
+        [decoded.id],
       );
 
       if (!userRes.rows.length) {
@@ -45,7 +45,7 @@ export const authMiddleware = async (req, res, next) => {
       FROM refresh_tokens
       WHERE token=$1 AND expires_at > NOW()
       `,
-      [refreshToken]
+      [refreshToken],
     );
 
     if (!tokenRes.rows.length || tokenRes.rows[0].revoked) {
@@ -67,7 +67,7 @@ export const authMiddleware = async (req, res, next) => {
     const newRefreshToken = jwt.sign(
       { id: decoded.id, email: decoded.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     await db.query(
@@ -75,34 +75,34 @@ export const authMiddleware = async (req, res, next) => {
       INSERT INTO refresh_tokens (user_id, token, expires_at)
       VALUES ($1,$2,NOW()+INTERVAL '7 days')
       `,
-      [decoded.id, newRefreshToken]
+      [decoded.id, newRefreshToken],
     );
 
     const newAccessToken = jwt.sign(
       { id: decoded.id, email: decoded.email },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "15m" },
     );
 
     const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
-      maxAge: 15 * 60 * 1000,
+      sameSite: "none",
+      secure: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     const userRes = await db.query(
       `SELECT id, email, auth_uuid FROM users WHERE id=$1`,
-      [decoded.id]
+      [decoded.id],
     );
 
     req.user = {
