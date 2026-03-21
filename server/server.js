@@ -27,17 +27,14 @@ import "./permanent-deletion-job.js";
 const app = express();
 
 /* ---------- CORE ---------- */
-app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(cookieParser());
-app.use((req, res, next) => {
-  console.log("🔥 Incoming:", req.method, req.url);
-  next();
-});
+
 
 app.use(
   cors({
-    origin: true,
+    origin: [process.env.CLIENT_URL, "http://localhost:5173"],
     credentials: true,
   }),
 );
