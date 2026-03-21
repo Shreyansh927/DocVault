@@ -68,7 +68,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const userRes = await db.query(
-      `SELECT id, name, email, password_hash, profile_image FROM users WHERE email=$1`,
+      `SELECT id, name, email, password_hash, profile_image, locked_until FROM users WHERE email=$1`,
       [email],
     );
 
@@ -78,7 +78,10 @@ export const login = async (req, res) => {
 
     const user = userRes.rows[0];
 
-    if (user.locked_until > new Date()) {
+    if (
+      user.locked_until &&
+      new Date(user.locked_until).getTime() > Date.now()
+    ) {
       return res
         .status(403)
         .json({ error: "Account blocked. try again later" });
