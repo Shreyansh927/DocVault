@@ -8,7 +8,7 @@ export const authLimiter = rateLimit({
 
 export const aiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 1,
+  max: 2,
   message: "Too many attempts. Try again later.",
   handler: (req, res) => {
     console.log("Rate limit triggered for IP:", req.ip);

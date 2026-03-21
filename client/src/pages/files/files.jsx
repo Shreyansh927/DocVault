@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import "./files.css";
 import Header from "../../components/header/header";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import axios, { all } from "axios";
 import { MdUpload, MdClose, MdDelete } from "react-icons/md";
 import { TbRestore } from "react-icons/tb";
 import Cookies from "js-cookie";
@@ -25,9 +25,12 @@ const Files = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [currentPage, setcurrentPage] = useState(1);
+  const [timeline, setTimeline] = useState(new Date().toISOString());
   const [trashMode, setTrashMode] = useState(
     JSON.parse(localStorage.getItem("trash")) || false,
   );
+  const pages = [1, 2, 3, 4, 5];
 
   /* ---------- Derived ---------- */
   const filteredFiles = useMemo(() => {
@@ -48,15 +51,14 @@ const Files = () => {
   useEffect(() => {
     trashMode ? fetchAllTrashFiles() : fetchAllFiles();
     localStorage.setItem("trash", JSON.stringify(trashMode));
-  }, [trashMode, folderId]);
+  }, [trashMode, folderId, timeline]);
 
   const fetchAllFiles = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/api/get-all-files`, {
-        params: { folderId },
+      const res = await axios.get(`${API_BASE_URL}/api/get-all-files/${folderId}/${timeline}`,{
         withCredentials: true,
-      });
+      })
       setAllFiles(res.data.allFiles || []);
     } catch (err) {
       console.error(err);
@@ -64,6 +66,10 @@ const Files = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const nextTimeline = () => {
+    setTimeline(allFiles[allFiles.length - 1]?.created_at);
   };
 
   const fetchAllTrashFiles = async () => {
@@ -323,6 +329,20 @@ const Files = () => {
           {trashMode ? "← Back to files" : "🗑️ Open Trash"}
         </button>
       </div>
+      <ul>
+        {pages.map((e, id) => (
+          <button
+            onClick={() => setcurrentPage(e)}
+            className={id + 1 === currentPage ? "a" : "b"}
+            key={id}
+          >
+            {e}
+          </button>
+        ))}
+      </ul>
+      {allFiles.length > 0 && (
+        <button onClick={() => nextTimeline()}>Next</button>
+      )}
     </div>
   );
 };

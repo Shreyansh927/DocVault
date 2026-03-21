@@ -4,7 +4,7 @@ import { redis } from "../redis.js";
 /* ================= GET FILES ================= */
 export const allFiles = async (req, res) => {
   try {
-    const { folderId } = req.query;
+    const { folderId, timeline } = req.params;
     const userId = req.user.id;
 
     if (!folderId) {
@@ -14,24 +14,24 @@ export const allFiles = async (req, res) => {
     const cacheKey = `folderFiles:${userId}:${folderId}`;
 
     /* ---------- CACHE READ ---------- */
-    if (redis) {
-      try {
-        const cachedFiles = await redis.get(cacheKey);
-        if (cachedFiles) {
-          return res.status(200).json({
-            allFiles: JSON.parse(cachedFiles),
-            message: "FROM CACHE",
-          });
-        }
-      } catch {
-        console.warn("Redis read failed, falling back to DB");
-      }
-    }
+    // if (redis) {
+    //   try {
+    //     const cachedFiles = await redis.get(cacheKey);
+    //     if (cachedFiles) {
+    //       return res.status(200).json({
+    //         allFiles: JSON.parse(cachedFiles),
+    //         message: "FROM CACHE",
+    //       });
+    //     }
+    //   } catch {
+    //     console.warn("Redis read failed, falling back to DB");
+    //   }
+    // }
 
     /* ---------- OWNERSHIP CHECK ---------- */
     const folder = await db.query(
       `SELECT id FROM folders WHERE id=$1 AND user_id=$2`,
-      [folderId, userId]
+      [folderId, userId],
     );
 
     if (!folder.rows.length) {
@@ -42,6 +42,7 @@ export const allFiles = async (req, res) => {
     const files = await db.query(
       `
       SELECT
+      
         files.id,
         files.filename,
         files.encrypted_link,
@@ -50,10 +51,12 @@ export const allFiles = async (req, res) => {
         files.ai_summary,
         files.created_at
       FROM files left join folders on files.folder_id = folders.id
-      WHERE folder_id=$1 AND is_deleted=false
+      WHERE folder_id=$1 AND is_deleted=false AND files.created_at < $2
       ORDER BY created_at DESC
+      LIMIT 5
+     
       `,
-      [folderId],
+      [folderId, timeline],
     );
 
     // /* ---------- CACHE WRITE ---------- */
@@ -87,7 +90,7 @@ export const trashFiles = async (req, res) => {
 
     const folder = await db.query(
       `SELECT id FROM folders WHERE id=$1 AND user_id=$2`,
-      [folderId, userId]
+      [folderId, userId],
     );
 
     if (!folder.rows.length) {
@@ -107,7 +110,7 @@ export const trashFiles = async (req, res) => {
       WHERE folder_id=$1 AND is_deleted=true
       ORDER BY deleted_at DESC
       `,
-      [folderId]
+      [folderId],
     );
 
     return res.status(200).json({

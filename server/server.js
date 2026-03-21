@@ -42,13 +42,13 @@ app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/forgot", forgotPasswordRoute);
 app.use("/api/user-profile", authMiddleware, personalRoute);
 
 app.use("/ai-query-response", aiResponseRouter);
 
-app.get("/api/get-all-files", authMiddleware, allFiles);
+app.get("/api/get-all-files/:folderId/:timeline", authMiddleware, allFiles);
 app.get("/api/get-all-trash-files", authMiddleware, trashFiles);
 
 app.use("/api/folder-auth", authMiddleware, folderRoutes);
