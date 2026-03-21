@@ -18,9 +18,9 @@ api.interceptors.response.use(
 
     if (status === 401) {
       try {
-        // 🔥 try refresh flow
+        
         await api.get("/api/auth/me");
-        return api(err.config); // retry original request
+        return api(err.config); 
       } catch {
         window.location.href = "/login";
       }
