@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL, "http://localhost:5173"],
+    origin: true,
     credentials: true,
   }),
 );
@@ -46,6 +46,7 @@ app.use(
 app.get("/", (req, res) => {
   res.send("API is running");
 });
+app.options("*", cors());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/forgot", forgotPasswordRoute);
