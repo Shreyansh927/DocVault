@@ -4,7 +4,7 @@ dns.setDefaultResultOrder("ipv4first");
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-dotenv.config({ path: "./.env" });
+dotenv.config();
 
 import { initDB } from "./db.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
