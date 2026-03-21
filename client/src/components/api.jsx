@@ -13,16 +13,21 @@ const api = axios.create({
 
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
+  async (err) => {
     const status = err.response?.status;
-    const path = window.location.pathname;
 
-    if (status === 401 && path !== "/login") {
-      window.location.href = "/login";
+    if (status === 401) {
+      try {
+        // 🔥 try refresh flow
+        await api.get("/api/auth/me");
+        return api(err.config); // retry original request
+      } catch {
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(err);
-  }
+  },
 );
 
 export default api;
