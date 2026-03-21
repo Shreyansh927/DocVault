@@ -1,9 +1,10 @@
 import express from "express";
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-
-dotenv.config();
+dotenv.config({ path: "./.env" });
 
 import { initDB } from "./db.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
@@ -61,8 +62,10 @@ app.get("/api/all-users", authMiddleware, allUsers);
 /* ---------- START ---------- */
 const PORT = process.env.PORT || 4000;
 
-initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
+
+initDB()
+  .then(() => console.log("DB initialized"))
+  .catch((err) => console.error("DB failed:", err));
