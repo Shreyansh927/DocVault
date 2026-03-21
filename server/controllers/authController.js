@@ -117,6 +117,10 @@ export const login = async (req, res) => {
 
     const isProd = process.env.NODE_ENV === "production";
 
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
+    console.log("BODY:", req.body);
+    console.log("USER:", user);
+
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       sameSite: isProd ? "none" : "lax",
