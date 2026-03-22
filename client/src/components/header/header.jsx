@@ -10,13 +10,10 @@ const Header = () => {
 
   const base_url = import.meta.env.VITE_API_BASE_URL;
 
-  const userEmail = JSON.parse(
-    localStorage.getItem("current-user"),
-  ).name.toUpperCase();
+  const user = JSON.parse(localStorage.getItem("current-user"));
 
-  const userProfileImage = JSON.parse(
-    localStorage.getItem("current-user"),
-  ).profile_image;
+  const userEmail = user?.name?.toUpperCase() || "";
+  const userProfileImage = user?.profile_image || null;
 
   const logout = async () => {
     try {
