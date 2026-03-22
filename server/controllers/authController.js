@@ -163,17 +163,34 @@ export const login = async (req, res) => {
 
 /* -- LOGOUT -- */
 export const logout = async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-  const accessToken = req.cookies.accessToken;
+  try {
+    const refreshToken = req.cookies.refreshToken;
 
-  if (refreshToken || accessToken) {
-    await db.query(`DELETE FROM refresh_tokens WHERE token=$1`, [refreshToken]);
-    await db.query(`DELETE FROM refresh_tokens WHERE token=$1`, [accessToken]);
+    if (refreshToken) {
+      await db.query(`DELETE FROM refresh_tokens WHERE token=$1`, [
+        refreshToken,
+      ]);
+    }
+
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
+      path: "/",
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
+      path: "/",
+    });
+
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Logout failed" });
   }
-
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
-  res.clearCookie("csrfToken");
-
-  res.json({ message: "Logged out successfully" });
 };
