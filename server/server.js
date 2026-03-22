@@ -16,7 +16,7 @@ import personalRoute from "./routes/personalInfoRoutes.js";
 import connectionRoutes from "./routes/connectionRoute.js";
 import messageRouter from "./routes/messagesRoutes.js";
 import { authLimiter, aiLimiter } from "./middleware/rateLimiter.js";
-
+import { db } from "./db.js";
 import { allUsers } from "./all-users/allUsers.js";
 import { allFiles, trashFiles } from "./all-users/all-folder-files.js";
 
@@ -30,10 +30,12 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
-
 app.use(
   cors({
-    origin: "https://docvault-frontend-ba1a.onrender.com",
+    origin: [
+      "https://docvault-frontend-ba1a.onrender.com",
+      "http://localhost:5173",
+    ],
     credentials: true,
   }),
 );
@@ -58,11 +60,19 @@ app.use("/api/files", authMiddleware, fileRoutes);
 app.use("/api", authMiddleware, connectionRoutes);
 app.use("/api/messages", authMiddleware, messageRouter);
 app.get("/api/all-users", authMiddleware, allUsers);
-
+app.get("/test-db", async (req, res) => {
+  try {
+    const result = await db.query("SELECT NOW()");
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "DB failed" });
+  }
+});
 /* ---------- START ---------- */
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
 

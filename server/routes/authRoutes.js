@@ -42,13 +42,14 @@ router.post("/refresh", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "15m" },
     );
+    const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       maxAge: 15 * 60 * 1000,
-      path: "/"
+      path: "/",
     });
 
     return res.json({ message: "Token refreshed" });

@@ -30,7 +30,8 @@ const Header = () => {
 
       setShowLogoutModal(false);
       setLoggingOut(true);
-      navigate("/login");
+    navigate("/login", { replace: true });
+    window.location.reload();
     } catch (err) {
       console.error(err);
 

@@ -72,14 +72,13 @@ export const login = async (req, res) => {
       [email],
     );
 
-
     if (!userRes.rows.length) {
       return res.status(401).json({ error: "user not found" });
     }
 
     const user = userRes.rows[0];
-        console.log("JWT_SECRET:", process.env.JWT_SECRET);
-        console.log("USER PASSWORD HASH:", user.password_hash);
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
+    console.log("USER PASSWORD HASH:", user.password_hash);
 
     if (
       user.locked_until &&
@@ -125,7 +124,6 @@ export const login = async (req, res) => {
       [user.id, refreshToken],
     );
 
-
     const isProd = process.env.NODE_ENV === "production";
 
     console.log("JWT_SECRET:", process.env.JWT_SECRET);
@@ -134,16 +132,16 @@ export const login = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
