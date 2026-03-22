@@ -114,6 +114,10 @@ export const login = async (req, res) => {
     const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is missing!");
+      return res.status(500).json({ error: "Server misconfigured" });
+    }
 
     await db.query(
       `INSERT INTO refresh_tokens (user_id, token, expires_at)
