@@ -125,6 +125,7 @@ export const login = async (req, res) => {
       [user.id, refreshToken],
     );
 
+
     const isProd = process.env.NODE_ENV === "production";
 
     console.log("JWT_SECRET:", process.env.JWT_SECRET);
@@ -135,6 +136,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -142,6 +144,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
