@@ -27,8 +27,7 @@ const Header = () => {
 
       setShowLogoutModal(false);
       setLoggingOut(true);
-    navigate("/login", { replace: true });
-    window.location.reload();
+      navigate("/login", { replace: true });
     } catch (err) {
       console.error(err);
 
@@ -92,7 +91,14 @@ const Header = () => {
               alt="Profile"
               className="profile-image"
               onClick={() => setShowLogoutModal(true)}
-              style={{ height: "50px", width: "50px", borderRadius: "50%", cursor: "pointer", objectFit: "cover", marginLeft: "12px" }}
+              style={{
+                height: "50px",
+                width: "50px",
+                borderRadius: "50%",
+                cursor: "pointer",
+                objectFit: "cover",
+                marginLeft: "12px",
+              }}
             />
           ) : (
             <button
