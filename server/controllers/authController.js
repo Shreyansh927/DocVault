@@ -71,14 +71,15 @@ export const login = async (req, res) => {
       `SELECT id, name, email, password_hash, profile_image, locked_until FROM users WHERE email=$1`,
       [email],
     );
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
-    console.log("USER PASSWORD HASH:", user.password_hash);
+
 
     if (!userRes.rows.length) {
       return res.status(401).json({ error: "user not found" });
     }
 
     const user = userRes.rows[0];
+        console.log("JWT_SECRET:", process.env.JWT_SECRET);
+        console.log("USER PASSWORD HASH:", user.password_hash);
 
     if (
       user.locked_until &&

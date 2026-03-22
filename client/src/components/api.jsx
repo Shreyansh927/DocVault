@@ -19,7 +19,7 @@ api.interceptors.response.use(
     if (status === 401) {
       try {
         // 🔥 CALL REFRESH ENDPOINT (NOT /me)
-        await api.post("/auth/refresh");
+        await api.post("/api/auth/refresh");
 
         return api(err.config); // retry original request
       } catch {

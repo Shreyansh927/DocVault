@@ -14,7 +14,7 @@ router.post("/logout", logout);
 router.get("/me", authMiddleware, (req, res) => {
   res.json({
     id: req.user.id,
-    auth_uuid: req.user.auth_uuid,
+
     email: req.user.email,
   });
 });
