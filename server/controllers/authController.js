@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { db } from "../db.js";
 import jwt from "jsonwebtoken";
 import { supabaseAdmin } from "../supabaseAdmin.js";
+import nodemailer from "nodemailer";
 import { usersBackup } from "../utils/supabase-cloud-storage-users-backup.js";
 import { profile } from "console";
 
@@ -19,6 +20,7 @@ export const signup = async (req, res) => {
       `SELECT 1 FROM users WHERE email=$1 OR phone_number=$2`,
       [email, phoneNumber],
     );
+
     if (exists.rows.length) {
       return res.status(400).json({ error: "Email or phone already exists" });
     }
@@ -39,12 +41,10 @@ export const signup = async (req, res) => {
     const publicId = `${name}_${crypto.randomUUID()}`;
 
     const result = await db.query(
-      `
-      INSERT INTO users
-      (auth_uuid, name, email, password_hash, phone_number, public_id)
-      VALUES ($1,$2,$3,$4,$5,$6)
-      RETURNING id, auth_uuid, name, email, phone_number, public_id, created_at
-      `,
+      `INSERT INTO users
+       (auth_uuid, name, email, password_hash, phone_number, public_id)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       RETURNING id, auth_uuid, name, email, phone_number, public_id, created_at`,
       [authUuid, name, email, hashedPassword, phoneNumber, publicId],
     );
 
@@ -52,6 +52,41 @@ export const signup = async (req, res) => {
 
     await usersBackup(user);
 
+    // Email service
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: email,
+      subject: "Welcome to DocVault",
+
+      text: `Hello ${name},
+
+Welcome to DocVault!
+
+Thank you for registering with us. We’re excited to have you on board and look forward to helping you securely manage and access your documents with ease.
+
+If you have any questions or need assistance, feel free to reach out to our support team.
+
+Best regards,  
+The DocVault Team`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully");
+    } catch (emailErr) {
+      console.error(" Failed to send email:", emailErr.message);
+    }
+
+    /* ---------- RESPONSE ---------- */
     res.status(201).json({
       message: "User registered successfully",
       user,
@@ -77,8 +112,6 @@ export const login = async (req, res) => {
     }
 
     const user = userRes.rows[0];
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
-    console.log("USER PASSWORD HASH:", user.password_hash);
 
     if (
       user.locked_until &&
@@ -125,10 +158,6 @@ export const login = async (req, res) => {
     );
 
     const isProd = process.env.NODE_ENV === "production";
-
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
-    console.log("BODY:", req.body);
-    console.log("USER:", user);
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,

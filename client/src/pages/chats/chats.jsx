@@ -103,22 +103,23 @@ const Chats = () => {
     }
   }, [messages]);
 
-  const fetchMessages = async () => {
-    const chatID = connectionId; // Assuming connectionId is the same as chatID
-    try {
-      const res = await axios.get(
-        `${API_BASE_URL}/api/messages/get/${chatID}`,
-        {
-          withCredentials: true,
-        },
-      );
-      setMessages(res.data.messages);
-      setEditedMessage(res.data.messages[0]?.content || ""); // Set initial edited message to the first message's content
-    } catch (err) {
-      console.error(err);
-      setMessages([err.message || "Failed to fetch messages"]);
-    }
-  };
+const fetchMessages = async () => {
+  try {
+    const res = await axios.get(
+      `${API_BASE_URL}/api/messages/get/${connectionId}`,
+      { withCredentials: true },
+    );
+
+    const safeMessages = (res.data.messages || []).filter(
+      (msg) => msg && msg.id,
+    );
+
+    setMessages(safeMessages);
+  } catch (err) {
+    console.error(err);
+    setMessages([]); // 🔥 NEVER put string inside array
+  }
+};
 
   const sendMessage = async () => {
     try {

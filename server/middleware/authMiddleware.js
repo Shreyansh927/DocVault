@@ -22,7 +22,6 @@ export const authMiddleware = async (req, res, next) => {
 
     req.user = userRes.rows[0];
 
-    console.log("ACCESS TOKEN:", accessToken);
     next();
   } catch {
     return res.status(401).json({ error: "Token expired" });

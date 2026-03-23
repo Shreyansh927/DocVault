@@ -27,6 +27,7 @@
     "mammoth": "^1.11.0",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.3",
     "officeparser": "^5.2.2",
     "openai": "^6.21.0",
     "pg": "^8.16.3",

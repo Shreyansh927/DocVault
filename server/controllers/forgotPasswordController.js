@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { db } from "../db.js";
-import { sendEmail } from "../utils/send-email.js";
+import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 
 export const forGotPAssword = async (req, res) => {
@@ -18,21 +18,41 @@ export const forGotPAssword = async (req, res) => {
 
     const resetOtp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    await db.query(
+    const n = await db.query(
       `
       UPDATE users
       SET otp = $1,
           otp_expiry = NOW() + INTERVAL '15 minutes'
       WHERE email = $2
+      RETURNING name
       `,
-      [resetOtp, email]
+      [resetOtp, email],
     );
 
-    await sendEmail({
-      to: email,
-      subject: "Password Reset OTP",
-      html: `<p>Your OTP is <b>${resetOtp}</b>. It expires in 15 minutes.</p>`,
+    const name = n.rows[0].name;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
     });
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: email,
+      subject: "Welcome to DocVault",
+
+      text: `Hello ${name}, your reset password OTP is ${resetOtp}, it will expires in 15 minutes`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully");
+    } catch (emailErr) {
+      console.error(" Failed to send email:", emailErr.message);
+    }
 
     res.json({ message: "OTP sent to email" });
   } catch (err) {
@@ -53,7 +73,7 @@ export const verifyOtp = async (req, res) => {
         AND otp = $2
         AND otp_expiry > NOW()
       `,
-      [email, otp.toString()]
+      [email, otp.toString()],
     );
 
     if (!result.rows.length) {
@@ -68,7 +88,7 @@ export const verifyOtp = async (req, res) => {
           otp_expiry = NULL
       WHERE email = $1
       `,
-      [email]
+      [email],
     );
 
     res.json({ message: "OTP verified successfully" });

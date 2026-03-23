@@ -34,13 +34,13 @@ const Home = () => {
   /* ================= FETCH FOLDERS ================= */
   useEffect(() => {
     fetchAllFolders();
-  }, []);
+  }, [allFolders]);
 
   const fetchAllFolders = async () => {
     try {
       const res = await axios.get(
         `${base_url}/api/folder-auth/get-all-folders`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const folders = res.data.allUserFolders || [];
@@ -62,7 +62,7 @@ const Home = () => {
 
     if (search.trim()) {
       data = data.filter((f) =>
-        f.folder_name.toLowerCase().includes(search.toLowerCase())
+        f.folder_name.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
@@ -78,7 +78,7 @@ const Home = () => {
       await axios.post(
         `${base_url}/api/folder-auth/add-folder`,
         { folderName, category },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       setFolderName("");
@@ -103,7 +103,7 @@ const Home = () => {
           folderId: folderToUpdate.id,
           category,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       setToggleFolderSettings(false);
@@ -122,7 +122,7 @@ const Home = () => {
       await axios.post(
         `${base_url}/api/folder-auth/delete-folder`,
         { folderId: folderToDelete.id },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       fetchAllFolders();
