@@ -39,7 +39,7 @@ export default function Signup() {
         { withCredentials: true },
       );
 
-      toast.success(res.data.message);
+      // toast.success(res.data.message);
       navigate("/login");
     } catch (err) {
       console.error(err);
