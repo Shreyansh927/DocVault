@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./signup.css";
 import { useEffect } from "react";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 export default function Signup() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -35,14 +36,14 @@ export default function Signup() {
           password: form.password,
           phoneNumber: form.phoneNumber,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
-      alert(res.data.message);
+      toast.success(res.data.message);
       navigate("/login");
     } catch (err) {
       console.error(err);
-      alert("Signup failed");
+      toast.error("Signup failed");
     } finally {
       setLoading(false);
     }
