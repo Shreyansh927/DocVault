@@ -12,19 +12,19 @@ export const allUserFolders = async (req, res) => {
   }
 
   // /* ================= CACHE READ ================= */
-  if (redis) {
-    try {
-      const cached = await redis.get(cacheKey);
-      if (cached) {
-        return res.status(200).json({
-          allUserFolders: JSON.parse(cached),
-          source: "cache",
-        });
-      }
-    } catch (err) {
-      console.warn("Redis read failed:", err.message);
-    }
-  }
+  // if (redis) {
+  //   try {
+  //     const cached = await redis.get(cacheKey);
+  //     if (cached) {
+  //       return res.status(200).json({
+  //         allUserFolders: JSON.parse(cached),
+  //         source: "cache",
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.warn("Redis read failed:", err.message);
+  //   }
+  // }
 
   /* ================= DATABASE ================= */
   try {
@@ -39,17 +39,17 @@ export const allUserFolders = async (req, res) => {
       WHERE user_id = $1
       ORDER BY created_at DESC
       `,
-      [userId]
+      [userId],
     );
 
     /* ================= CACHE WRITE ================= */
-    if (redis) {
-      try {
-        await redis.setEx(cacheKey, CACHE_TTL, JSON.stringify(foldersRes.rows));
-      } catch (err) {
-        console.warn("Redis write failed:", err.message);
-      }
-    }
+    // if (redis) {
+    //   try {
+    //     await redis.setEx(cacheKey, CACHE_TTL, JSON.stringify(foldersRes.rows));
+    //   } catch (err) {
+    //     console.warn("Redis write failed:", err.message);
+    //   }
+    // }
 
     return res.status(200).json({
       allUserFolders: foldersRes.rows,

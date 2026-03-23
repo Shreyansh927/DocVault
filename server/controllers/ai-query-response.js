@@ -80,7 +80,7 @@ export const aiQueryResponse = async (req, res) => {
 File: ${row.filename}
 Content:
 ${row.ai_summary}
-embedding: ${row.embedding}
+
 Folder: ${row.folder_name}
 ---
 `;

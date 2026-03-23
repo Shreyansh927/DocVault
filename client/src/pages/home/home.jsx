@@ -34,7 +34,7 @@ const Home = () => {
   /* ================= FETCH FOLDERS ================= */
   useEffect(() => {
     fetchAllFolders();
-  }, [allFolders]);
+  }, []);
 
   const fetchAllFolders = async () => {
     try {

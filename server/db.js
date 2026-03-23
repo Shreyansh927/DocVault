@@ -11,13 +11,14 @@ export const db = new Pool({
 
 export const initDB = async () => {
   /* ---------- ENABLE VECTOR EXTENSION ---------- */
+  await db.query(`CREATE EXTENSION IF NOT EXISTS vector`)
 
   /* ---------- USERS ---------- */
   await db.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       public_id TEXT UNIQUE NOT NULL,
-      auth_uuid UUID UNIQUE,
+      auth_uuid UUID UNIQUE,   
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
