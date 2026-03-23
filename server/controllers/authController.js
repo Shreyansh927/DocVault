@@ -62,6 +62,9 @@ export const signup = async (req, res) => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      connectionTimeout: 10000, // 🔥 important
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
     });
 
     const mailOptions = {
@@ -82,7 +85,10 @@ The DocVault Team`,
     };
 
     try {
-      await transporter.sendMail(mailOptions);
+      await transporter
+        .sendMail(mailOptions)
+        .then(() => console.log("Email sent"))
+        .catch((err) => console.error("Email error:", err.message));
       console.log("Email sent successfully");
     } catch (emailErr) {
       console.error(" Failed to send email:", emailErr.message);
