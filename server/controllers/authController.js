@@ -54,45 +54,45 @@ export const signup = async (req, res) => {
 
     // Email service
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      connectionTimeout: 10000, // 🔥 important
-      greetingTimeout: 5000,
-      socketTimeout: 10000,
-    });
+//     const transporter = nodemailer.createTransport({
+//       host: "smtp-relay.brevo.com",
+//       port: 587,
+//       secure: false,
+//       auth: {
+//         user: process.env.SMTP_USER,
+//         pass: process.env.SMTP_PASS,
+//       },
+//       connectionTimeout: 10000, // 🔥 important
+//       greetingTimeout: 5000,
+//       socketTimeout: 10000,
+//     });
 
-    const mailOptions = {
-      from: "krishnadixit0808@gmail.com",
-      to: email,
-      subject: "Welcome to DocVault",
+//     const mailOptions = {
+//       from: "krishnadixit0808@gmail.com",
+//       to: email,
+//       subject: "Welcome to DocVault",
 
-      text: `Hello ${name},
+//       text: `Hello ${name},
 
-Welcome to DocVault!
+// Welcome to DocVault!
 
-Thank you for registering with us. We’re excited to have you on board and look forward to helping you securely manage and access your documents with ease.
+// Thank you for registering with us. We’re excited to have you on board and look forward to helping you securely manage and access your documents with ease.
 
-If you have any questions or need assistance, feel free to reach out to our support team.
+// If you have any questions or need assistance, feel free to reach out to our support team.
 
-Best regards,  
-The DocVault Team`,
-    };
+// Best regards,  
+// The DocVault Team`,
+//     };
 
-    try {
-      await transporter
-        .sendMail(mailOptions)
-        .then(() => console.log("Email sent"))
-        .catch((err) => console.error("Email error:", err.message));
-      console.log("Email sent successfully");
-    } catch (emailErr) {
-      console.error(" Failed to send email:", emailErr.message);
-    }
+//     try {
+//       await transporter
+//         .sendMail(mailOptions)
+//         .then(() => console.log("Email sent"))
+//         .catch((err) => console.error("Email error:", err.message));
+//       console.log("Email sent successfully");
+//     } catch (emailErr) {
+//       console.error(" Failed to send email:", emailErr.message);
+//     }
 
     /* ---------- RESPONSE ---------- */
     res.status(201).json({
