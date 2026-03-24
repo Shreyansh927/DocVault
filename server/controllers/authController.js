@@ -135,7 +135,7 @@ export const login = async (req, res) => {
       sameSite: isProd ? "none" : "lax",
       secure: isProd,
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 1 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -181,7 +181,7 @@ export const logout = async (req, res) => {
       sameSite: isProd ? "none" : "lax",
       secure: isProd,
       path: "/",
-      maxAge: 1* 60 * 1000,
+      maxAge: 1 * 60 * 1000,
     });
 
     res.clearCookie("refreshToken", refreshToken, {
