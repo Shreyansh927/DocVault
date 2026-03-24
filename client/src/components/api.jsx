@@ -14,14 +14,14 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
-    const status = err.response?.status;
+    const originalRequest = err.config;
 
-    if (status === 401) {
+    if (err.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       try {
-        // 🔥 CALL REFRESH ENDPOINT (NOT /me)
         await api.post("/api/auth/refresh");
-
-        return api(err.config); // retry original request
+        return api(originalRequest);
       } catch {
         window.location.href = "/login";
       }

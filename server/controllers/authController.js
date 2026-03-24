@@ -148,6 +148,8 @@ export const login = async (req, res) => {
       domain: ".onrender.com",
     });
 
+    console.log("Cookies:", req.cookies);
+
     res.status(200).json({
       message: "Login successful",
       user: {
