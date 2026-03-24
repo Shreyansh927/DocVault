@@ -3,9 +3,8 @@ import { db } from "../db.js";
 
 export const authMiddleware = async (req, res, next) => {
   const accessToken = req.cookies.accessToken;
-  const refreshToken = req.cookies.refreshToken;
 
-  if (!accessToken || !refreshToken) {
+  if (!accessToken) {
     return res.status(401).json({ error: "No token" });
   }
 
@@ -13,7 +12,7 @@ export const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
     const userRes = await db.query(
-      `SELECT id, email, auth_uuid FROM users WHERE id=$1`,
+      `SELECT id, email, token_version FROM users WHERE id=$1`,
       [decoded.id],
     );
 
@@ -21,11 +20,20 @@ export const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: "User not found" });
     }
 
-    req.user = userRes.rows[0];
+    const user = userRes.rows[0];
+
+    if (decoded.tokenVersion !== user.token_version) {
+      return res.status(401).json({ error: "Session expired" });
+    }
+
+    req.user = user;
 
     next();
-  } catch {
-    return res.status(401).json({ error: "Token expired" });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "ACCESS_TOKEN_EXPIRED" });
+    }
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
 

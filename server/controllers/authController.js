@@ -104,7 +104,11 @@ export const login = async (req, res) => {
       [user.id],
     );
 
-    const payload = { id: user.id, email: user.email };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      tokenVersion: user.token_version,
+    };
 
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -167,6 +171,11 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const userId = req.user.id;
+
+    await db.query(
+      `UPDATE users SET token_version = token_version + 1 WHERE id=$1`,
+      [userId],
+    );
 
     await db.query(`DELETE FROM refresh_tokens WHERE user_id=$1`, [userId]);
 
