@@ -132,20 +132,19 @@ export const login = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: ".onrender.com",
+      
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: ".onrender.com",
     });
 
     console.log("Cookies:", req.cookies);
@@ -180,18 +179,18 @@ export const logout = async (req, res) => {
 
     res.clearCookie("accessToken", {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       path: "/",
-      domain: ".onrender.com",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
       sameSite: "none",
+      secure: true,
       path: "/",
-      domain: ".onrender.com",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({ message: "Logged out successfully" });
