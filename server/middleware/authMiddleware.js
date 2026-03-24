@@ -3,8 +3,9 @@ import { db } from "../db.js";
 
 export const authMiddleware = async (req, res, next) => {
   const accessToken = req.cookies.accessToken;
+  const refreshToken = req.cookies.refreshToken;
 
-  if (!accessToken) {
+  if (!accessToken || !refreshToken) {
     return res.status(401).json({ error: "No token" });
   }
 
