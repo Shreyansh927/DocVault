@@ -110,8 +110,7 @@ You are an AI assistant.
 User Question:
 ${q}
 
-Document Context:
-${context}
+
 `,
             },
           ],
