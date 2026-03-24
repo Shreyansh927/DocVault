@@ -167,10 +167,8 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    if (refreshToken) {
-      await db.query(`DELETE FROM refresh_tokens WHERE user_id=$1`, [userId]);
-    }
+
+    await db.query(`DELETE FROM refresh_tokens WHERE user_id=$1`, [userId]);
 
     const isProd = process.env.NODE_ENV === "production";
 
@@ -179,7 +177,6 @@ export const logout = async (req, res) => {
       sameSite: "none",
       secure: true,
       path: "/",
-      
     });
 
     res.clearCookie("refreshToken", {
@@ -187,7 +184,6 @@ export const logout = async (req, res) => {
       sameSite: "none",
       secure: true,
       path: "/",
-      
     });
 
     res.json({ message: "Logged out successfully" });
