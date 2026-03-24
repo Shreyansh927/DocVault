@@ -16,7 +16,20 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config;
 
-    if (err.response?.status === 401 && !originalRequest._retry) {
+    const errorMsg = err.response?.data?.error;
+
+    // ❌ prevent infinite loop
+    if (originalRequest.url.includes("/auth/refresh")) {
+      window.location.href = "/login";
+      return Promise.reject(err);
+    }
+
+    // 🔥 HANDLE TOKEN EXPIRED (refresh case)
+    if (
+      err.response?.status === 401 &&
+      errorMsg === "ACCESS_TOKEN_EXPIRED" &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -25,6 +38,11 @@ api.interceptors.response.use(
       } catch {
         window.location.href = "/login";
       }
+    }
+
+    // 🔥 HANDLE SESSION INVALIDATED (logout all devices)
+    if (err.response?.status === 401 && errorMsg === "Session expired") {
+      window.location.href = "/login";
     }
 
     return Promise.reject(err);
