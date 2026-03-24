@@ -10,9 +10,7 @@ export const db = new Pool({
 });
 
 export const initDB = async () => {
-  /* ---------- ENABLE VECTOR EXTENSION ---------- */
-  await db.query(`CREATE EXTENSION IF NOT EXISTS vector`)
-
+  
   /* ---------- USERS ---------- */
   await db.query(`
     CREATE TABLE IF NOT EXISTS users (
