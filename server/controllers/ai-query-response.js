@@ -104,9 +104,8 @@ Folder: ${row.folder_name}
               text: `
 You are an AI assistant.
 
-Answer strictly using the document context below.
-If the information is not present, respond exactly with:
-"I could not find this information in your documents."
+
+
 
 User Question:
 ${q}
