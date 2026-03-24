@@ -135,7 +135,7 @@ export const login = async (req, res) => {
       sameSite: "none",
       secure: true,
       path: "/",
-      maxAge: 10* 60 * 1000,
+      maxAge: 10 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -166,12 +166,10 @@ export const login = async (req, res) => {
 /* -- LOGOUT -- */
 export const logout = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-
+    const userId = req.user.id;
+    
     if (refreshToken) {
-      await db.query(`DELETE FROM refresh_tokens WHERE token=$1`, [
-        refreshToken,
-      ]);
+      await db.query(`DELETE FROM refresh_tokens WHERE user_id=$1`, [userId]);
     }
 
     const isProd = process.env.NODE_ENV === "production";
@@ -181,15 +179,15 @@ export const logout = async (req, res) => {
       sameSite: "none",
       secure: true,
       path: "/",
-      maxAge: 10 * 60 * 1000,
+      
     });
 
-    res.clearCookie("refreshToken", refreshToken, {
+    res.clearCookie("refreshToken", {
       httpOnly: true,
       sameSite: "none",
       secure: true,
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      
     });
 
     res.json({ message: "Logged out successfully" });

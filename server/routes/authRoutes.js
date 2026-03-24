@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
-router.post("/logout", logout);
+router.post("/logout",authMiddleware, logout);
 // authRoutes.js
 router.get("/me", authMiddleware, (req, res) => {
   res.json({

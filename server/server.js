@@ -22,10 +22,13 @@ import { allFiles, trashFiles } from "./all-users/all-folder-files.js";
 
 import aiResponseRouter from "./routes/ai-query-response-route.js";
 import "./permanent-deletion-job.js";
+import helmet from "helmet";
+
 
 const app = express();
 
 /* ---------- CORE ---------- */
+app.use(helmet());
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
