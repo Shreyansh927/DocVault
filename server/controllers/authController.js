@@ -66,6 +66,9 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const userAgent = req.headers["user-agent"];
+    const ip =
+      req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
 
     const userRes = await db.query(
       `SELECT id, name, email, password_hash, profile_image, locked_until, token_version FROM users WHERE email=$1`,
@@ -123,9 +126,10 @@ export const login = async (req, res) => {
     }
 
     await db.query(
-      `INSERT INTO refresh_tokens (user_id, token, expires_at)
-       VALUES ($1,$2,NOW() + INTERVAL '7 days')`,
-      [user.id, refreshToken],
+      `INSERT INTO refresh_tokens 
+   (user_id, token, expires_at, user_agent, ip_address)
+   VALUES ($1,$2,NOW() + INTERVAL '7 days',$3,$4)`,
+      [user.id, refreshToken, userAgent, ip],
     );
 
     const isProd = process.env.NODE_ENV === "production";
