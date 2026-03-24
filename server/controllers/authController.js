@@ -68,7 +68,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const userRes = await db.query(
-      `SELECT id, name, email, password_hash, profile_image, locked_until FROM users WHERE email=$1`,
+      `SELECT id, name, email, password_hash, profile_image, locked_until, token_version FROM users WHERE email=$1`,
       [email],
     );
 
