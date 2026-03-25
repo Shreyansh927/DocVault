@@ -70,7 +70,7 @@ const ipLocation = async (ip) => {
 
     const geoRes = await axios.get(`https://ipapi.co/${ip}/json/`);
 
-    console.log("Geo API:", geoRes.data); // debug
+    console.log("Geo API:", geoRes.data); 
 
     const city = geoRes.data.city || "Unknown city";
     const country = geoRes.data.country_name || "Unknown country";
