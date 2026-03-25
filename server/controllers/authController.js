@@ -3,8 +3,10 @@ import crypto from "crypto";
 import { db } from "../db.js";
 import jwt from "jsonwebtoken";
 import { supabaseAdmin } from "../supabaseAdmin.js";
+import axios from "axios";
 import { usersBackup } from "../utils/supabase-cloud-storage-users-backup.js";
 import { profile } from "console";
+import { UAParser } from "ua-parser-js";
 
 export const signup = async (req, res) => {
   try {
@@ -62,14 +64,37 @@ export const signup = async (req, res) => {
   }
 };
 
+const ipLocation = async (ip) => {
+  try {
+    if (!ip) return "Unknown";
+
+    const geoRes = await axios.get(`https://ipapi.co/${ip}/json/`);
+
+    console.log("Geo API:", geoRes.data); // debug
+
+    const city = geoRes.data.city || "Unknown city";
+    const country = geoRes.data.country_name || "Unknown country";
+
+    return `${city}, ${country}`;
+  } catch (err) {
+    console.log("IP location error:", err.message);
+    return "Unknown location";
+  }
+};
+
 /* -- LOGIN ----- */
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const userAgent = req.headers["user-agent"];
+    const parser = new UAParser(userAgent);
+    const deviceType = parser.getDevice().type;
+    const browser = parser.getBrowser().name;
+    const os = parser.getOS().name;
+    const device_name = `${browser} on ${os} (${deviceType})`;
     const ip =
       req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
-
+    const ip_location = await ipLocation(ip);
     const userRes = await db.query(
       `SELECT id, name, email, password_hash, profile_image, locked_until, token_version FROM users WHERE email=$1`,
       [email],
@@ -127,9 +152,9 @@ export const login = async (req, res) => {
 
     await db.query(
       `INSERT INTO refresh_tokens 
-   (user_id, token, expires_at, user_agent, ip_address)
-   VALUES ($1,$2,NOW() + INTERVAL '7 days',$3,$4)`,
-      [user.id, refreshToken, userAgent, ip],
+   (user_id, token, expires_at, user_agent, ip_address, ip_location)
+   VALUES ($1,$2,NOW() + INTERVAL '7 days',$3,$4, $5)`,
+      [user.id, refreshToken, device_name, ip, ip_location],
     );
 
     const isProd = process.env.NODE_ENV === "production";
@@ -140,16 +165,16 @@ export const login = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
       maxAge: 10 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -187,15 +212,15 @@ export const logout = async (req, res) => {
 
     res.clearCookie("accessToken", {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
     });
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
     });
 

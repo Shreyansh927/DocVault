@@ -15,6 +15,7 @@
     "@google/genai": "^1.41.0",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.87.1",
+    "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -36,6 +37,7 @@
     "redis": "^5.10.0",
     "resend": "^6.6.0",
     "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "ua-parser-js": "^2.0.9"
   }
 }
