@@ -165,16 +165,16 @@ export const login = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       path: "/",
       maxAge: 10 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -212,15 +212,15 @@ export const logout = async (req, res) => {
 
     res.clearCookie("accessToken", {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       path: "/",
     });
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      sameSite: "none",
+      secure: true,
       path: "/",
     });
 
