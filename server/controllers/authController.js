@@ -70,7 +70,7 @@ const ipLocation = async (ip) => {
 
     const geoRes = await axios.get(`https://ipapi.co/${ip}/json/`);
 
-    console.log("Geo API:", geoRes.data); 
+    console.log("Geo API:", geoRes.data);
 
     const city = geoRes.data.city || "Unknown city";
     const country = geoRes.data.country_name || "Unknown country";
@@ -165,16 +165,16 @@ export const login = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: "lax",
+      secure: false,
       path: "/",
       maxAge: 10 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: "lax",
+      secure: false,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -212,15 +212,15 @@ export const logout = async (req, res) => {
 
     res.clearCookie("accessToken", {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: "lax",
+      secure: false,
       path: "/",
     });
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: "lax",
+      secure: false,
       path: "/",
     });
 
@@ -228,5 +228,19 @@ export const logout = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Logout failed" });
+  }
+};
+
+export const getAllCurrentSessions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { rows } = await db.query(
+      `SELECT user_agent as userAgent, ip_address as deviceIpAddress, ip_location as deviceIpLocation FROM refresh_tokens WHERE user_id = $1 `,
+      [userId],
+    );
+    return res.status(200).json({ allExistingSession: rows });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err });
   }
 };

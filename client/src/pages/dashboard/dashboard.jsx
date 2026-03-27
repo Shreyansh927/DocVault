@@ -4,12 +4,32 @@ import Header from "../../components/header/header.jsx";
 import axios from "axios";
 import AskAi from "../../ask-ai/ask-ai.jsx";
 
+const sessions = [
+  {
+    id: "1",
+    device: "Windows PC",
+    browser: "Chrome",
+    location: "Mumbai, India",
+    lastActive: "2 mins ago",
+    isCurrent: true,
+  },
+  {
+    id: "2",
+    device: "iPhone 13",
+    browser: "Safari",
+    location: "Delhi, India",
+    lastActive: "10 mins ago",
+    isCurrent: false,
+  },
+];
+
 const Dashboard = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [userInfo, setUserInfo] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [preview, setPreview] = useState("");
+  const [allExistingSessions, setAllExistingSessions] = useState([]);
 
   const [form, setForm] = useState({
     name: "",
@@ -20,6 +40,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchUserPersonalInfo();
+    fetchCurrentSessions();
   }, []);
 
   const fetchUserPersonalInfo = async () => {
@@ -42,6 +63,24 @@ const Dashboard = () => {
     }
   };
 
+  const fetchCurrentSessions = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/auth/current-sessions`, {
+        withCredentials: true,
+      });
+      const currentSesssions = res.data.allExistingSession;
+      const formattedData = currentSesssions.map((e) => ({
+        ipAddress: e.deviceIpAddress,
+        ipLocation: e.deviceIpLocation,
+        userAgent: e.userAgent,
+      }));
+      setAllExistingSessions(formattedData);
+      console.log(formattedData);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const submit = async (e) => {
     e.preventDefault();
 
@@ -60,7 +99,7 @@ const Dashboard = () => {
         {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
-        }
+        },
       );
 
       alert(res.data.message);
@@ -100,20 +139,22 @@ const Dashboard = () => {
             {/* View mode */}
             {!editMode ? (
               <div className="profile-body">
-                <div className="identity">
-                  {userInfo.profile_image ? (
-                    <img
-                      src={userInfo.profile_image}
-                      alt="profile"
-                      className="avatar-xl"
-                    />
-                  ) : (
-                    <div className="avatar-xl placeholder">👤</div>
-                  )}
+                <div className="current-logged-in-sessions">
+                  <div className="identity">
+                    {userInfo.profile_image ? (
+                      <img
+                        src={userInfo.profile_image}
+                        alt="profile"
+                        className="avatar-xl"
+                      />
+                    ) : (
+                      <div className="avatar-xl placeholder">👤</div>
+                    )}
 
-                  <div>
-                    <h2>{userInfo.name}</h2>
-                    <span>{userInfo.email}</span>
+                    <div>
+                      <h2>{userInfo.name}</h2>
+                      <span>{userInfo.email}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -137,10 +178,35 @@ const Dashboard = () => {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
-                        }
+                        },
                       )}
                     </p>
                   </div>
+                </div>
+                <div className="sessions-container">
+                  <h2 className="sessions-title">Active Sessions</h2>
+
+                  {allExistingSessions.map((session, index) => (
+                    <div className="session-card" key={index}>
+                      <div className="session-info">
+                        <p className="device">{session.userAgent}</p>
+                        <p className="location">{session.ipLocation}</p>
+
+                        <span className="badge">
+                          Current Session IP : {session.ipAddress}
+                        </span>
+                      </div>
+
+                      {/* {!session.isCurrent && (
+                        <button
+                          className="logout-btn"
+                          onClick={() => logoutSession(session.id)}
+                        >
+                          Logout
+                        </button>
+                      )} */}
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (

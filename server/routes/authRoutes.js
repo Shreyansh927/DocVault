@@ -1,4 +1,9 @@
-import { signup, login, logout } from "../controllers/authController.js";
+import {
+  signup,
+  login,
+  logout,
+  getAllCurrentSessions,
+} from "../controllers/authController.js";
 import jwt from "jsonwebtoken";
 import { db } from "../db.js";
 
@@ -18,6 +23,7 @@ router.get("/me", authMiddleware, (req, res) => {
     email: req.user.email,
   });
 });
+router.get("/current-sessions", authMiddleware, getAllCurrentSessions);
 router.post("/refresh", async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -70,8 +76,8 @@ router.post("/refresh", async (req, res) => {
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: "lax",
+      secure: false,
       maxAge: 15 * 60 * 1000,
       path: "/",
     });

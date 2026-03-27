@@ -6,8 +6,76 @@
   font-family: Inter, system-ui, sans-serif;
 }
 
+.current-logged-in-sessions {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px;
+}
+
+.sessions-container {
+  background-color: #0f172a;
+  padding: 20px;
+  border-radius: 10px;
+  width: 100%;
+  
+  
+}
+
+.sessions-title {
+  color: white;
+  margin-bottom: 15px;
+}
+
+.session-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.session-card:hover {
+  background: #334155;
+}
+
+.session-info p {
+  margin: 2px 0;
+  color: #cbd5f5;
+}
+
+.device {
+  font-weight: bold;
+  color: white;
+}
+
+.badge {
+  background: #22c55e;
+  color: black;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.logout-btn {
+  background: #ef4444;
+  border: none;
+  padding: 8px 12px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+}
+
 .content-area {
-  max-width: 1100px;
+  
   margin: auto;
   padding: 64px 24px;
 }
@@ -183,13 +251,12 @@ button:focus {
   outline: none;
 }
 
-
 /* Form container */
 .glass-form {
   background: rgba(2, 6, 23, 0.6);
   border-radius: 14px;
   padding: 28px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* Sections */
@@ -228,7 +295,7 @@ button:focus {
 .field input:focus {
   outline: none;
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.25);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
 }
 
 /* Floating label */
