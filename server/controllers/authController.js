@@ -235,7 +235,7 @@ export const getAllCurrentSessions = async (req, res) => {
   try {
     const userId = req.user.id;
     const { rows } = await db.query(
-      `SELECT user_agent as userAgent, ip_address as deviceIpAddress, ip_location as deviceIpLocation FROM refresh_tokens WHERE user_id = $1 `,
+      `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation" FROM refresh_tokens WHERE user_id = $1 `,
       [userId],
     );
     return res.status(200).json({ allExistingSession: rows });
