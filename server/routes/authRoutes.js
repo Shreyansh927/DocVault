@@ -76,8 +76,8 @@ router.post("/refresh", async (req, res) => {
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
       maxAge: 15 * 60 * 1000,
       path: "/",
     });
