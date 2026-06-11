@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { aiQueryResponse } from "../controllers/ai-query-response.js";
+import { aiQueryResponse } from "../controllers/ai-assistant.js";
 import { aiLimiter } from "../middleware/rateLimiter.js";
 
 const aiResponseRouter = express.Router();

@@ -25,7 +25,7 @@ const generateEmbedding = async (text) => {
       ],
     });
 
-    return result.embeddings[0].values.slice(0, 1536);
+    return result.embeddings[0].values.slice(0, 3072);
   } catch (err) {
     console.error("Gemini embedding failed:", err);
     return null;
@@ -70,7 +70,9 @@ export const summarizeFileWithAI = async (file) => {
           {
             role: "user",
             parts: [
-              { text: "Summarize this document in 3 concise sentences." },
+              {
+                text: "Summarize this document briefly in 10-15 lines.and also store the type o document like is it a resume , giftcard etc store summary in brief 20-30 lines and also provide a title for the document",
+              },
               {
                 inlineData: {
                   mimeType: "application/pdf",
@@ -97,7 +99,9 @@ export const summarizeFileWithAI = async (file) => {
           {
             role: "user",
             parts: [
-              { text: "Describe and summarize this image in 10 words." },
+              {
+                text: "Summarize this document briefly in 10-15 lines.and also store the type o document like is it a resume , giftcard etc store summary in brief 20-30 lines and also provide a title for the document",
+              },
               {
                 inlineData: {
                   mimeType: file.mimetype,
@@ -175,7 +179,7 @@ export const uploadFiles = async (req, res) => {
       const dbRes = await db.query(
         `
         INSERT INTO files
-        (folder_id, filename, encrypted_name, encrypted_link, file_type, size, storage, ai_summary, embedding)
+        (folder_id, filename, encrypted_name, encrypted_link, file_type, size, storage, ai_summary, new_embedding)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
         RETURNING *
         `,

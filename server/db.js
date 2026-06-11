@@ -10,7 +10,6 @@ export const db = new Pool({
 });
 
 export const initDB = async () => {
-  
   /* ---------- USERS ---------- */
   await db.query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -56,7 +55,7 @@ export const initDB = async () => {
       storage TEXT,
       ai_summary TEXT,
 
-      embedding vector(1536), --pgvector added here
+      new_embedding vector(3072), --pgvector added here
 
       created_at TIMESTAMP DEFAULT NOW(),
       deleted_at TIMESTAMP DEFAULT NULL,
@@ -68,7 +67,7 @@ export const initDB = async () => {
   await db.query(`
     CREATE INDEX IF NOT EXISTS idx_files_embedding
     ON files
-    USING ivfflat (embedding vector_cosine_ops)
+    USING ivfflat (new_embedding vector_cosine_ops)
     WITH (lists = 100);
   `);
 
