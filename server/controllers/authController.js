@@ -7,6 +7,7 @@ import axios from "axios";
 import { usersBackup } from "../utils/supabase-cloud-storage-users-backup.js";
 import { profile } from "console";
 import { UAParser } from "ua-parser-js";
+import { stat } from "fs";
 
 export const signup = async (req, res) => {
   try {
@@ -96,7 +97,9 @@ export const login = async (req, res) => {
       req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
     const ip_location = await ipLocation(ip);
     const userRes = await db.query(
-      `SELECT id, name, email, password_hash, profile_image, locked_until, token_version FROM users WHERE email=$1`,
+      `SELECT id, auth_uuid, name, email, password_hash, profile_image, locked_until, token_version
+   FROM users
+   WHERE email=$1`,
       [email],
     );
 
@@ -106,7 +109,7 @@ export const login = async (req, res) => {
 
     const user = userRes.rows[0];
     console.log("JWT_SECRET:", process.env.JWT_SECRET);
-    console.log("USER PASSWORD HASH:", user.password_hash);
+    console.log("User from DB:", user);
 
     if (
       user.locked_until &&
@@ -134,6 +137,8 @@ export const login = async (req, res) => {
 
     const payload = {
       id: user.id,
+      auth_uuid: user.auth_uuid,
+
       email: user.email,
       tokenVersion: user.token_version,
     };
@@ -149,13 +154,26 @@ export const login = async (req, res) => {
       console.error("JWT_SECRET is missing!");
       return res.status(500).json({ error: "Server misconfigured" });
     }
-
-    await db.query(
-      `INSERT INTO refresh_tokens 
-   (user_id, token, expires_at, user_agent, ip_address, ip_location)
-   VALUES ($1,$2,NOW() + INTERVAL '7 days',$3,$4, $5)`,
-      [user.id, refreshToken, device_name, ip, ip_location],
+    const existingSession = await db.query(
+      `SELECT id FROM refresh_tokens 
+   WHERE user_id = $1 AND user_agent = $2 AND ip_address = $3`,
+      [user.id, device_name, ip],
     );
+    if (existingSession.rows.length > 0) {
+      await db.query(
+        `UPDATE refresh_tokens 
+     SET token = $1, expires_at = NOW() + INTERVAL '7 days'
+     WHERE id = $2`,
+        [refreshToken, existingSession.rows[0].id],
+      );
+    } else {
+      await db.query(
+        `INSERT INTO refresh_tokens 
+     (user_id, token, expires_at, user_agent, ip_address, ip_location)
+     VALUES ($1,$2,NOW() + INTERVAL '7 days',$3,$4,$5)`,
+        [user.id, refreshToken, device_name, ip, ip_location],
+      );
+    }
 
     const isProd = process.env.NODE_ENV === "production";
 
@@ -235,10 +253,28 @@ export const getAllCurrentSessions = async (req, res) => {
   try {
     const userId = req.user.id;
     const { rows } = await db.query(
-      `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation" FROM refresh_tokens WHERE user_id = $1 `,
+      `SELECT id as "refresh_token_id", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation" FROM refresh_tokens WHERE user_id = $1 and id <> $2`,
       [userId],
     );
     return res.status(200).json({ allExistingSession: rows });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err });
+  }
+};
+
+export const logoutSession = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { sessionId } = req.body;
+    await db.query(
+      `DELETE FROM refresh_tokens WHERE user_id = $1 AND id = $2`,
+      [userId, sessionId],
+    );
+
+    return res
+      .status(200)
+      .json({ message: `session id ${sessionId} deleted successfully` });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: err });

@@ -3,6 +3,7 @@ import {
   login,
   logout,
   getAllCurrentSessions,
+  logoutSession,
 } from "../controllers/authController.js";
 import jwt from "jsonwebtoken";
 import { db } from "../db.js";
@@ -24,6 +25,7 @@ router.get("/me", authMiddleware, (req, res) => {
   });
 });
 router.get("/current-sessions", authMiddleware, getAllCurrentSessions);
+router.post("/logout-session", authMiddleware, logoutSession);
 router.post("/refresh", async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;

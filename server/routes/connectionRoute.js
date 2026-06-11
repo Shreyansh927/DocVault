@@ -14,34 +14,34 @@ import {
 } from "../friend-requests/request.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { getNotifications } from "../friend-requests/notificatoins.js";
-const router = express.Router();
+const connectionRouter = express.Router();
 
-router.post("/connect", authMiddleware, sendRequest);
-router.post("/accept", authMiddleware, acceptRequest);
-router.post("/deny", authMiddleware, denyRequest);
+connectionRouter.post("/connect", authMiddleware, sendRequest);
+connectionRouter.post("/accept", authMiddleware, acceptRequest);
+connectionRouter.post("/deny", authMiddleware, denyRequest);
 
-router.get("/connections", authMiddleware, getConnections);
-router.post("/allow-folder-access", authMiddleware, allowShowFolder);
-router.post("/deny-folder-access", authMiddleware, restrictShowFolder);
-router.post("/cancel-connection", authMiddleware, removeFriend);
-router.get(
+connectionRouter.get("/connections", authMiddleware, getConnections);
+connectionRouter.post("/allow-folder-access", authMiddleware, allowShowFolder);
+connectionRouter.post("/deny-folder-access", authMiddleware, restrictShowFolder);
+connectionRouter.post("/cancel-connection", authMiddleware, removeFriend);
+connectionRouter.get(
   "/folders/shared/:userId",
   authMiddleware,
   checkFolderAccess,
   getSharedFoldersPractice
 );
-router.get(
+connectionRouter.get(
   "/folders/files/shared/:friendId/:folderId",
   authMiddleware,
 
   getSharedFiles
 );
-router.get(
+connectionRouter.get(
   "/folders/files/file/shared/:friendId/:folderId/:fileId",
   authMiddleware,
 
   getSharedFileView
 );
-router.get("/notifications", authMiddleware, getNotifications);
+connectionRouter.get("/notifications",authMiddleware, getNotifications);
 
-export default router;
+export default connectionRouter;

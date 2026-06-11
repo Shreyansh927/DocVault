@@ -12,7 +12,7 @@ export const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
     const userRes = await db.query(
-      `SELECT id, email, token_version FROM users WHERE id=$1`,
+      `SELECT id, auth_uuid, email, token_version FROM users WHERE id=$1`,
       [decoded.id],
     );
 
@@ -27,6 +27,9 @@ export const authMiddleware = async (req, res, next) => {
     }
 
     req.user = user;
+
+    console.log("Cookies:", req.cookies);
+    console.log("User:", req.user);
 
     next();
   } catch (err) {

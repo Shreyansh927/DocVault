@@ -110,7 +110,8 @@ You are an AI assistant.
 User Question:
 ${q}
 
-
+context:
+${context}
 `,
             },
           ],

@@ -43,6 +43,10 @@ const Dashboard = () => {
     fetchCurrentSessions();
   }, []);
 
+  useEffect(() => {
+    fetchCurrentSessions();
+  }, [allExistingSessions]);
+
   const fetchUserPersonalInfo = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/user-profile/me`, {
@@ -73,6 +77,7 @@ const Dashboard = () => {
         ipAddress: e.deviceIpAddress,
         ipLocation: e.deviceIpLocation,
         userAgent: e.userAgent,
+        sessionId: e.refresh_token_id,
       }));
       setAllExistingSessions(formattedData);
       console.log(formattedData);
@@ -109,6 +114,21 @@ const Dashboard = () => {
     } catch (err) {
       console.error("UPDATE PROFILE ERROR:", err);
       alert("Update failed");
+    }
+  };
+
+  const logoutSession = async (sessionId) => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/auth/logout-session`,
+        {
+          sessionId: sessionId,
+        },
+        { withCredentials: true },
+      );
+      alert(res.data.message);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -197,14 +217,12 @@ const Dashboard = () => {
                         </span>
                       </div>
 
-                      {/* {!session.isCurrent && (
-                        <button
-                          className="logout-btn"
-                          onClick={() => logoutSession(session.id)}
-                        >
-                          Logout
-                        </button>
-                      )} */}
+                      <button
+                        className="logout-btn"
+                        onClick={() => logoutSession(session.sessionId)}
+                      >
+                        Logout
+                      </button>
                     </div>
                   ))}
                 </div>

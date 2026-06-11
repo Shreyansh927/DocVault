@@ -23,12 +23,13 @@ import { allFiles, trashFiles } from "./all-users/all-folder-files.js";
 import aiResponseRouter from "./routes/ai-query-response-route.js";
 import "./permanent-deletion-job.js";
 import helmet from "helmet";
-
+import connectionRouter from "./routes/connectionRoute.js";
 
 const app = express();
 
 /* ---------- CORE ---------- */
 app.use(helmet());
+app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
@@ -60,7 +61,7 @@ app.get("/api/get-all-trash-files", authMiddleware, trashFiles);
 app.use("/api/folder-auth", authMiddleware, folderRoutes);
 app.use("/api/files", authMiddleware, fileRoutes);
 
-app.use("/api", authMiddleware, connectionRoutes);
+app.use("/api", connectionRouter);
 app.use("/api/messages", authMiddleware, messageRouter);
 app.get("/api/all-users", authMiddleware, allUsers);
 app.get("/test-db", async (req, res) => {
