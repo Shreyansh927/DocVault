@@ -8,7 +8,7 @@ const memory = new MemorySaver();
 export const createFallbackAgent = (tools, systemPrompt) => {
   const geminiAgent = createAgent({
     model: new ChatGoogleGenerativeAI({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       temperature: 0,
       apiKey: process.env.GEMINI_API_KEY,
     }),
