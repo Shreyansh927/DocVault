@@ -163,42 +163,59 @@ export const removeFriend = async (req, res) => {
     const removeFriendId = Number(req.body.removeFriend);
     const currentUserId = Number(req.user.id);
 
-    const friendUUIDResult = await db.query(
+    const currentUserResult = await db.query(
+      `SELECT auth_uuid FROM users WHERE id = $1`,
+      [currentUserId],
+    );
+
+    const friendResult = await db.query(
       `SELECT auth_uuid FROM users WHERE id = $1`,
       [removeFriendId],
     );
 
-    if (friendUUIDResult.rows.length > 0) {
-      await db.query(
-        `
-    DELETE FROM notifications
-    WHERE user_id = $1
-      AND sender_id = $2 OR user_id = $2 AND sender_id = $1
-    `,
-        [friendUUIDResult.rows[0].auth_uuid, currentUserId],
-      );
-    }
+    const currentUserUUID = currentUserResult.rows[0]?.auth_uuid;
+
+    const friendUUID = friendResult.rows[0]?.auth_uuid;
+
+    await db.query(
+      `
+      DELETE FROM notifications
+      WHERE
+          (user_id = $1 AND sender_id = $2)
+       OR (user_id = $3 AND sender_id = $4)
+      `,
+      [friendUUID, currentUserId, currentUserUUID, removeFriendId],
+    );
 
     await db.query(
       `
       DELETE FROM connections
-      WHERE (sender_id=$1 AND receiver_id=$2) OR (sender_id=$2 AND receiver_id=$1)
-      
+      WHERE
+          (sender_id = $1 AND receiver_id = $2)
+       OR (sender_id = $2 AND receiver_id = $1)
       `,
       [currentUserId, removeFriendId],
     );
 
-    await db.query(`DELETE FROM friends WHERE user_id=$1 AND friend_id=$2`, [
-      removeFriendId,
-      currentUserId,
-    ]);
+    await db.query(
+      `
+      DELETE FROM friends
+      WHERE
+          (user_id = $1 AND friend_id = $2)
+       OR (user_id = $2 AND friend_id = $1)
+      `,
+      [currentUserId, removeFriendId],
+    );
 
-    return res
-      .status(200)
-      .json({ message: "friend removed from connection list successfully" });
+    return res.status(200).json({
+      message: "Friend removed from connection list successfully",
+    });
   } catch (err) {
-    console.log(err);
-    return res.status(400).json({ err: "error removing friend" });
+    console.error(err);
+
+    return res.status(500).json({
+      error: "Error removing friend",
+    });
   }
 };
 
