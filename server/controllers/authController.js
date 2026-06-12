@@ -168,9 +168,22 @@ export const login = async (req, res) => {
       );
     } else {
       await db.query(
-        `INSERT INTO refresh_tokens 
-     (user_id, token, expires_at, user_agent, ip_address, ip_location)
-     VALUES ($1,$2,NOW() + INTERVAL '7 days',$3,$4,$5)`,
+        `INSERT INTO refresh_tokens
+(user_id, token, expires_at, user_agent, ip_address, ip_location)
+VALUES (
+    $1,
+    $2,
+    NOW() + INTERVAL '7 days',
+    $3,
+    $4,
+    $5
+)
+ON CONFLICT (user_id, user_agent, ip_address)
+DO UPDATE SET
+    token = EXCLUDED.token,
+    expires_at = EXCLUDED.expires_at,
+    ip_location = EXCLUDED.ip_location;
+     `,
         [user.id, refreshToken, device_name, ip, ip_location],
       );
     }
