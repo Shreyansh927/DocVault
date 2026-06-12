@@ -27,20 +27,20 @@ const FileView = () => {
     }
   };
 
-  const handleDownload = async () => {
-    try {
-      // const res = await axios.get(
-      //   `${API_BASE_URL}/api/files/${fileId}/download`,
-      //   { withCredentials: true },
-      // );
+const handleDownload = async () => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/api/files/${fileId}/access`, {
+      responseType: "blob",
+      withCredentials: true,
+    });
 
-      
-        window.open(`${API_BASE_URL}/api/files/${fileId}/access`, "_blank");
-      
-    } catch (err) {
-      console.error("DOWNLOAD ERROR:", err);
-    }
-  };
+    const blobUrl = URL.createObjectURL(res.data);
+
+    window.open(blobUrl, "_blank");
+  } catch (err) {
+    console.error("DOWNLOAD ERROR:", err);
+  }
+};
 
   if (!fileData) return <p className="loading">Loading file…</p>;
 
