@@ -4,24 +4,24 @@ import Header from "../../components/header/header.jsx";
 import axios from "axios";
 import AskAi from "../../ask-ai/ask-ai.jsx";
 
-const sessions = [
-  {
-    id: "1",
-    device: "Windows PC",
-    browser: "Chrome",
-    location: "Mumbai, India",
-    lastActive: "2 mins ago",
-    isCurrent: true,
-  },
-  {
-    id: "2",
-    device: "iPhone 13",
-    browser: "Safari",
-    location: "Delhi, India",
-    lastActive: "10 mins ago",
-    isCurrent: false,
-  },
-];
+// const sessions = [
+//   {
+//     id: "1",
+//     device: "Windows PC",
+//     browser: "Chrome",
+//     location: "Mumbai, India",
+//     lastActive: "2 mins ago",
+//     isCurrent: true,
+//   },
+//   {
+//     id: "2",
+//     device: "iPhone 13",
+//     browser: "Safari",
+//     location: "Delhi, India",
+//     lastActive: "10 mins ago",
+//     isCurrent: false,
+//   },
+// ];
 
 const Dashboard = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -77,7 +77,7 @@ const Dashboard = () => {
         ipAddress: e.deviceIpAddress,
         ipLocation: e.deviceIpLocation,
         userAgent: e.userAgent,
-        sessionId: e.refresh_token_id,
+        sessionId: e.refreshTokenId,
       }));
       setAllExistingSessions(formattedData);
       console.log(formattedData);

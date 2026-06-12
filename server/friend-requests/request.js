@@ -87,7 +87,7 @@ export const acceptRequest = async (req, res) => {
       VALUES ($1,$2,$3,$4,'FRIEND_REQUEST_ACCEPTED','ACCEPTED')
       `,
       [
-        sender.rows[0].auth_uuid, // 🔥 UUID
+        sender.rows[0].auth_uuid,
         receiverId,
         receiver.rows[0].name,
         receiver.rows[0].profile_image,
@@ -144,7 +144,7 @@ export const denyRequest = async (req, res) => {
       VALUES ($1,$2,$3,$4,'FRIEND_REQUEST_REJECTED','REJECTED')
       `,
       [
-        sender.rows[0].auth_uuid, // 🔥 UUID
+        sender.rows[0].auth_uuid,
         receiverId,
         receiver.rows[0].name,
         receiver.rows[0].profile_image,
@@ -175,6 +175,12 @@ export const removeFriend = async (req, res) => {
       `,
       [removeFriendId, currentUserId],
     );
+
+    await db.query(`
+      DELETE FROM connections
+      WHERE (sender_id=$1 AND receiver_id=$2) OR (sender_id=$2 AND receiver_id=$1)
+      
+      `);
 
     return res
       .status(200)

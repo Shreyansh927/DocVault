@@ -12,19 +12,25 @@ export const createFallbackAgent = (tools, systemPrompt) => {
       temperature: 0,
       apiKey: process.env.GEMINI_API_KEY,
     }),
+
     tools,
+
     systemPrompt,
+
     checkpointer: memory,
   });
 
   const groqAgent = createAgent({
     model: new ChatGroq({
-      model: "llama-3.1-8b-instant",
+      model: "llama-3.3-70b-versatile",
       temperature: 0,
       apiKey: process.env.GROQ_API_KEY,
     }),
+
     tools,
+
     systemPrompt,
+
     checkpointer: memory,
   });
 
@@ -32,10 +38,25 @@ export const createFallbackAgent = (tools, systemPrompt) => {
     invoke: async (payload, config) => {
       try {
         return await geminiAgent.invoke(payload, config);
-      } catch (error) {
-        console.error("Gemini agent failed:", error.message);
+      } catch (geminiError) {
+        console.error("Gemini agent failed:", geminiError.message);
 
-        return await groqAgent.invoke(payload, config);
+        try {
+          return await groqAgent.invoke(payload, config);
+        } catch (groqError) {
+          console.error("Groq fallback failed:", groqError);
+
+          return {
+            messages: [
+              {
+                role: "assistant",
+
+                content:
+                  "Sorry, I couldn't process your request at the moment.",
+              },
+            ],
+          };
+        }
       }
     },
   };

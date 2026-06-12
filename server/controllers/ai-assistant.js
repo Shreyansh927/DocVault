@@ -1,167 +1,179 @@
 import { tool } from "langchain/tools";
 import { createFallbackAgent } from "./agentFactory.js";
 import { db } from "../db.js";
+
 import {
   GoogleGenerativeAIEmbeddings,
   ChatGoogleGenerativeAI,
 } from "@langchain/google-genai";
+
 import { z } from "zod";
 
-// Gemini LLM
-const geminiResponse = new ChatGoogleGenerativeAI({
-  model: "gemini-3.5-flash",
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
-// Gemini Embeddings
 const embeddings = new GoogleGenerativeAIEmbeddings({
   model: "gemini-embedding-001",
+
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-// Generate final answer using retrieved context
-const generateFinalResponse = async (responseContext, userId, userQuery) => {
+const geminiResponse = new ChatGoogleGenerativeAI({
+  model: "gemini-3.5-flash",
+
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+const generateFinalResponse = async (context, userQuery) => {
   try {
     const result = await geminiResponse.invoke([
       {
         role: "system",
+
         content: `
 You are DocVault's AI assistant.
 
-Your job is to help users locate files, identify folders,
-retrieve document-related information, and answer questions
-based ONLY on the provided context.
+Answer ONLY using the retrieved document context.
 
 If the answer cannot be determined from the context,
-say that you could not find relevant information.
+say:
+
+"I couldn't find relevant information in your documents."
         `,
       },
 
       {
         role: "user",
-        content: `
-User ID: ${userId}
 
+        content: `
 User Query:
 ${userQuery}
 
 Retrieved Context:
-${responseContext}
-
-Answer the user's query concisely.
+${context}
         `,
       },
     ]);
 
     return result.content;
-  } catch (err) {
-    console.error("Error generating Gemini response:", err);
+  } catch (error) {
+    console.error("Error generating final response:", error);
 
-    return "Sorry, I couldn't process your request at the moment.";
+    return "I found relevant documents but " + "couldn't generate a response.";
   }
 };
 
-// Semantic search tool
-const fetchUserQueryResponse = tool(
-  async ({ userQuery, userId }) => {
-    try {
-      // Generate embedding
-      const queryEmbedding = await embeddings.embedQuery(userQuery);
-
-      if (!queryEmbedding) {
-        return "Sorry, I couldn't understand your query.";
-      }
-
-      const finalEmbedding = `[${queryEmbedding.join(",")}]`;
-
-      // Search pgvector
-      const { rows } = await db.query(
-        `
-        SELECT
-          f.filename,
-          f.ai_summary,
-          fo.folder_name
-        FROM files f
-        JOIN folders fo
-          ON fo.id = f.folder_id
-        WHERE fo.user_id = $1
-          AND f.deleted_at IS NULL
-          AND f.new_embedding IS NOT NULL
-        ORDER BY f.new_embedding <-> $2
-        LIMIT 3
-        `,
-        [userId, finalEmbedding],
-      );
-
-      if (rows.length === 0) {
-        return "No relevant documents were found.";
-      }
-
-      const context = rows
-        .map(
-          (row) => `
-Filename: ${row.filename}
-Summary: ${row.ai_summary}
-Folder: ${row.folder_name}
-        `,
-        )
-        .join("\n\n");
-
-      return await generateFinalResponse(context, userId, userQuery);
-    } catch (error) {
-      console.error("Error inside semantic search tool:", error);
-
-      return "An error occurred while searching your documents.";
-    }
-  },
-
-  {
-    name: "search_user_documents",
-
-    description:
-      "Search the user's documents semantically and answer questions about them.",
-
-    schema: z.object({
-      userQuery: z.string(),
-
-      userId: z.number(),
-    }),
-  },
-);
-
-// Agent tools
-const tools = [fetchUserQueryResponse];
-
-// Main Agent
-const mainAgent = createFallbackAgent(
-  tools,
-
-  `
-You are DocVault's AI assistant.
-
-You help users:
-- Locate documents,
-- Identify folder locations,
-- Retrieve information from stored files,
-- Answer questions based on semantic search results.
-
-Always use the available tools whenever the user asks
-about their documents.
-`,
-);
-
-// API Controller
 export const aiQueryResponse = async (req, res) => {
   try {
     const userId = req.user.id;
 
     const { q } = req.query;
 
-    if (!q || q.trim().length === 0) {
+    if (!q?.trim()) {
       return res.status(400).json({
         error: "Query is required",
       });
     }
+
+    const fetchUserQueryResponse = tool(
+      async ({ userQuery }) => {
+        try {
+          const queryEmbedding = await embeddings.embedQuery(userQuery);
+
+          if (!queryEmbedding) {
+            return "Sorry, I couldn't understand your query.";
+          }
+
+          const finalEmbedding = `[${queryEmbedding.join(",")}]`;
+
+          const { rows } = await db.query(
+            `
+            SELECT
+              f.filename,
+              f.ai_summary,
+              fo.folder_name
+            FROM files f
+            JOIN folders fo
+              ON fo.id = f.folder_id
+            WHERE fo.user_id = $1
+              AND f.deleted_at IS NULL
+              AND f.new_embedding IS NOT NULL
+            ORDER BY f.new_embedding <-> $2
+            LIMIT 3
+            `,
+            [userId, finalEmbedding],
+          );
+
+          if (rows.length === 0) {
+            return "No relevant documents were found.";
+          }
+
+          const context = rows
+            .map(
+              (row) => `
+Filename: ${row.filename}
+
+Folder: ${row.folder_name}
+
+Summary: ${row.ai_summary}
+            `,
+            )
+            .join("\n\n");
+
+          return await generateFinalResponse(context, userQuery);
+        } catch (error) {
+          console.error("Semantic search error:", error);
+
+          return "An error occurred while searching " + "your documents.";
+        }
+      },
+
+      {
+        name: "search_user_documents",
+
+        description: `
+Search the authenticated user's stored documents.
+
+Use this tool whenever the user asks about:
+
+- file contents
+- document summaries
+- folder locations
+- information contained inside uploaded documents
+        `,
+
+        schema: z.object({
+          userQuery: z.string(),
+        }),
+      },
+    );
+
+    const mainAgent = createFallbackAgent(
+      [fetchUserQueryResponse],
+
+      `
+You are DocVault's AI assistant.
+
+You can help users:
+
+- locate files,
+- identify folders,
+- answer questions about uploaded documents.
+
+Available tools:
+
+1. search_user_documents
+
+Rules:
+
+- Use ONLY the tools listed above.
+- Never invent tool names.
+- Never perform web searches.
+- Never call brave_search.
+- Never call google_search.
+- If the user's question is unrelated to documents,
+answer directly without tools.
+- When the user asks about documents,
+always use search_user_documents.
+      `,
+    );
 
     const result = await mainAgent.invoke(
       {
@@ -169,12 +181,7 @@ export const aiQueryResponse = async (req, res) => {
           {
             role: "user",
 
-            content: `
-User ID: ${userId}
-
-Command:
-${q}
-            `,
+            content: q,
           },
         ],
       },

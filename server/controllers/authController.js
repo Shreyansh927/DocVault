@@ -253,8 +253,8 @@ export const getAllCurrentSessions = async (req, res) => {
   try {
     const userId = req.user.id;
     const { rows } = await db.query(
-      `SELECT id as "refresh_token_id", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation" FROM refresh_tokens WHERE user_id = $1 and id <> $2`,
-      [userId],
+      `SELECT id as "refreshTokenId", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation" FROM refresh_tokens WHERE user_id = $1 AND id <> (SELECT id FROM refresh_tokens WHERE user_id = $1 AND token = $2)`,
+      [userId, req.cookies.refreshToken],
     );
     return res.status(200).json({ allExistingSession: rows });
   } catch (err) {
@@ -266,6 +266,14 @@ export const getAllCurrentSessions = async (req, res) => {
 export const logoutSession = async (req, res) => {
   try {
     const userId = req.user.id;
+    const currentLoggedDevice = await db.query(
+      `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress" FROM refresh_tokens WHERE user_id = $1`,
+      [userId],
+    );
+    // const currentLoggedDeviceSessionId = await db.query(
+    //   `SELECT id as "refresh_token_id" FROM refresh_tokens WHERE user_id = $1 AND `,
+    //   [userId],
+    // );
     const { sessionId } = req.body;
     await db.query(
       `DELETE FROM refresh_tokens WHERE user_id = $1 AND id = $2`,
