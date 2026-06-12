@@ -163,24 +163,35 @@ export const removeFriend = async (req, res) => {
     const removeFriendId = Number(req.body.removeFriend);
     const currentUserId = Number(req.user.id);
 
-    await db.query(`DELETE FROM friends WHERE user_id=$1 AND friend_id=$2`, [
-      currentUserId,
-      removeFriendId,
-    ]);
+    const friendUUIDResult = await db.query(
+      `SELECT auth_uuid FROM users WHERE id = $1`,
+      [removeFriendId],
+    );
+
+    if (friendUUIDResult.rows.length > 0) {
+      await db.query(
+        `
+    DELETE FROM notifications
+    WHERE user_id = $1
+      AND sender_id = $2 OR user_id = $2 AND sender_id = $1
+    `,
+        [friendUUIDResult.rows[0].auth_uuid, currentUserId],
+      );
+    }
 
     await db.query(
       `
-      DELETE FROM notifications
-      WHERE user_id=$1 AND sender_id=$2
-      `,
-      [removeFriendId, currentUserId],
-    );
-
-    await db.query(`
       DELETE FROM connections
       WHERE (sender_id=$1 AND receiver_id=$2) OR (sender_id=$2 AND receiver_id=$1)
       
-      `);
+      `,
+      [currentUserId, removeFriendId],
+    );
+
+    await db.query(`DELETE FROM friends WHERE user_id=$1 AND friend_id=$2`, [
+      removeFriendId,
+      currentUserId,
+    ]);
 
     return res
       .status(200)
