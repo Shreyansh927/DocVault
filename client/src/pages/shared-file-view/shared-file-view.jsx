@@ -18,7 +18,7 @@ const SharedFileView = () => {
     try {
       const res = await axios.get(
         `${API_BASE_URL}/api/folders/files/file/shared/${friendId}/${folderId}/${fileId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       setFile(res.data.SharefileData);
@@ -26,6 +26,24 @@ const SharedFileView = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/files/${fileId}/access`,
+        {
+          responseType: "blob",
+          withCredentials: true,
+        },
+      );
+
+      const blobUrl = URL.createObjectURL(res.data);
+
+      window.open(blobUrl, "_blank");
+    } catch (err) {
+      console.error("DOWNLOAD ERROR:", err);
     }
   };
 
@@ -86,14 +104,9 @@ const SharedFileView = () => {
           </div>
         )}
 
-        <a
-          href={file.encrypted_link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="open-btn"
-        >
-          Open File
-        </a>
+        <button className="primary-btn" onClick={handleDownload}>
+          Open / Download
+        </button>
       </div>
     </div>
   );
