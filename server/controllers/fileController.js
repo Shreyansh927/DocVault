@@ -1,5 +1,6 @@
 import { db } from "../db.js";
 import { redis } from "../redis.js";
+import supabase from "../supabase.js";
 import { uploadFilesToSupabase } from "../utils/supabase-cloud-storage-users-backup.js";
 import { GoogleGenAI } from "@google/genai";
 import officeParser from "officeparser";
@@ -158,7 +159,11 @@ export const uploadFiles = async (req, res) => {
     const uploadedFiles = [];
 
     for (const file of files) {
-      const { publicUrl } = await uploadFilesToSupabase(userId, folderId, file);
+      const { storagePath } = await uploadFilesToSupabase(
+        userId,
+        folderId,
+        file,
+      );
 
       const aiSummary = await summarizeFileWithAI(file);
 
@@ -187,7 +192,7 @@ export const uploadFiles = async (req, res) => {
           folderId,
           file.originalname,
           `${Date.now()}_${file.originalname}`,
-          publicUrl,
+          storagePath,
           file.mimetype,
           file.size,
           "supabase",
@@ -448,5 +453,93 @@ ${context} provide me the filename which is going to expire soonest and its expi
   } catch (err) {
     console.error("FILE HEALTH CHECK ERROR:", err.message);
     return "no worry";
+  }
+};
+
+export const accessFile = async (req, res) => {
+  try {
+    const fileId = Number(req.params.fileId);
+
+    const userId = Number(req.user.id);
+
+    const { rows } = await db.query(
+      `
+        SELECT
+            f.encrypted_link,
+            f.file_type,
+            fo.user_id AS owner_id
+        FROM files f
+        JOIN folders fo
+            ON fo.id = f.folder_id
+        WHERE
+            f.id = $1
+            AND f.is_deleted = FALSE
+        `,
+      [fileId],
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: "File not found",
+      });
+    }
+
+    const file = rows[0];
+
+    let hasAccess = false;
+
+    /*
+       OWNER
+    */
+
+    if (file.owner_id === userId) {
+      hasAccess = true;
+    } else {
+
+    /*
+       FRIEND
+    */
+      const permission = await db.query(
+        `
+          SELECT 1
+          FROM friends
+          WHERE
+              user_id = $1
+              AND friend_id = $2
+              AND show_folders = TRUE
+          `,
+        [file.owner_id, userId],
+      );
+
+      hasAccess = permission.rows.length > 0;
+    }
+
+    if (!hasAccess) {
+      return res.status(403).json({
+        error: "You don't have access to this file",
+      });
+    }
+
+    const { data, error } = await supabase.storage
+      .from("project2-bucket")
+      .download(file.encrypted_link);
+
+    if (error) {
+      throw error;
+    }
+
+    const arrayBuffer = await data.arrayBuffer();
+
+    const buffer = Buffer.from(arrayBuffer);
+
+    res.setHeader("Content-Type", file.file_type);
+
+    return res.send(buffer);
+  } catch (err) {
+    console.error("ACCESS FILE ERROR:", err.message);
+
+    return res.status(500).json({
+      error: "Cannot access file",
+    });
   }
 };

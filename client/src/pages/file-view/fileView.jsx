@@ -18,7 +18,7 @@ const FileView = () => {
     try {
       const res = await axios.get(
         `${API_BASE_URL}/api/files/${folderId}/${fileId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setFileData(res.data.file);
     } catch (err) {
@@ -27,16 +27,16 @@ const FileView = () => {
     }
   };
 
-  /* ✅ FINAL DOWNLOAD HANDLER */
   const handleDownload = async () => {
     try {
-      const res = await axios.get(
-        `${API_BASE_URL}/api/files/${fileId}/download`,
-        { withCredentials: true }
-      );
+      // const res = await axios.get(
+      //   `${API_BASE_URL}/api/files/${fileId}/download`,
+      //   { withCredentials: true },
+      // );
 
-      // axios follows redirect → get final cloud URL
-      window.open(res.data.url, "_blank");
+      
+        window.open(`${API_BASE_URL}/api/files/${fileId}/access`, "_blank");
+      
     } catch (err) {
       console.error("DOWNLOAD ERROR:", err);
     }

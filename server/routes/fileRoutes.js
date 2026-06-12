@@ -8,6 +8,7 @@ import {
   restoreFile,
   restoreAllFiles,
   downloadFile,
+  accessFile,
 } from "../controllers/fileController.js";
 import { viewIndividualFile } from "../all-users/indivisualFile.js";
 
@@ -17,14 +18,12 @@ fileRoutes.post(
   "/upload",
   authMiddleware,
   upload.array("files", 10),
-  uploadFiles
+  uploadFiles,
 );
 
-fileRoutes.get(
-  "/:fileId/download",
-  authMiddleware,
-  downloadFile
-);
+fileRoutes.get("/:fileId/download", authMiddleware, downloadFile);
+
+fileRoutes.get("/:fileId/access", authMiddleware, accessFile);
 fileRoutes.get("/:folderId/:fileId", authMiddleware, viewIndividualFile);
 
 fileRoutes.post("/delete-file", authMiddleware, deleteFile);

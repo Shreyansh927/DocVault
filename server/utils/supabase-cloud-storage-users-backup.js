@@ -57,9 +57,10 @@ export const uploadProfileImageToSupabase = async (user, file) => {
     throw error;
   }
 
-  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
+  // const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
 
-  return data.publicUrl;
+  // return data.publicUrl;
+  return storagePath;
 };
 
 /* ================= FILE UPLOAD (USER DATA) ================= */
@@ -84,10 +85,12 @@ export const uploadFilesToSupabase = async (userId, folderId, file) => {
     throw error;
   }
 
-  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
+  // const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
 
   return {
-    publicUrl: data.publicUrl,
+    // publicUrl: data.publicUrl,
     storagePath,
   };
 };
+
+
