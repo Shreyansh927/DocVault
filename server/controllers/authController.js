@@ -135,10 +135,12 @@ export const login = async (req, res) => {
       [user.id],
     );
 
+    const sessionUuid = crypto.randomUUID();
+
     const payload = {
       id: user.id,
       auth_uuid: user.auth_uuid,
-
+      session_uuid: sessionUuid,
       email: user.email,
       tokenVersion: user.token_version,
     };
@@ -169,14 +171,15 @@ export const login = async (req, res) => {
     } else {
       await db.query(
         `INSERT INTO refresh_tokens
-(user_id, token, expires_at, user_agent, ip_address, ip_location)
+(user_id, token, session_uuid, expires_at, user_agent, ip_address, ip_location)
 VALUES (
     $1,
     $2,
-    NOW() + INTERVAL '7 days',
     $3,
+    NOW() + INTERVAL '7 days',
     $4,
-    $5
+    $5,
+    $6
 )
 ON CONFLICT (user_id, user_agent, ip_address)
 DO UPDATE SET
@@ -184,7 +187,7 @@ DO UPDATE SET
     expires_at = EXCLUDED.expires_at,
     ip_location = EXCLUDED.ip_location;
      `,
-        [user.id, refreshToken, device_name, ip, ip_location],
+        [user.id, refreshToken, sessionUuid, device_name, ip, ip_location],
       );
     }
 
@@ -266,7 +269,7 @@ export const getAllCurrentSessions = async (req, res) => {
   try {
     const userId = req.user.id;
     const { rows } = await db.query(
-      `SELECT id as "refreshTokenId", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation" FROM refresh_tokens WHERE user_id = $1 AND id <> (SELECT id FROM refresh_tokens WHERE user_id = $1 AND token = $2)`,
+      `SELECT id as "refreshTokenId", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1 AND id <> (SELECT id FROM refresh_tokens WHERE user_id = $1 AND token = $2)`,
       [userId, req.cookies.refreshToken],
     );
     return res.status(200).json({ allExistingSession: rows });
@@ -280,17 +283,17 @@ export const logoutSession = async (req, res) => {
   try {
     const userId = req.user.id;
     const currentLoggedDevice = await db.query(
-      `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress" FROM refresh_tokens WHERE user_id = $1`,
+      `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1`,
       [userId],
     );
     // const currentLoggedDeviceSessionId = await db.query(
     //   `SELECT id as "refresh_token_id" FROM refresh_tokens WHERE user_id = $1 AND `,
     //   [userId],
     // );
-    const { sessionId } = req.body;
+    const { sessionId, sessionUuid } = req.body;
     await db.query(
-      `DELETE FROM refresh_tokens WHERE user_id = $1 AND id = $2`,
-      [userId, sessionId],
+      `DELETE FROM refresh_tokens WHERE user_id = $1 AND id = $2 AND session_uuid = $3`,
+      [userId, sessionId, sessionUuid],
     );
 
     return res

@@ -11,6 +11,13 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
+    const sessionUuidFromDb = await db.query(
+      `
+      SELECT session_uuid FROM refresh_tokens WHERE user_id = $1 AND session_uuid = $2
+    `,
+      [decoded.id, decoded.session_uuid],
+    );
+
     const userRes = await db.query(
       `SELECT id, auth_uuid, email, token_version FROM users WHERE id=$1`,
       [decoded.id],
@@ -22,7 +29,7 @@ export const authMiddleware = async (req, res, next) => {
 
     const user = userRes.rows[0];
 
-    if (decoded.tokenVersion !== user.token_version) {
+    if (decoded.tokenVersion !== user.token_version || !sessionUuidFromDb.rows.length) {
       return res.status(401).json({ error: "Session expired" });
     }
 

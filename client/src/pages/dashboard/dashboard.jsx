@@ -78,6 +78,7 @@ const Dashboard = () => {
         ipLocation: e.deviceIpLocation,
         userAgent: e.userAgent,
         sessionId: e.refreshTokenId,
+        sessionUuid: e.sessionUuid,
       }));
       setAllExistingSessions(formattedData);
       console.log(formattedData);
@@ -117,12 +118,13 @@ const Dashboard = () => {
     }
   };
 
-  const logoutSession = async (sessionId) => {
+  const logoutSession = async (sessionId, sessionUuid) => {
     try {
       const res = await axios.post(
         `${API_BASE_URL}/api/auth/logout-session`,
         {
           sessionId: sessionId,
+          sessionUuid: sessionUuid,
         },
         { withCredentials: true },
       );
@@ -219,7 +221,9 @@ const Dashboard = () => {
 
                       <button
                         className="logout-btn"
-                        onClick={() => logoutSession(session.sessionId)}
+                        onClick={() =>
+                          logoutSession(session.sessionId, session.sessionUuid)
+                        }
                       >
                         Logout
                       </button>
