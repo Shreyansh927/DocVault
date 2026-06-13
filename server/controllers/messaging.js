@@ -17,6 +17,7 @@ export const sendMessage = async (req, res) => {
       `
   INSERT INTO messages (chat_id, sender_id, content)
   VALUES ($1, $2, $3)
+  
   `,
       [chatID, senderId, message],
     );
@@ -84,7 +85,7 @@ export const getMessages = async (req, res) => {
     const { chatID } = req.params;
     const { rows } = await db.query(
       `
-      select messages.id as id, messages.content, users.profile_image as profile_photo, users.name as username, messages.sender_id from messages inner join chats on chats.id = messages.chat_id inner join users on users.id = messages.sender_id where chats.id = $1 
+      select messages.id as id, messages.content, users.profile_image as profile_photo, users.name as username, messages.sender_id from messages inner join chats on chats.id = messages.chat_id inner join users on users.id = messages.sender_id where chats.id = $1 ORDER BY messages.id ASC
     `,
       [chatID],
     );
