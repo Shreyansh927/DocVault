@@ -9,7 +9,7 @@ const memory = new MemorySaver();
 export const createFallbackAgent = (tools, systemPrompt) => {
   const geminiAgent = createAgent({
     model: new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash",
       temperature: 0,
       apiKey: process.env.GEMINI_API_KEY,
     }),
@@ -54,14 +54,15 @@ export const createFallbackAgent = (tools, systemPrompt) => {
       //   console.error("Ollama agent failed:", ollamaError.message);
 
       try {
-        return await geminiAgent.invoke(payload, config);
-      } catch (geminiError) {
-        console.error("Gemini fallback failed:", geminiError.message);
+        return await groqAgent.invoke(payload, config);
+        
+      } catch (groqError) {
+        console.error("Gemini fallback failed:", groqError.message);
 
         try {
-          return await groqAgent.invoke(payload, config);
-        } catch (groqError) {
-          console.error("Groq fallback failed:", groqError);
+          return await geminiAgent.invoke(payload, config);
+        } catch (geminiError) {
+          console.error("Groq fallback failed:", geminiError);
         }
       }
     },

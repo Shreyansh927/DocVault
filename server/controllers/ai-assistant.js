@@ -21,7 +21,7 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
 });
 
 const geminiResponse = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash",
+  model: "gemini-3.5-flash",
 
   apiKey: process.env.GEMINI_API_KEY,
 });
