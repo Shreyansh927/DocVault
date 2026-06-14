@@ -269,6 +269,9 @@ Use this tool whenever the user asks to:
 - transfer a document
 - relocate a document
 - shift a file to another folder
+
+suppose if user asks to move let say adhaar card file or any other file you have to understand his intent and first confirm which file he wants to move show him exactly which files he wants to move and then once he confirms it then directly move them to folder he already said or if he didn't say any folder then ask him to which folder he wants to move the file and then move it to that folder. Provide the list of all file nnames you think he is referring to if did'nt provide the exact name.But most imp thing whatever file you think is close to what user is referring to you to first confirm it 
+by returning the name of the you think , once user confirms it then directly move to the destination folder user once said.
 `,
 
     schema: z.object({
@@ -363,14 +366,10 @@ Use this tool ONLY when the user asks about:
 - summaries of files
 - information extracted from documents
 - questions answerable using document text
-
-DO NOT use this tool for:
-
-- moving files
-- folder operations
-- file location queries
-- metadata retrieval
-- file management tasks
+- use this tool to search the exact file name , user might be referring to when he asks
+  to move file to any particular folder.
+-But most imp thing whatever file you think is close to what user is referring to you to first confirm it 
+by returning the name of the you think , once user confirms it then directly move to the destination folder user once said.
         `,
 
         schema: z.object({
