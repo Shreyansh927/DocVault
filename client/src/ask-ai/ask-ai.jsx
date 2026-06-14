@@ -20,7 +20,7 @@ const AskAi = () => {
         withCredentials: true,
       });
 
-      setAnswer(res.data.answer);
+      setAnswer(res.data.response);
       setQuery("");
     } catch {
       setAnswer("Too many requests try after 1 min...");

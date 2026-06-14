@@ -20,6 +20,7 @@ router.post("/logout", authMiddleware, logout);
 router.get("/me", authMiddleware, (req, res) => {
   res.json({
     id: req.user.id,
+    tokenVersion: req.user.token_version,
 
     email: req.user.email,
   });
