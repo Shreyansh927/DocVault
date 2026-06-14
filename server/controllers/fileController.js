@@ -66,7 +66,7 @@ export const summarizeFileWithAI = async (file) => {
       const base64PDF = file.buffer.toString("base64");
 
       const result = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: [
           {
             role: "user",
@@ -95,7 +95,7 @@ export const summarizeFileWithAI = async (file) => {
       const base64Image = file.buffer.toString("base64");
 
       const result = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: [
           {
             role: "user",
