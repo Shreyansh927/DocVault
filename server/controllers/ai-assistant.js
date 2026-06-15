@@ -243,12 +243,31 @@ const accessControlTool = tool(
   {
     name: "toggle_folder_access",
 
-    description: "Allow or revoke folder access for a connected friend.",
+    description: `
+Allow or revoke folder access for one of the user's connected friends.
+
+The friend name provided by the user may not exactly match the stored name in the database. Interpret the user's intent flexibly and identify the most likely friend by considering close matches, nicknames, case differences, spaces, underscores, and trailing numbers.
+
+Examples:
+- User says "Rana" → stored name is "rana_12".
+- User says "Aman" → stored name is "aman_kumar".
+- User says "John" → stored name is "john123".
+
+If exactly one reasonable match exists among the user's connected friends, use that friend automatically.
+
+If multiple close matches exist (e.g., "rana_12" and "rana_22"), ask the user for clarification instead of making assumptions.
+
+Only report that a friend cannot be found if there are no reasonable matches in the user's connected friend list.
+
+Never search outside the user's existing connections. and i can give command to allow or revoke access to my folders for many friends at a time so be prepared
+`,
 
     schema: z.object({
       userId: z.number(),
 
-      friendName: z.string(),
+      friendNames: z
+        .array(z.string())
+        .min(1, "At least one friend name is required"),
 
       accessType: z.enum(["allow", "revoke"]),
     }),
