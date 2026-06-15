@@ -176,6 +176,85 @@ Create a new folder for the authenticated user.`,
   },
 );
 
+// tool for controlling access to public folder to any friend
+
+const accessControlTool = tool(
+  async ({ userId, friendName, accessType }) => {
+    try {
+      const friend = await db.query(
+        `SELECT id FROM users WHERE LOWER(name)=LOWER($1)`,
+        [friendName],
+      );
+
+      if (!friend.rows.length) {
+        return `User '${friendName}' not found.`;
+      }
+
+      const friendId = friend.rows[0].id;
+
+      const authenticateFriend = await db.query(
+        `
+        SELECT 1
+        FROM connections
+        WHERE
+          (sender_id = $1 AND receiver_id = $2)
+          OR
+          (sender_id = $2 AND receiver_id = $1)
+        `,
+        [userId, friendId],
+      );
+
+      if (!authenticateFriend.rows.length) {
+        return `${friendName} is not in your connections list.`;
+      }
+
+      if (accessType === "allow") {
+        await db.query(
+          `
+          UPDATE friends
+          SET show_folders = TRUE
+          WHERE user_id = $1
+            AND friend_id = $2
+          `,
+          [userId, friendId],
+        );
+
+        return `Folder access allowed for ${friendName}.`;
+      }
+
+      await db.query(
+        `
+        UPDATE friends
+        SET show_folders = FALSE
+        WHERE user_id = $1
+          AND friend_id = $2
+        `,
+        [userId, friendId],
+      );
+
+      return `Folder access revoked for ${friendName}.`;
+    } catch (err) {
+      console.error(err);
+
+      return "An error occurred while updating folder permissions.";
+    }
+  },
+
+  {
+    name: "toggle_folder_access",
+
+    description: "Allow or revoke folder access for a connected friend.",
+
+    schema: z.object({
+      userId: z.number(),
+
+      friendName: z.string(),
+
+      accessType: z.enum(["allow", "revoke"]),
+    }),
+  },
+);
+
 const movingFilesTool = tool(
   async ({ userId, movingFileName, destinationFolderName }) => {
     console.log(" movingFilesTool called with:", {
@@ -378,7 +457,12 @@ by returning the name of the you think , once user confirms it then directly mov
       },
     );
 
-    const tools = [fetchUserQueryResponse, createFolderTool, movingFilesTool];
+    const tools = [
+      fetchUserQueryResponse,
+      createFolderTool,
+      movingFilesTool,
+      accessControlTool,
+    ];
 
     const mainAgent = createFallbackAgent(
       tools,

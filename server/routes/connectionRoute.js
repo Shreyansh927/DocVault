@@ -9,8 +9,9 @@ import {
   restrictShowFolder,
   getSharedFiles,
   getSharedFileView,
-  checkFolderAccess,
+  
   removeFriend,
+  getAccessControl,
 } from "../friend-requests/request.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { getNotifications } from "../friend-requests/notificatoins.js";
@@ -21,27 +22,32 @@ connectionRouter.post("/accept", authMiddleware, acceptRequest);
 connectionRouter.post("/deny", authMiddleware, denyRequest);
 
 connectionRouter.get("/connections", authMiddleware, getConnections);
+connectionRouter.get("/access-control", authMiddleware, getAccessControl);
 connectionRouter.post("/allow-folder-access", authMiddleware, allowShowFolder);
-connectionRouter.post("/deny-folder-access", authMiddleware, restrictShowFolder);
+connectionRouter.post(
+  "/deny-folder-access",
+  authMiddleware,
+  restrictShowFolder,
+);
 connectionRouter.post("/cancel-connection", authMiddleware, removeFriend);
 connectionRouter.get(
   "/folders/shared/:userId",
   authMiddleware,
-  checkFolderAccess,
-  getSharedFoldersPractice
+  
+  getSharedFoldersPractice,
 );
 connectionRouter.get(
   "/folders/files/shared/:friendId/:folderId",
   authMiddleware,
 
-  getSharedFiles
+  getSharedFiles,
 );
 connectionRouter.get(
   "/folders/files/file/shared/:friendId/:folderId/:fileId",
   authMiddleware,
 
-  getSharedFileView
+  getSharedFileView,
 );
-connectionRouter.get("/notifications",authMiddleware, getNotifications);
+connectionRouter.get("/notifications", authMiddleware, getNotifications);
 
 export default connectionRouter;

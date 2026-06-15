@@ -219,21 +219,10 @@ export const removeFriend = async (req, res) => {
   }
 };
 
-/* ================= GET CONNECTIONS ================= */
+/*======= GET CONNECTIONS == */
 export const getConnections = async (req, res) => {
   try {
     const userId = req.user.id;
-    // const cacheKey = `connections:${userId}`;
-
-    // if (redis) {
-    //   const cached = await redis.get(cacheKey);
-    //   if (cached) {
-    //     return res.json({
-    //       connections: JSON.parse(cached),
-    //       source: "cache",
-    //     });
-    //   }
-    // }
 
     const result = await db.query(
       `
@@ -241,17 +230,24 @@ export const getConnections = async (req, res) => {
         u.id,
         u.name,
         u.profile_image,
-        f.show_folders, 
-        c.id as connection_id
+        f.show_folders,
+        c.id AS connection_id
       FROM connections c
-      JOIN users u ON (u.id = c.sender_id AND c.receiver_id = $1)
-                   OR (u.id = c.receiver_id AND c.sender_id = $1)
-      JOIN friends f ON f.user_id = u.id AND f.friend_id = $1
+      JOIN users u
+        ON (
+          u.id = c.sender_id
+          AND c.receiver_id = $1
+        )
+        OR (
+          u.id = c.receiver_id
+          AND c.sender_id = $1
+        )
+      JOIN friends f
+        ON f.user_id = u.id
+       AND f.friend_id = $1
       `,
       [userId],
     );
-
-    // await redis?.setEx(cacheKey, 300, JSON.stringify(result.rows));
 
     return res.json({
       connections: result.rows,
@@ -259,58 +255,69 @@ export const getConnections = async (req, res) => {
     });
   } catch (err) {
     console.error("GET CONNECTIONS ERROR:", err.message);
-    return res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
 /* ================= TOGGLE FOLDER VISIBILITY ================= */
 export const allowShowFolder = async (req, res) => {
-  const ownerId = req.user.id;
-  const friendId = Number(req.body.connectionId);
+  try {
+    const ownerId = req.user.id;
+    const friendId = Number(req.body.connectionId);
 
-  await db.query(
-    `
-    UPDATE friends
-    SET show_folders = TRUE
-    WHERE user_id = $1 AND friend_id = $2
-    `,
-    [friendId, ownerId],
-  );
-  await db.query(
-    `
-    UPDATE friends
-    SET show_folders = TRUE
-    WHERE user_id = $1 AND friend_id = $2
-    `,
-    [ownerId, friendId],
-  );
+    await db.query(
+      `
+      UPDATE friends
+      SET show_folders = TRUE
+      WHERE user_id = $1
+        AND friend_id = $2
+      `,
+      [ownerId, friendId],
+    );
 
-  return res.json({ success: true });
+    return res.json({
+      success: true,
+    });
+  } catch (err) {
+    console.error("ALLOW ACCESS ERROR:", err.message);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
 };
 
 export const restrictShowFolder = async (req, res) => {
-  const ownerId = req.user.id;
-  const friendId = Number(req.body.connectionId);
+  try {
+    const ownerId = req.user.id;
+    const friendId = Number(req.body.connectionId);
 
-  await db.query(
-    `
-    UPDATE friends
-    SET show_folders = FALSE
-    WHERE user_id = $1 AND friend_id = $2
-    `,
-    [friendId, ownerId],
-  );
-  await db.query(
-    `
-    UPDATE friends
-    SET show_folders = FALSE
-    WHERE user_id = $1 AND friend_id = $2
-    `,
-    [ownerId, friendId],
-  );
+    await db.query(
+      `
+      UPDATE friends
+      SET show_folders = FALSE
+      WHERE user_id = $1
+        AND friend_id = $2
+      `,
+      [ownerId, friendId],
+    );
 
-  return res.json({ success: true });
+    return res.json({
+      success: true,
+    });
+  } catch (err) {
+    console.error("RESTRICT ACCESS ERROR:", err.message);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
 };
+
+
 
 /* ================= GET SHARED FOLDERS ================= */
 export const getSharedFoldersPractice = async (req, res) => {
@@ -326,7 +333,7 @@ export const getSharedFoldersPractice = async (req, res) => {
       WHERE
         fo.user_id = $1
         AND fr.friend_id = $2
-        AND fr.show_folders = true
+        AND fr.show_folders = TRUE
         AND fo.category = 'PUBLIC'
       `,
       [ownerId, viewerId],
@@ -405,27 +412,33 @@ export const getSharedFileView = async (req, res) => {
   }
 };
 
-export const checkFolderAccess = async (req, res, next) => {
-  const ownerId = Number(req.params.userId) || Number(req.params.friendId);
+export const getAccessControl = async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-  const viewerId = req.user.id;
+    const result = await db.query(
+      `
+      SELECT
+        u.id,
+        u.name,
+        u.profile_image,
+        f.show_folders
+      FROM friends f
+      JOIN users u
+        ON u.id = f.friend_id
+      WHERE f.user_id = $1
+      `,
+      [userId],
+    );
 
-  const result = await db.query(
-    `
-    SELECT 1
-    FROM friends
-    WHERE user_id = $1
-      AND friend_id = $2
-      AND show_folders = TRUE
-    `,
-    [ownerId, viewerId],
-  );
+    return res.json({
+      connections: result.rows,
+    });
+  } catch (err) {
+    console.error("GET ACCESS CONTROL ERROR:", err.message);
 
-  if (!result.rows.length) {
-    return res.status(403).json({
-      error: "Access revoked or not permitted",
+    return res.status(500).json({
+      error: "Internal server error",
     });
   }
-
-  next();
 };

@@ -10,16 +10,16 @@ const AccessControl = () => {
 
   const base_url = import.meta.env.VITE_API_BASE_URL;
 
-  // ✅ correct cookie name
+  
   const csrfToken = Cookies.get("csrfToken");
 
   useEffect(() => {
     fetchConnections();
-  }, []); // ✅ run once
+  }, []); 
 
   const fetchConnections = async () => {
     try {
-      const res = await axios.get(`${base_url}/api/connections`, {
+      const res = await axios.get(`${base_url}/api/access-control`, {
         withCredentials: true,
       });
       setAllConnections(res.data.connections || []);
