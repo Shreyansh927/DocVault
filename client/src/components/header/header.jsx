@@ -60,7 +60,7 @@ const Header = () => {
             src="https://png.pngtree.com/png-clipart/20250207/original/pngtree-cloud-storage-optimization-service-featuring-a-3d-icon-isolated-on-transparent-png-image_20375425.png"
             alt="SafeCloud"
           />
-          <span className="logo-text">SafeCloud</span>
+          <span className="logo-text">DocVault</span>
         </div>
 
         <nav className="header-nav">
