@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function Login() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -16,6 +18,28 @@ export default function Login() {
 
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/auth/google`,
+        {
+          credential: credentialResponse.credential,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      localStorage.setItem("current-user", JSON.stringify(res.data.user));
+
+      toast.success("Google login successful");
+
+      navigate("/home");
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Google login failed");
+    }
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -44,7 +68,7 @@ export default function Login() {
           email: form.email.trim(),
           password: form.password,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       const user = res.data.user;
 
@@ -91,12 +115,30 @@ export default function Login() {
             </button>
           </form>
 
+          <div
+            style={{
+              marginTop: "20px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+            className="google-login-button"
+          >
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => {
+                toast.error("Google login failed");
+              }}
+              useOneTap={false}
+            />
+          </div>
+
           <div className="login-links">
             <span onClick={() => navigate("/reset-email")}>
               Forgot password?
             </span>
             <p>
-              New here? <span onClick={() => navigate('/signup')}>Create an account</span>
+              New here?{" "}
+              <span onClick={() => navigate("/signup")}>Create an account</span>
             </p>
           </div>
         </div>

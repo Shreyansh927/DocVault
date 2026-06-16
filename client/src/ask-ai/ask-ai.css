@@ -14,16 +14,16 @@ body {
   position: fixed;
   right: 28px;
   bottom: 98px;
-  z-index: 920;
+  z-index: 1000;
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 24px;
+  padding: 16px 15px;
   background: linear-gradient(
     135deg,
-    rgba(13, 35, 94, 0.96),
-    rgba(54, 35, 160, 0.96),
-    rgba(83, 140, 255, 0.94)
+    rgba(13, 35, 94),
+    rgba(54, 35, 160),
+    rgba(83, 140, 255)
   );
   border: 1px solid rgba(95, 168, 255, 0.24);
   border-radius: 999px;

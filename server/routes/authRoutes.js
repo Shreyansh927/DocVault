@@ -5,6 +5,7 @@ import {
   getAllCurrentSessions,
   logoutSession,
 } from "../controllers/authController.js";
+import { googleLoginAuth } from "../controllers/googleLoginAuth.js";
 import jwt from "jsonwebtoken";
 import { db } from "../db.js";
 
@@ -14,6 +15,9 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.post("/signup", signup);
+
+
+router.post("/google", googleLoginAuth);
 router.post("/login", login);
 router.post("/logout", authMiddleware, logout);
 // authRoutes.js
