@@ -1,205 +1,354 @@
-/* ---------- Logout Modal Overlay ---------- */
-.logout-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 6, 23, 0.65);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.25s ease;
+:root {
+  --bg: #020617;
+  --surface: rgba(16, 134, 46, 0.96);
+  --border: rgba(34, 180, 107, 0.18);
+  --accent: #22b46b;
+  --text: #eff6ff;
 }
+
+/* ================= HEADER ================= */
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 22px;
-  padding-bottom: 10px;
+  gap: 20px;
+  padding: 14px 32px;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 10, 18, 0.96),
+    rgba(2, 6, 23, 0.8)
+  );
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.24);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.header-right {
-  margin-left: auto;
+/* ================= LOGO ================= */
+.header-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px;
-  background: rgba(2, 6, 23, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 14px;
-  backdrop-filter: blur(10px);
+  gap: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
 }
 
-/* ---------- Header Separator ---------- */
+.header-logo:hover {
+  opacity: 0.8;
+}
+
+.header-logo img {
+  height: 48px;
+  width: 48px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+/* ================= NAVIGATION ================= */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(14, 169, 76, 0.5);
+  background: rgb(0, 30, 0);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-btn:hover {
+  background: rgba(34, 180, 107, 0.3);
+  border-color: rgb(27, 207, 117);
+  box-shadow: 0 8px 16px rgba(34, 180, 107, 0.18);
+}
+
+.nav-btn:active {
+  transform: scale(0.98);
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+  display: inline-flex;
+}
+
+.nav-label {
+  display: inline;
+}
+
+/* ================= PROFILE ================= */
+.header-profile {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.profile-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 180, 107, 0.2);
+  background: rgba(34, 180, 107, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.profile-btn:hover {
+  background: rgba(34, 180, 107, 0.16);
+  border-color: rgba(34, 180, 107, 0.35);
+  box-shadow: 0 8px 16px rgba(34, 180, 107, 0.18);
+}
+
+.profile-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-btn--fallback {
+  font-size: 1.4rem;
+}
+
+/* ================= SEPARATOR ================= */
 .header-separator {
   height: 1px;
   width: 100%;
   background: linear-gradient(
     to right,
     transparent,
-    rgba(59, 130, 246, 0.35),
-    rgba(148, 163, 184, 0.35),
-    rgba(59, 130, 246, 0.35),
+    rgba(86, 146, 255, 0.25),
+    rgba(86, 146, 255, 0.15),
+    rgba(86, 146, 255, 0.25),
     transparent
   );
-  margin-bottom: 14px;
 }
 
+/* ================= MODAL ================= */
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
+  padding: 20px;
+}
 
-/* ---------- Modal ---------- */
 .logout-modal {
-  background: rgba(2, 6, 23, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 16px;
-  padding: 24px 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
   width: 100%;
-  max-width: 380px;
-  color: #e5e7eb;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  max-width: 400px;
+  color: var(--text);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   animation: slideUp 0.3s ease;
 }
 
 .logout-modal h3 {
-  font-size: 18px;
+  margin: 0 0 12px;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 8px;
 }
 
-/* ---------- Logout Modal Buttons ---------- */
+.logout-modal p {
+  margin: 0 0 24px;
+  color: rgba(238, 244, 255, 0.78);
+  font-size: 1rem;
+}
+
 .logout-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+  justify-content: flex-end;
 }
 
-/* Cancel (No) */
-.logout-btn.cancel {
-  background: transparent;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  color: #e5e7eb;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-size: 14px;
+.logout-btn {
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, border 0.2s ease;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.logout-btn.cancel {
+  background: rgba(34, 180, 107, 0.1);
+  color: var(--text);
+  border: 1px solid rgba(34, 180, 107, 0.25);
 }
 
 .logout-btn.cancel:hover {
-  background: rgba(148, 163, 184, 0.08);
-  border-color: rgba(148, 163, 184, 0.4);
+  background: rgba(34, 180, 107, 0.18);
+  border-color: rgba(34, 180, 107, 0.4);
 }
 
-/* Confirm (Yes) */
 .logout-btn.confirm {
   background: linear-gradient(135deg, #ef4444, #dc2626);
-  border: none;
   color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 24px rgba(239, 68, 68, 0.3);
 }
 
 .logout-btn.confirm:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 32px rgba(239, 68, 68, 0.5);
-}
-/* ---------- Header Right Container ---------- */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px;
-  background: rgba(2, 6, 23, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 14px;
-  backdrop-filter: blur(10px);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(239, 68, 68, 0.4);
 }
 
-/* ---------- Base Button ---------- */
-.header-btn {
-  padding: 8px 14px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* ---------- Users Button ---------- */
-.header-btn.secondary {
-  background: rgba(5, 27, 79, 0.8);
-  color: #e5e7eb;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.header-btn.secondary:hover {
-  background: rgb(24, 115, 207);
-  border-color: #2563eb;
-  color: #dbeafe;
-  box-shadow: 0 8px 20px rgba(47, 137, 255, 0.4);
-}
-
-.header-btn.success {
-  background: rgba(16, 48, 18, 0.8);
-  color: #e5e7eb;
-  border: 1px solid rgba(23, 235, 69, 0.2);
-}
-
-.header-btn.success:hover {
-  background: rgb(13, 162, 13);
-  border-color: #39ff67;
-  color: #dbeafe;
-  box-shadow: 0 8px 20px rgba(47, 255, 85, 0.4);
-}
-
-/* ---------- Logout Button ---------- */
-.header-btn.danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fecaca;
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  
-}
-
-.header-btn.danger:hover {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
-  transform: translateY(-1px);
-}
-
-/* ---------- Mobile ---------- */
-@media (max-width: 600px) {
-  .header-right {
-    gap: 6px;
-    padding: 4px;
+/* ================= RESPONSIVE: TABLET (1024px) ================= */
+@media (max-width: 1024px) {
+  .app-header {
+    padding: 12px 24px;
+    gap: 16px;
   }
 
-  .header-btn {
-    padding: 7px 12px;
-    font-size: 13px;
+  .header-logo img {
+    height: 44px;
+    width: 44px;
+  }
+
+  .logo-text {
+    font-size: 1.1rem;
+  }
+
+  .nav-btn {
+    padding: 9px 14px;
+    font-size: 0.9rem;
   }
 }
 
-/* Mobile */
-@media (max-width: 480px) {
-  .logout-actions {
-    flex-direction: column-reverse;
+/* ================= RESPONSIVE: TABLET WITH ICONS ONLY (768px) ================= */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 12px 16px;
+    gap: 12px;
   }
 
-  .logout-btn {
-    width: 100%;
+  .header-logo img {
+    height: 40px;
+    width: 40px;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .header-logo {
+    gap: 0;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-icon {
+    font-size: 1.3rem;
   }
 }
 
-/* ---------- Animations ---------- */
+/* ================= MOBILE WITH BOTTOM NAV (520px) ================= */
+@media (max-width: 520px) {
+  body {
+    padding-bottom: 80px;
+  }
+
+  .app-header {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    border-bottom: none;
+    border-top: 1px solid var(--border);
+    padding: 8px 8px;
+    gap: 4px;
+    background: linear-gradient(
+      180deg,
+      rgba(2, 6, 23, 0.8),
+      rgba(8, 10, 18, 0.96)
+    );
+    z-index: 1000;
+  }
+
+  .header-logo {
+    display: none;
+  }
+
+  .header-nav {
+    flex: 1;
+    gap: 4px;
+    margin: 0;
+  }
+
+  .nav-btn {
+    flex: 1;
+    width: 0;
+    height: 50px;
+    padding: 0;
+    border-radius: 10px;
+    gap: 4px;
+    flex-direction: column;
+    font-size: 0.7rem;
+  }
+
+  .nav-icon {
+    font-size: 1.4rem;
+  }
+
+  .nav-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .header-profile {
+    display: none;
+  }
+
+  .header-separator {
+    display: none;
+  }
+}
+
+/* ================= ANIMATIONS ================= */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -217,12 +366,5 @@
   to {
     transform: translateY(0) scale(1);
     opacity: 1;
-  }
-}
-
-/* ---------- Mobile ---------- */
-@media (max-width: 480px) {
-  .logout-modal {
-    margin: 0 16px;
   }
 }

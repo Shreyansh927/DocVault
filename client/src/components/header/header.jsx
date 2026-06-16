@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FiUsers, FiBarChart2, FiBell, FiLink2, FiLock } from "react-icons/fi";
 import "./header.css";
 
 const Header = () => {
@@ -14,6 +15,14 @@ const Header = () => {
 
   const userEmail = user?.name?.toUpperCase() || "";
   const userProfileImage = user?.profile_image || null;
+
+  const navItems = [
+    { label: "Users", icon: FiUsers, path: "/others" },
+    { label: "Dashboard", icon: FiBarChart2, path: "/dashboard" },
+    { label: "Notifications", icon: FiBell, path: "/notifications" },
+    { label: "Connections", icon: FiLink2, path: "/connections" },
+    { label: "Control", icon: FiLock, path: "/access-control" },
+  ];
 
   const logout = async () => {
     try {
@@ -46,67 +55,47 @@ const Header = () => {
   return (
     <>
       <header className="app-header">
-        <div onClick={() => navigate("/home")} className="header-left">
+        <div className="header-logo" onClick={() => navigate("/home")}>
           <img
             src="https://png.pngtree.com/png-clipart/20250207/original/pngtree-cloud-storage-optimization-service-featuring-a-3d-icon-isolated-on-transparent-png-image_20375425.png"
             alt="SafeCloud"
-            style={{ height: "70px", width: "80px" }}
           />
+          <span className="logo-text">SafeCloud</span>
         </div>
 
-        <div className="header-right">
-          <button
-            className="header-btn secondary"
-            onClick={() => navigate("/others")}
-          >
-            Users
-          </button>
-          <button
-            className="header-btn success"
-            onClick={() => navigate("/dashboard")}
-          >
-            Dashboard
-          </button>
-          <button
-            className="header-btn success"
-            onClick={() => navigate("/notifications")}
-          >
-            Notifications
-          </button>
-          <button
-            className="header-btn success"
-            onClick={() => navigate("/connections")}
-          >
-            Connections
-          </button>
-          <button
-            className="header-btn success"
-            onClick={() => navigate("/access-control")}
-          >
-            Access Control
-          </button>
+        <nav className="header-nav">
+          {navItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <button
+                key={item.path}
+                className="nav-btn"
+                onClick={() => navigate(item.path)}
+                title={item.label}
+              >
+                <IconComponent className="nav-icon" />
+                <span className="nav-label">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
 
+        <div className="header-profile">
           {userProfileImage ? (
-            <img
-              src={userProfileImage}
-              alt="Profile"
-              className="profile-image"
+            <button
+              className="profile-btn"
               onClick={() => setShowLogoutModal(true)}
-              style={{
-                height: "50px",
-                width: "50px",
-                borderRadius: "50%",
-                cursor: "pointer",
-                objectFit: "cover",
-                marginLeft: "12px",
-              }}
-            />
+              title="Account menu"
+            >
+              <img src={userProfileImage} alt="Profile" />
+            </button>
           ) : (
             <button
-              className="header-btn danger"
+              className="profile-btn profile-btn--fallback"
               onClick={() => setShowLogoutModal(true)}
+              title="Account menu"
             >
-              {userEmail || "Account"}
+              <span>👤</span>
             </button>
           )}
         </div>

@@ -1,102 +1,180 @@
-/* ================= ROOT ================= */
-.acl-root {
+:root {
+  --bg: #020617;
+  --surface: rgba(8, 10, 18, 0.96);
+  --surface-alt: rgba(14, 18, 34, 0.94);
+  --border: rgba(86, 146, 255, 0.18);
+  --accent: #5fa3ff;
+  --accent-strong: #2f6eff;
+  --text: #eff6ff;
+  --muted: #94a3b8;
+}
+
+.acl-page {
   min-height: 100vh;
   background:
-    radial-gradient(900px 500px at top left, rgba(59,130,246,0.18), transparent),
-    radial-gradient(700px 400px at bottom right, rgba(14,165,233,0.12), transparent),
-    #020617;
-  color: #e5e7eb;
+    radial-gradient(
+      circle at top left,
+      rgba(49, 109, 255, 0.12),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(70, 153, 255, 0.1),
+      transparent 28%
+    ),
+    var(--bg);
+  color: var(--text);
 }
 
-/* ================= LAYOUT ================= */
 .acl-shell {
-  max-width: 1120px;
+  width: min(1160px, 100%);
   margin: 0 auto;
-  padding: 32px 18px 72px;
+  padding: 32px 32px 60px;
 }
 
-.acl-header {
-  margin-bottom: 32px;
+.acl-hero {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 30px;
+  margin-bottom: 36px;
+}
+
+.acl-tag {
+  display: inline-flex;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(96, 148, 255, 0.16);
+  color: var(--accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
 }
 
 .acl-title {
-  font-size: clamp(1.7rem, 2.8vw, 2.2rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: #f8fafc;
+  margin: 0;
+  font-size: clamp(2.2rem, 2.4vw, 3rem);
+  line-height: 1.03;
 }
 
 .acl-description {
-  margin-top: 6px;
-  font-size: 0.95rem;
-  color: #94a3b8;
+  margin-top: 18px;
+  color: rgba(238, 244, 255, 0.78);
+  font-size: 1rem;
+  line-height: 1.75;
+  max-width: 680px;
 }
 
-/* ================= STATES ================= */
-.acl-status {
+.acl-status-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.acl-summary-card {
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(10, 14, 28, 0.96);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.24);
+}
+
+.acl-summary-card.soft {
+  background: rgba(13, 18, 34, 0.92);
+}
+
+.acl-summary-card span {
+  display: block;
+  color: rgba(196, 212, 255, 0.74);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.acl-summary-card strong {
+  display: block;
+  font-size: 2rem;
+}
+
+.acl-panel {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 34px;
+  padding: 30px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.28);
+}
+
+.acl-empty-state {
+  padding: 50px 28px;
   text-align: center;
-  padding: 56px 0;
-  color: #64748b;
+  color: rgba(214, 223, 242, 0.76);
 }
 
-/* ================= GRID ================= */
+.acl-empty-state h2 {
+  margin: 0 0 14px;
+  font-size: 1.6rem;
+}
+
+.acl-empty-state p {
+  margin: 0 auto;
+  max-width: 520px;
+  color: rgba(206, 215, 234, 0.72);
+}
+
 .acl-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(250px, 1fr));
+  gap: 22px;
 }
 
-/* ================= CARD ================= */
 .acl-card {
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.9),
-    rgba(2, 6, 23, 0.85)
-  );
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  border-radius: 16px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  padding: 26px;
+  border-radius: 28px;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 12, 24, 0.98),
+    rgba(10, 14, 28, 0.96)
+  );
+  border: 1px solid rgba(86, 146, 255, 0.12);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.22);
   transition:
     transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+    box-shadow 0.25s ease;
 }
 
 .acl-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(59, 130, 246, 0.45);
-  box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.65),
-    0 0 0 1px rgba(59, 130, 246, 0.35);
+  transform: translateY(-4px);
+  box-shadow: 0 28px 52px rgba(0, 0, 0, 0.29);
 }
 
-/* ================= USER ================= */
-.acl-user {
+.acl-card-top {
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-bottom: 22px;
 }
 
 .acl-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
   background: linear-gradient(
-    135deg,
-    rgba(59,130,246,0.45),
-    rgba(15,23,42,0.9)
+    140deg,
+    rgba(23, 112, 255, 0.88),
+    rgba(32, 143, 255, 0.85)
   );
-  border: 1px solid rgba(59,130,246,0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: #f8fafc;
-  overflow: hidden;
+  border: 1px solid rgba(90, 164, 255, 0.24);
+}
+
+.acl-avatar span {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
 }
 
 .acl-avatar img {
@@ -105,62 +183,87 @@
   object-fit: cover;
 }
 
-.acl-name {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #f8fafc;
+.acl-meta h3 {
+  margin: 0;
+  font-size: 1.05rem;
 }
 
-/* ================= ACTIONS ================= */
+.acl-connection-state {
+  margin: 8px 0 0;
+  color: rgba(206, 215, 234, 0.74);
+  font-size: 0.93rem;
+}
+
 .acl-actions {
-  margin-top: 18px;
   display: flex;
   justify-content: flex-end;
 }
 
-/* ================= BUTTONS ================= */
 .acl-btn {
-  padding: 9px 20px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  border: none;
   transition:
-    transform 0.15s ease,
+    transform 0.2s ease,
     box-shadow 0.2s ease,
     background 0.2s ease;
 }
 
-/* Allow */
 .acl-allow {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: white;
+  background: linear-gradient(
+    135deg,
+    rgba(38, 92, 241, 0.98),
+    rgba(84, 164, 255, 0.95)
+  );
+  color: #ffffff;
+}
+
+.acl-deny {
+  background: rgba(255, 95, 111, 0.12);
+  color: #f8fafc;
+  border-color: rgba(255, 95, 111, 0.25);
 }
 
 .acl-allow:hover {
-  box-shadow: 0 12px 32px rgba(59,130,246,0.6);
-}
-
-/* Deny */
-.acl-deny {
-  background: rgba(254, 74, 74, 0.85);
-  color: #e5e7eb;
+  box-shadow: 0 18px 30px rgba(40, 100, 255, 0.32);
 }
 
 .acl-deny:hover {
-  background: rgba(51, 65, 85, 0.9);
+  background: rgba(255, 95, 111, 0.2);
 }
 
-/* ================= INTERACTION ================= */
 .acl-btn:active {
-  transform: scale(0.94);
+  transform: scale(0.97);
 }
 
-/* ================= MOBILE ================= */
-@media (max-width: 640px) {
+@media (max-width: 980px) {
   .acl-shell {
-    padding: 24px 14px 60px;
+    padding: 28px 24px 58px;
+  }
+
+  .acl-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .acl-status-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acl-grid {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .acl-shell {
+    padding: 24px 18px 50px;
+  }
+
+  .acl-grid {
+    grid-template-columns: 1fr;
   }
 
   .acl-actions {
@@ -169,5 +272,19 @@
 
   .acl-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .acl-shell {
+    padding: 20px 14px 42px;
+  }
+
+  .acl-summary-card {
+    padding: 20px;
+  }
+
+  .acl-card {
+    padding: 22px;
   }
 }

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./fileView.css";
+import AskAi from "../../ask-ai/ask-ai";
 
 const FileView = () => {
   const { folderId, fileId } = useParams();
@@ -45,42 +46,46 @@ const handleDownload = async () => {
   if (!fileData) return <p className="loading">Loading file…</p>;
 
   return (
-    <div className="fileview-container">
-      {/* LEFT */}
-      <div className="file-card">
-        <div className="file-header">
-          <h3 className="file-title">{fileData.filename}</h3>
+    <>
+      <AskAi />
+      <div className="fileview-container">
+        {/* LEFT */}
 
-          <button className="primary-btn" onClick={handleDownload}>
-            Open / Download
-          </button>
+        <div className="file-card">
+          <div className="file-header">
+            <h3 className="file-title">{fileData.filename}</h3>
+
+            <button className="primary-btn" onClick={handleDownload}>
+              Open / Download
+            </button>
+          </div>
+
+          <div className="file-meta">
+            <span>📦 {(fileData.size / 1024).toFixed(2)} KB</span>
+            <br />
+            <span>
+              📅{" "}
+              {new Date(fileData.created_at).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          </div>
         </div>
 
-        <div className="file-meta">
-          <span>📦 {(fileData.size / 1024).toFixed(2)} KB</span>
-          <br />
-          <span>
-            📅{" "}
-            {new Date(fileData.created_at).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
-          </span>
+        {/* RIGHT */}
+        <div className="summary-card">
+          <h3>🤖 AI Summary</h3>
+
+          {fileData.ai_summary ? (
+            <p className="summary-text">{fileData.ai_summary}</p>
+          ) : (
+            <p className="summary-empty">No summary available.</p>
+          )}
         </div>
       </div>
-
-      {/* RIGHT */}
-      <div className="summary-card">
-        <h3>🤖 AI Summary</h3>
-
-        {fileData.ai_summary ? (
-          <p className="summary-text">{fileData.ai_summary}</p>
-        ) : (
-          <p className="summary-empty">No summary available.</p>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 

@@ -1,26 +1,26 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Header from "../../components/header/header.jsx";
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
 import "./notification.css";
+import AskAi from "../../ask-ai/ask-ai.jsx";
 
 const Notifications = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [notifications, setNotifications] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  /* ================= FETCH AUTH USER ================= */
   useEffect(() => {
     axios
       .get(`${API_BASE_URL}/api/auth/me`, { withCredentials: true })
       .then((res) => setUser(res.data))
       .catch(() => toast.error("Auth failed"));
-  }, []);
+  }, [API_BASE_URL]);
 
-  /* ================= FETCH NOTIFICATIONS ================= */
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/notifications`, {
         withCredentials: true,
@@ -29,10 +29,11 @@ const Notifications = () => {
     } catch (err) {
       console.error(err);
       toast.error("Failed to load notifications");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [API_BASE_URL]);
 
-  /* ================= ACCEPT ================= */
   const acceptRequest = async (senderId) => {
     try {
       await axios.post(
@@ -56,7 +57,6 @@ const Notifications = () => {
     }
   };
 
-  /* ================= DENY ================= */
   const denyRequest = async (senderId) => {
     try {
       await axios.post(
@@ -78,7 +78,6 @@ const Notifications = () => {
     }
   };
 
-  /* ================= REALTIME ================= */
   useEffect(() => {
     if (!user?.id) return;
 
@@ -108,60 +107,118 @@ const Notifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, fetchNotifications]);
 
-  /* ================= UI ================= */
   return (
-    <div className="notifications-wrapper">
+    <div className="notifications-page">
       <Header />
-
-      <div className="notifications-container">
-        <h1>Notifications</h1>
-
-        {notifications.length === 0 && (
-          <p className="empty-state">No notifications yet</p>
-        )}
-
-        {notifications.map((n) => (
-          <div key={n.id} className="notification-card">
-            {/* FRIEND REQUEST */}
-            {n.type === "FRIEND_REQUEST" && n.status === "PENDING" && (
-              <>
-                <p>
-                  <strong>{n.sender_name}</strong> sent you a friend request
-                </p>
-                <div className="notification-actions">
-                  <button onClick={() => acceptRequest(n.sender_id)}>
-                    Accept
-                  </button>
-                  <button onClick={() => denyRequest(n.sender_id)}>Deny</button>
-                </div>
-              </>
-            )}
-
-            {/* YOU ACCEPTED */}
-            {n.type === "FRIEND_REQUEST" && n.status === "ACCEPTED" && (
-              <p>
-                You accepted <strong>{n.sender_name}</strong>'s request
-              </p>
-            )}
-
-            {/* THEY ACCEPTED */}
-            {n.type === "FRIEND_REQUEST_ACCEPTED" && (
-              <p>
-                <strong>{n.sender_name}</strong> accepted your friend request
-              </p>
-            )}
-
-            {/* THEY REJECTED */}
-            {n.type === "FRIEND_REQUEST_REJECTED" && (
-              <p>
-                <strong>{n.sender_name}</strong> rejected your friend request
-              </p>
-            )}
+      <AskAi />
+      <main className="notifications-shell">
+        <section className="notifications-hero">
+          <div>
+            <p className="notifications-tag">Notifications</p>
+            <h1 className="notifications-title">Stay on top of every update</h1>
+            <p className="notifications-description">
+              All alerts, friend requests, and permission updates in one
+              polished feed.
+            </p>
           </div>
-        ))}
-      </div>
+
+          <aside className="notifications-summary">
+            <div className="summary-pill">
+              <span>Total alerts</span>
+              <strong>{loading ? "--" : notifications.length}</strong>
+            </div>
+            <div className="summary-pill soft">
+              <span>Pending actions</span>
+              <strong>
+                {loading
+                  ? "--"
+                  : notifications.filter(
+                      (n) =>
+                        n.type === "FRIEND_REQUEST" && n.status === "PENDING",
+                    ).length}
+              </strong>
+            </div>
+          </aside>
+        </section>
+
+        <section className="notifications-panel">
+          {loading ? (
+            <div className="notification-empty">Loading notifications…</div>
+          ) : notifications.length === 0 ? (
+            <div className="notification-empty">
+              <h2>No notifications yet</h2>
+              <p>
+                Once activity happens, you’ll see it here in a clean premium
+                stream.
+              </p>
+            </div>
+          ) : (
+            <div className="notifications-list">
+              {notifications.map((n) => (
+                <article key={n.id} className="notification-card">
+                  <div className="notification-header">
+                    <div>
+                      <p className="notification-type">
+                        {n.type.replace(/_/g, " ")}
+                      </p>
+                      <p className="notification-body">
+                        {n.type === "FRIEND_REQUEST" &&
+                          n.status === "PENDING" && (
+                            <>
+                              <strong>{n.sender_name}</strong> sent you a friend
+                              request.
+                            </>
+                          )}
+                        {n.type === "FRIEND_REQUEST" &&
+                          n.status === "ACCEPTED" && (
+                            <>
+                              You accepted <strong>{n.sender_name}</strong>'s
+                              request.
+                            </>
+                          )}
+                        {n.type === "FRIEND_REQUEST_ACCEPTED" && (
+                          <>
+                            <strong>{n.sender_name}</strong> accepted your
+                            friend request.
+                          </>
+                        )}
+                        {n.type === "FRIEND_REQUEST_REJECTED" && (
+                          <>
+                            <strong>{n.sender_name}</strong> rejected your
+                            friend request.
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    <span className="notification-badge">
+                      {n.status.toLowerCase()}
+                    </span>
+                  </div>
+
+                  {n.type === "FRIEND_REQUEST" && n.status === "PENDING" && (
+                    <div className="notification-actions">
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => acceptRequest(n.sender_id)}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => denyRequest(n.sender_id)}
+                      >
+                        Deny
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
     </div>
   );
 };

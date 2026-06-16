@@ -1,26 +1,40 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import Header from "../../components/header/header";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import "./other-users.css";
+import AskAi from "../../ask-ai/ask-ai";
 
 const OtherUsers = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [originalUsers, setOriginalUsers] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
   const pendingRequests = useRef(new Set());
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/api/all-users`, { withCredentials: true })
-      .then((res) => setOriginalUsers(res.data.otherUsers));
+    fetchUsers();
   }, []);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/all-users`, {
+        withCredentials: true,
+      });
+      setOriginalUsers(res.data.otherUsers || []);
+    } catch (err) {
+      console.error("Fetch users error:", err);
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  }, [API_BASE_URL]);
 
   const filtered = useMemo(() => {
     return originalUsers.filter((u) =>
-      u.name.toLowerCase().includes(search.toLowerCase())
+      u.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [search, originalUsers]);
 
@@ -28,49 +42,101 @@ const OtherUsers = () => {
     if (pendingRequests.current.has(receiverId)) return;
 
     pendingRequests.current.add(receiverId);
-    await axios.post(
-      `${API_BASE_URL}/api/connect`,
-      { receiverId },
-      {
-        withCredentials: true,
-        headers: { "x-csrf-token": Cookies.get("csrfToken") },
-      }
-    );
-    toast.success(`Request sent to ${name}`);
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/connect`,
+        { receiverId },
+        {
+          withCredentials: true,
+          headers: { "x-csrf-token": Cookies.get("csrfToken") },
+        },
+      );
+      toast.success(`Request sent to ${name}`);
+    } catch (err) {
+      console.error("Connect error:", err);
+      toast.error("Failed to send request");
+    } finally {
+      pendingRequests.current.delete(receiverId);
+    }
   };
 
-return (
-  <div className="users-page">
-    <Header />
-
-    <h2>Discover Users</h2>
-
-    {/* Search */}
-    <input
-      className="search-input"
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      placeholder="Search users..."
-    />
-
-    {/* Users Grid */}
-    <div className="users-grid">
-      {filtered.map((u) => (
-        <div key={u.id} className="user-card">
-          <div className="avatar">{u.name[0]}</div>
-
-          <h3>{u.public_id.slice(0, 10)}...</h3>
-
-          <button className="connect-btn" onClick={() => connect(u.id, u.name)}>
-            Connect
-          </button>
-        </div>
-      ))}
+  const SkeletonCard = () => (
+    <div className="user-card skeleton">
+      <div className="skeleton-avatar"></div>
+      <div className="skeleton-text"></div>
+      <div className="skeleton-btn"></div>
     </div>
-  </div>
-);
+  );
 
+  return (
+    <>
+      <Header />
+      <AskAi />
+      <div className="users-wrapper">
+        <main className="users-shell">
+          <section className="users-hero">
+            <div>
+              <p className="users-tag">Connect</p>
+              <h1 className="users-title">Discover people</h1>
+              <p className="users-subtitle">
+                Find and connect with other users on the platform. Expand your
+                network and collaborate.
+              </p>
+            </div>
+          </section>
 
+          <div className="search-wrapper">
+            <input
+              className="search-input"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or ID..."
+              disabled={loading}
+            />
+            {search && (
+              <span className="search-hint">
+                Found {filtered.length} user{filtered.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+
+          <div className="users-grid">
+            {loading
+              ? Array.from({ length: 9 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))
+              : filtered.map((u) => (
+                  <div key={u.id} className="user-card">
+                    <div className="user-avatar">{u.name[0].toUpperCase()}</div>
+
+                    <div className="user-info">
+                      <h3>{u.name}</h3>
+                      <p>{u.public_id.slice(0, 12)}...</p>
+                    </div>
+
+                    <button
+                      className="connect-btn"
+                      onClick={() => connect(u.id, u.name)}
+                      disabled={pendingRequests.current.has(u.id)}
+                    >
+                      {pendingRequests.current.has(u.id)
+                        ? "Sending..."
+                        : "Connect"}
+                    </button>
+                  </div>
+                ))}
+          </div>
+
+          {!loading && filtered.length === 0 && (
+            <div className="empty-state">
+              <p>No users found</p>
+              <span>Try adjusting your search</span>
+            </div>
+          )}
+        </main>
+      </div>
+    </>
+  );
 };
 
 export default OtherUsers;

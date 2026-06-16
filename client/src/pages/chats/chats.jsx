@@ -1,16 +1,14 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/header/header";
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
 import axios from "axios";
-import { TbLaurelWreath1 } from "react-icons/tb";
-import "./chats.css";
-import { useRef } from "react";
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
+import "./chats.css";
 
 const Chats = () => {
-  const loggedInUserId = JSON.parse(localStorage.getItem("current-user"));
+  const storedUser = localStorage.getItem("current-user");
+  const loggedInUser = storedUser ? JSON.parse(storedUser) : null;
   const [user, setUser] = useState(null);
   const { friendId, friendName, connectionId } = useParams();
   const [messages, setMessages] = useState([]);
@@ -18,39 +16,50 @@ const Chats = () => {
   const [editMode, setEditMode] = useState(false);
   const [editedMessage, setEditedMessage] = useState("");
   const [editingMessageId, setEditingMessageId] = useState(null);
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const chatID = connectionId; // Assuming connectionId is the same as chatID
-  const chatContainerRef = useRef(null);
   const [unsent, setUnsent] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const chatContainerRef = useRef(null);
+
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const chatID = connectionId;
+
+  const isOwnMessage = (senderId) =>
+    parseInt(senderId, 10) === parseInt(loggedInUser?.id, 10);
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/messages/get/${connectionId}`,
+        { withCredentials: true },
+      );
+
+      const safeMessages = (res.data.messages || []).filter(
+        (msg) => msg && msg.id,
+      );
+      setMessages(safeMessages);
+    } catch (err) {
+      console.error(err);
+      setMessages([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [API_BASE_URL, connectionId]);
 
   useEffect(() => {
     axios
       .get(`${API_BASE_URL}/api/auth/me`, { withCredentials: true })
       .then((res) => setUser(res.data))
       .catch(() => toast.error("Auth failed"));
-  }, []);
-  
-  const channel = supabase.channel(`chat-${chatID}`);
+  }, [API_BASE_URL]);
 
-  useEffect(() => {
-    channel.subscribe();
-  }, []);
-
-  const handleTyping = (value) => {
-    setNewMessage(value);
-
-    channel.send({
-      type: "broadcast",
-      event: "typing",
-      payload: { userId: loggedInUserId.id },
-    });
-  };
-
-
-  /* ================= REALTIME ================= */
   useEffect(() => {
     if (!user?.id) return;
-
     fetchMessages();
 
     const channel = supabase
@@ -63,9 +72,7 @@ const Chats = () => {
           table: "messages",
           filter: `chat_id=eq.${connectionId}`,
         },
-        (payload) => {
-          console.log("New connection change:", payload);
-
+        () => {
           fetchMessages();
         },
       )
@@ -74,20 +81,7 @@ const Chats = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
-
-  useEffect(() => {
-    const handleOnline = () => {
-      console.log("Back online. Retrying...");
-      retrySendMessage();
-    };
-
-    window.addEventListener("online", handleOnline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-    };
-  }, [unsent]);
+  }, [user, connectionId, fetchMessages]);
 
   useEffect(() => {
     const stored = localStorage.getItem("unsent-messages");
@@ -97,49 +91,46 @@ const Chats = () => {
   }, []);
 
   useEffect(() => {
+    if (navigator.onLine) {
+      retrySendMessage();
+    }
+  }, [unsent]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      retrySendMessage();
+    };
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [unsent]);
+
+  useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
-const fetchMessages = async () => {
-  try {
-    const res = await axios.get(
-      `${API_BASE_URL}/api/messages/get/${connectionId}`,
-      { withCredentials: true },
-    );
-
-    const safeMessages = (res.data.messages || []).filter(
-      (msg) => msg && msg.id,
-    );
-
-    setMessages(safeMessages);
-  } catch (err) {
-    console.error(err);
-    setMessages([]); // 🔥 NEVER put string inside array
-  }
-};
-
   const sendMessage = async () => {
-    try {
-      const res = await axios.post(
-        `${API_BASE_URL}/api/messages/send/${friendId}/${chatID}`,
-        { message: newMessage },
-        {
-          withCredentials: true,
-        },
-      );
+    const trimmedMessage = newMessage.trim();
+    if (!trimmedMessage) return;
 
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/messages/send/${friendId}/${chatID}`,
+        { message: trimmedMessage },
+        { withCredentials: true },
+      );
       setNewMessage("");
-      fetchMessages(); // Refresh messages after sending
+      fetchMessages();
     } catch (err) {
       console.error(err);
-
-      const updatedUnsent = [...unsent, newMessage];
-
+      const updatedUnsent = [...unsent, trimmedMessage];
       setUnsent(updatedUnsent);
       localStorage.setItem("unsent-messages", JSON.stringify(updatedUnsent));
+      toast.warn(
+        "Message saved locally; it will send when you're back online.",
+      );
     }
   };
 
@@ -147,7 +138,6 @@ const fetchMessages = async () => {
     if (unsent.length === 0) return;
 
     const remaining = [];
-
     for (const msg of unsent) {
       try {
         await axios.post(
@@ -156,137 +146,158 @@ const fetchMessages = async () => {
           { withCredentials: true },
         );
       } catch (err) {
-        console.log(err);
+        console.error(err);
         remaining.push(msg);
       }
     }
-
     setUnsent(remaining);
     localStorage.setItem("unsent-messages", JSON.stringify(remaining));
-
     if (remaining.length === 0) {
       fetchMessages();
     }
   };
 
-  useEffect(() => {
-    if (navigator.onLine) {
-      retrySendMessage();
-    }
-  }, [unsent]);
-
   const editChat = async (messageId) => {
     try {
-      const res = await axios.put(
+      await axios.put(
         `${API_BASE_URL}/api/messages/edit/${chatID}/${messageId}`,
         { content: editedMessage },
-        {
-          withCredentials: true,
-        },
+        { withCredentials: true },
       );
       setEditMode(false);
       setEditingMessageId(null);
-
-      fetchMessages(); // Refresh messages after editing
+      setEditedMessage("");
+      fetchMessages();
     } catch (err) {
       console.error(err);
+      toast.error("Failed to update message");
     }
   };
 
   const deleteChat = async (messageId) => {
     try {
-      const res = await axios.delete(
+      await axios.delete(
         `${API_BASE_URL}/api/messages/delete/${chatID}/${messageId}`,
-        {
-          withCredentials: true,
-        },
+        { withCredentials: true },
       );
-
-      fetchMessages(); // Refresh messages after deletion
+      fetchMessages();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete message");
+      toast.error("Failed to delete message");
     }
   };
-
-  useEffect(() => {
-    // Fetch messages for this chat using friendId
-    fetchMessages();
-  }, []);
 
   return (
     <div className="chat-wrapper">
       <Header />
 
       <div className="chat-container">
-        <p>{friendName}</p>
+        <div className="chat-topbar">
+          <div className="chat-profile">
+            <div className="chat-indicator" />
+            <div>
+              <p className="chat-friend-name">{friendName}</p>
+              <p className="chat-friend-status">Active now</p>
+            </div>
+          </div>
+          <div className="chat-meta">
+            <span>{messages.length} messages</span>
+          </div>
+        </div>
 
         <div className="chat-messages" ref={chatContainerRef}>
-          {messages.length > 0 ? (
-            messages.map((msg) => (
-              <>
+          {loading ? (
+            <div className="chat-empty">Loading messages…</div>
+          ) : messages.length === 0 ? (
+            <div className="chat-empty">
+              <h2>Welcome to your chat</h2>
+              <p>Send the first message to start the conversation.</p>
+            </div>
+          ) : (
+            messages.map((msg) => {
+              const own = isOwnMessage(msg.sender_id);
+              return (
                 <div
                   key={msg.id}
-                  className={
-                    parseInt(msg.sender_id) === parseInt(loggedInUserId.id)
-                      ? "left"
-                      : "right"
-                  }
+                  className={`message-row ${own ? "message-row--outgoing" : "message-row--incoming"}`}
                 >
-                  <div className="chat-avatar">
-                    <img src={msg.profile_photo} alt="profile" />
-                  </div>
-                  <div className="chat-content">
-                    <p className="chat-username">{msg.username}</p>
-                    {editMode && msg.id === editingMessageId ? (
-                      <input
-                        type="text"
-                        value={editedMessage}
-                        onChange={(e) => setEditedMessage(e.target.value)}
+                  {!own && (
+                    <div className="message-avatar">
+                      <img
+                        src={
+                          msg.profile_photo || "https://via.placeholder.com/40"
+                        }
+                        alt={msg.username}
                       />
-                    ) : (
-                      <p className="chat-text">{msg.content}</p>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  {parseInt(msg.sender_id) === parseInt(loggedInUserId.id) && (
-                    <>
-                      <button type="button" onClick={() => deleteChat(msg.id)}>
-                        delete
-                      </button>
-                      {editMode ? (
+                  <div
+                    className={`message-bubble ${own ? "message-bubble--outgoing" : "message-bubble--incoming"}`}
+                  >
+                    <div className="message-header">
+                      <span className="message-sender">
+                        {own ? "You" : msg.username}
+                      </span>
+                      <span className="message-time">
+                        {formatTime(msg.created_at)}
+                      </span>
+                    </div>
+
+                    {editMode && msg.id === editingMessageId ? (
+                      <div className="message-edit-box">
+                        <input
+                          type="text"
+                          value={editedMessage}
+                          onChange={(e) => setEditedMessage(e.target.value)}
+                        />
+                      </div>
+                    ) : (
+                      <p className="message-text">{msg.content}</p>
+                    )}
+
+                    {own && (
+                      <div className="message-actions">
                         <button
-                          onClick={() => {
-                            editChat(msg.id);
-                          }}
+                          className="message-action"
+                          onClick={() => deleteChat(msg.id)}
+                          type="button"
                         >
-                          Save
+                          Delete
                         </button>
-                      ) : (
                         <button
+                          className="message-action"
                           onClick={() => {
-                            setEditMode(!editMode);
+                            setEditMode(true);
                             setEditingMessageId(msg.id);
                             setEditedMessage(msg.content);
                           }}
+                          type="button"
                         >
                           Edit
                         </button>
-                      )}
-                    </>
-                  )}
+                        {editMode && msg.id === editingMessageId && (
+                          <button
+                            className="message-action message-action--save"
+                            onClick={() => editChat(msg.id)}
+                            type="button"
+                          >
+                            Save
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </>
-            ))
-          ) : (
-            <p className="no-messages">No messages yet</p>
+              );
+            })
           )}
         </div>
 
         <div className="chat-input-container">
           <input
             type="text"
-            placeholder="Type your message..."
+            placeholder="Type a message"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -295,7 +306,13 @@ const fetchMessages = async () => {
               }
             }}
           />
-          <button onClick={sendMessage}>Send</button>
+          <button
+            className="chat-send-button"
+            onClick={sendMessage}
+            type="button"
+          >
+            Send
+          </button>
         </div>
       </div>
     </div>
