@@ -180,7 +180,7 @@ export const uploadFiles = async (req, res) => {
         }
       }
 
-      await redis?.del(`folderFiles:${userId}:${folderId}`);
+      // await redis?.del(`folderFiles:${userId}:${folderId}`);
       const dbRes = await db.query(
         `
         INSERT INTO files

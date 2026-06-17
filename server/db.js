@@ -29,6 +29,14 @@ export const initDB = async () => {
     );
   `);
 
+  await db.query(`
+      CREATE TABLE IF NOT EXISTS google_drive_accounts (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        refresh_token TEXT NOT NULL,
+        connected_at TIMESTAMP DEFAULT NOW()
+    );`);
+
   /* ---------- FOLDERS ---------- */
   await db.query(`
     CREATE TABLE IF NOT EXISTS folders (

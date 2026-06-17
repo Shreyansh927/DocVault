@@ -202,7 +202,7 @@ DO UPDATE SET
       sameSite: "none",
       secure: true,
       path: "/",
-      maxAge: 60 * 60 * 1000,
+      maxAge: 180 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {

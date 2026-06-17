@@ -62,6 +62,3 @@ export const csrfMiddleware = (req, res, next) => {
 };
 
 
-export const googleLoginAuth = async (req, res) => {
-  
-}

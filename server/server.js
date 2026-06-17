@@ -24,6 +24,7 @@ import aiResponseRouter from "./routes/ai-query-response-route.js";
 import "./permanent-deletion-job.js";
 import helmet from "helmet";
 import connectionRouter from "./routes/connectionRoute.js";
+import googleDriveConnectRouter from "./routes/googleDriveConnect.js";
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use("/api/folder-auth", authMiddleware, folderRoutes);
 app.use("/api/files", authMiddleware, fileRoutes);
 
 app.use("/api", connectionRouter);
+app.use("/api/google-drive", googleDriveConnectRouter);
 app.use("/api/messages", authMiddleware, messageRouter);
 app.get("/api/all-users", authMiddleware, allUsers);
 app.get("/test-db", async (req, res) => {

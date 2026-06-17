@@ -31,6 +31,55 @@ const Files = () => {
     JSON.parse(localStorage.getItem("trash")) || false,
   );
   const pages = [1, 2, 3, 4, 5];
+  const [driveFolders, setDriveFolders] = useState([]);
+  const [loadingDriveFiles, setLoadingDriveFiles] = useState(false);
+  const [showDriveModal, setShowDriveModal] = useState(false);
+  const [isDriveConnected, setIsDriveConnected] = useState(false);
+  const [view, setView] = useState(false);
+  const [currentFolderId, setCurrentFolderId] = useState(null);
+
+  const getGoogleDriveFiles = async () => {
+    try {
+      setLoadingDriveFiles(true);
+
+      const response = await axios.get(
+        `${API_BASE_URL}/api/google-drive/files`,
+        {
+          withCredentials: true,
+        },
+      );
+
+      setDriveFolders(response.data.folders);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingDriveFiles(false);
+    }
+  };
+
+  // const selectFile = (f) => {
+  //   setSelectedFiles((prev) => [...prev, f.id]);
+  // };
+
+  const uploadSelectedDriveFileToDocvault = async () => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/google-drive/import`,
+        {
+          fileIds: selectedFiles,
+          folderId,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+      setView(false);
+      alert(res.data.message);
+      await fetchAllFiles();
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   /* ---------- Derived ---------- */
   const filteredFiles = useMemo(() => {
@@ -47,6 +96,23 @@ const Files = () => {
     [allFiles],
   );
 
+  useEffect(() => {
+    const checkDriveConnection = async () => {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/google-drive/status`,
+        { withCredentials: true },
+      );
+
+      setIsDriveConnected(response.data.connected);
+    };
+    checkDriveConnection();
+  }, []);
+
+  const viewFolder = (folderId) => {
+    setCurrentFolderId(folderId);
+    setView(true);
+  };
+
   /* ---------- Fetch ---------- */
   useEffect(() => {
     trashMode ? fetchAllTrashFiles() : fetchAllFiles();
@@ -56,9 +122,12 @@ const Files = () => {
   const fetchAllFiles = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/api/get-all-files/${folderId}/${timeline}`,{
-        withCredentials: true,
-      })
+      const res = await axios.get(
+        `${API_BASE_URL}/api/get-all-files/${folderId}/${timeline}`,
+        {
+          withCredentials: true,
+        },
+      );
       setAllFiles(res.data.allFiles || []);
     } catch (err) {
       console.error(err);
@@ -158,11 +227,16 @@ const Files = () => {
   };
 
   return (
-    <div className="files-container">
+    <div
+      className="files-container"
+      onClick={() => {
+        setView(false);
+        setCurrentFolderId(null);
+      }}
+    >
       <Header />
       <AskAi />
 
-      {/* ===== Top Bar ===== */}
       <div className="files-top-bar">
         <div>
           <h2>{trashMode ? "Trash" : "Your Files"}</h2>
@@ -180,17 +254,136 @@ const Files = () => {
           />
 
           {!trashMode && (
-            <button
-              className="primary-btn"
-              onClick={() => setShowUploadModal(true)}
-            >
-              <MdUpload /> Upload
-            </button>
+            <>
+              <button
+                className="primary-btn"
+                onClick={() => setShowUploadModal(true)}
+              >
+                <MdUpload /> Upload
+              </button>
+              <button
+                onClick={() => {
+                  if (isDriveConnected) {
+                    setShowDriveModal(true);
+                    getGoogleDriveFiles();
+                  } else {
+                    window.open(
+                      `${API_BASE_URL}/api/google-drive/connect`,
+                      "_blank",
+                      "width=600,height=700",
+                    );
+                  }
+                }}
+              >
+                Import From Google Drive
+              </button>
+            </>
           )}
         </div>
       </div>
+      {showDriveModal && (
+        <div className="drive-modal">
+          <div className="drive-header">
+            <h2>
+              Google Drive
+              <span className="drive-selection-count">
+                {selectedFiles.length}
+              </span>
+            </h2>
 
-      {/* ===== Toolbar ===== */}
+            <button
+              className="close-drive-btn"
+              onClick={() => setShowDriveModal(false)}
+            >
+              ✕
+            </button>
+          </div>
+
+          {loadingDriveFiles ? (
+            <div className="drive-loading">
+              <div className="loader"></div>
+              <p>Loading Drive Files...</p>
+            </div>
+          ) : (
+            <>
+              <div className="folder-grid">
+                {driveFolders.map((folder) => (
+                  <div
+                    key={folder.id}
+                    className="folder-card"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      viewFolder(folder.id);
+                    }}
+                  >
+                    <div className="folder-top">
+                      <div className="folder-info">
+                        <div className="folder-icon">📁</div>
+
+                        <div className="folder-meta">
+                          <h3>{folder.name}</h3>
+                          <span>{folder.children.length} files</span>
+                        </div>
+                      </div>
+
+                      
+                    </div>
+
+                    {view && currentFolderId === folder.id && (
+                      <div className="file-list">
+                        {folder.children.map((file) => (
+                          <div className="file-card" key={file.id}>
+                            <label className="file-checkbox">
+                              <input
+                                type="checkbox"
+                                checked={selectedFiles.includes(file.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedFiles((prev) => [
+                                      ...prev,
+                                      file.id,
+                                    ]);
+                                  } else {
+                                    setSelectedFiles((prev) =>
+                                      prev.filter((id) => id !== file.id),
+                                    );
+                                  }
+                                }}
+                              />
+                              <span>{file.name}</span>
+                            </label>
+
+                            <button
+                              className="preview-btn"
+                              onClick={() =>
+                                window.open(
+                                  `https://drive.google.com/file/d/${file.id}/view`,
+                                  "_blank",
+                                )
+                              }
+                            >
+                              Preview
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="upload-drive-btn"
+                onClick={uploadSelectedDriveFileToDocvault}
+              >
+                Upload {selectedFiles.length} Files To DocVault
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="files-toolbar">
         {trashMode ? (
           <button className="secondary-btn" onClick={restoreAllFiles}>
