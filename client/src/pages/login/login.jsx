@@ -87,7 +87,7 @@ export default function Login() {
       <div className="login-left">
         <div className="login-card">
           <h2>Welcome back</h2>
-          <p>Sign in to your SafeCloud account</p>
+          <p>Sign in to your Docvault account</p>
 
           <form onSubmit={submit} className="login-form">
             <input
@@ -146,7 +146,7 @@ export default function Login() {
 
       <div className="login-right">
         <div className="login-brand">
-          <h1>SafeCloud</h1>
+          <h1>DocVault</h1>
           <p>Secure cloud storage for your files.</p>
         </div>
       </div>

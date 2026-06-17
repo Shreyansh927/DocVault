@@ -28,7 +28,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
+      await axios.post(
         `${API_BASE_URL}/api/auth/signup`,
         {
           name: form.name,
@@ -56,7 +56,7 @@ export default function Signup() {
           <h2>Create your account</h2>
           <p>
             Securely store, manage, and access your files anywhere with
-            SafeCloud.
+            DocVault.
           </p>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function Signup() {
       <div className="signup-right">
         <div className="card">
           <h2>Sign up</h2>
-          <p>Create your SafeCloud account</p>
+          <p>Create your DocVault account</p>
 
           <form onSubmit={submit} style={{ display: "grid", gap: 12 }}>
             <input

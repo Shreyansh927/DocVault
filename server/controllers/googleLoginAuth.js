@@ -33,7 +33,7 @@ export const googleLoginAuth = async (req, res) => {
       });
     }
 
-    /* ---------- FIND USER ---------- */
+    /*  FIND USER-- */
 
     let userRes = await db.query(`SELECT * FROM users WHERE google_id = $1`, [
       googleId,
@@ -44,7 +44,7 @@ export const googleLoginAuth = async (req, res) => {
     if (userRes.rows.length > 0) {
       user = userRes.rows[0];
     } else {
-      /* ---------- LINK EXISTING EMAIL ---------- */
+      /* ---- LINK EXISTING EMAIL  */
 
       userRes = await db.query(`SELECT * FROM users WHERE email = $1`, [email]);
 
@@ -62,7 +62,7 @@ export const googleLoginAuth = async (req, res) => {
 
         user = updated.rows[0];
       } else {
-        /* ---------- CREATE USER ---------- */
+        /* ---- CREATE USER  */
 
         const publicId = `${name}_${crypto.randomUUID()}`;
 
@@ -86,7 +86,7 @@ export const googleLoginAuth = async (req, res) => {
       }
     }
 
-    /* ---------- SESSION ---------- */
+    /* -- SESSION -- */
 
     const parser = new UAParser(req.headers["user-agent"]);
 

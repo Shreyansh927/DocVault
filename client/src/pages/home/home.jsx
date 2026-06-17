@@ -138,7 +138,6 @@ const Home = () => {
       <Header />
       <AskAi />
 
-      {/* ================= HEADER ================= */}
       <div className="home-header">
         <h3>Your Folders</h3>
 
@@ -154,7 +153,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* ================= CATEGORY FILTER ================= */}
       <div className="category-filters">
         {["All", ...CATEGORIES].map((c) => (
           <button
@@ -167,7 +165,6 @@ const Home = () => {
         ))}
       </div>
 
-      {/* ================= FOLDERS GRID ================= */}
       <div className="folders">
         {allFolders.length === 0
           ? Array.from({ length: 8 }).map((_, i) => (
@@ -209,12 +206,10 @@ const Home = () => {
             ))}
       </div>
 
-      {/* ================= FAB ================= */}
       <button className="fab-btn" onClick={() => setToggleForm(true)}>
         <span className="fab-plus" />
       </button>
 
-      {/* ================= CREATE MODAL ================= */}
       {toggleFolderForm && (
         <div className="modal-overlay" onClick={() => setToggleForm(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -257,7 +252,6 @@ const Home = () => {
         </div>
       )}
 
-      {/* == DELETE MODAL */}
       {showDeleteModal && (
         <div
           className="delete-overlay"
@@ -287,7 +281,6 @@ const Home = () => {
         </div>
       )}
 
-      {/* == UPDATE MODAL = */}
       {toggleFolderSettings && folderToUpdate && (
         <div
           className="modal-overlay"
