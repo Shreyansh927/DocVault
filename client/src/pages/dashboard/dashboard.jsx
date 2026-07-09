@@ -12,6 +12,9 @@ const Dashboard = () => {
   const [preview, setPreview] = useState("");
   const [allExistingSessions, setAllExistingSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userQuery, setUserQuery] = useState("");
+  const [queryResponse, setQueryResponse] = useState([]);
+  const [queryLoading, setQueryLoading] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -60,6 +63,45 @@ const Dashboard = () => {
       setLoading(false);
     }
   }, [API_BASE_URL]);
+
+  const sendQuery = useCallback(async () => {
+    if (!userQuery.trim()) {
+      alert("Please enter a query");
+      return;
+    }
+
+    setQueryLoading(true);
+
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/ai-query-response/related-past-queries`,
+        {
+          params: {
+            q: userQuery.trim(),
+          },
+          withCredentials: true,
+        },
+      );
+
+      const formattedRes = res.data.relatedResponses.map((r) => ({
+        query: r.query,
+        response: r.response,
+        createdAt: r.created_at,
+      }));
+
+      setQueryResponse(formattedRes);
+    } catch (err) {
+      console.log(err);
+      setQueryResponse([]);
+    } finally {
+      setQueryLoading(false);
+    }
+  }, [API_BASE_URL, userQuery]);
+
+  const handleQuerySubmit = (e) => {
+    e.preventDefault();
+    sendQuery();
+  };
 
   useEffect(() => {
     fetchUserPersonalInfo();
@@ -222,6 +264,68 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
+                <section className="query-section">
+                  <div className="query-section-header">
+                    <div>
+                      <p className="query-eyebrow">AI insights</p>
+                      <h2>Search your past queries</h2>
+                      <p>
+                        Explore related conversations and useful summaries in a
+                        polished, quick-access workspace.
+                      </p>
+                    </div>
+                  </div>
+
+                  <form
+                    className="query-search-box"
+                    onSubmit={handleQuerySubmit}
+                  >
+                    <div className="query-input-wrap">
+                      <span className="query-icon" aria-hidden="true">
+                        ✦
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Ask about any past topic..."
+                        value={userQuery}
+                        onChange={(e) => setUserQuery(e.target.value)}
+                      />
+                    </div>
+                    <button type="submit" disabled={queryLoading}>
+                      {queryLoading ? "Searching..." : "Search"}
+                    </button>
+                  </form>
+
+                  <div className="query-results">
+                    {queryLoading ? (
+                      <div className="query-empty-state">
+                        Scanning your history…
+                      </div>
+                    ) : queryResponse.length === 0 ? (
+                      <div className="query-empty-state">
+                        Ask anything to reveal related past conversations.
+                      </div>
+                    ) : (
+                      queryResponse.map((rs, index) => (
+                        <article
+                          key={`${rs.query}-${index}`}
+                          className="query-result-card"
+                        >
+                          <div className="query-result-top">
+                            <span className="query-result-tag">
+                              Match {index + 1}
+                            </span>
+                            <span className="query-result-time">
+                              {rs.createdAt || "Recent"}
+                            </span>
+                          </div>
+                          <h3>{rs.query}</h3>
+                          <p>{rs.response}</p>
+                        </article>
+                      ))
+                    )}
+                  </div>
+                </section>
               </section>
             ) : (
               <section className="edit-section">

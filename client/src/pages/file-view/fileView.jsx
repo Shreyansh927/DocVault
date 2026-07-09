@@ -3,6 +3,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./fileView.css";
 import AskAi from "../../ask-ai/ask-ai";
+import {
+  getFileBlobLink,
+  getUserIndivisualFile,
+  saveFileLink,
+  saveUserIndivisualFile,
+} from "../../utils/offlineDB";
+import { toast } from "react-toastify";
 
 const FileView = () => {
   const { folderId, fileId } = useParams();
@@ -22,26 +29,43 @@ const FileView = () => {
         { withCredentials: true },
       );
       setFileData(res.data.file);
+      await saveUserIndivisualFile(res.data.file, folderId, fileId);
     } catch (err) {
+      const indexedDbCachedFileData = await getUserIndivisualFile(
+        folderId,
+        fileId,
+      );
+
+      toast.info("Serving offline data");
+      setFileData(indexedDbCachedFileData);
+
       console.error("FETCH FILE ERROR:", err);
-      navigate("/home");
+      // navigate("/home");
     }
   };
 
-const handleDownload = async () => {
-  try {
-    const res = await axios.get(`${API_BASE_URL}/api/files/${fileId}/access`, {
-      responseType: "blob",
-      withCredentials: true,
-    });
+  const handleDownload = async () => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/files/${fileId}/access`,
+        {
+          responseType: "blob",
+          withCredentials: true,
+        },
+      );
 
-    const blobUrl = URL.createObjectURL(res.data);
+      const blobUrl = URL.createObjectURL(res.data);
+      const blob = res.data;
+      await saveFileLink(blob, folderId, fileId);
 
-    window.open(blobUrl, "_blank");
-  } catch (err) {
-    console.error("DOWNLOAD ERROR:", err);
-  }
-};
+      window.open(blobUrl, "_blank");
+    } catch (err) {
+      console.error("DOWNLOAD ERROR:", err);
+      const indexedDBCachedBlobLink = await getFileBlobLink(folderId, fileId);
+      const blobUrl = URL.createObjectURL(indexedDBCachedBlobLink);
+      window.open(blobUrl, "_blank");
+    }
+  };
 
   if (!fileData) return <p className="loading">Loading file…</p>;
 

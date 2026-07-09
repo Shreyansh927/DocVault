@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FiUsers, FiBarChart2, FiBell, FiLink2, FiLock } from "react-icons/fi";
 import "./header.css";
+import { clearOfflineData } from "../../utils/offlineDB";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -31,7 +32,8 @@ const Header = () => {
         {},
         { withCredentials: true },
       );
-
+      const currentUserId = JSON.parse(localStorage.getItem("current-user"))
+      await clearOfflineData(currentUserId.id);
       localStorage.removeItem("current-user");
 
       setShowLogoutModal(false);

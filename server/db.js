@@ -62,7 +62,7 @@ export const initDB = async () => {
       size INTEGER,
       storage TEXT,
       ai_summary TEXT,
-
+      tessract_extracted_text TEXT,
       new_embedding vector(3072), --pgvector added here
 
       created_at TIMESTAMP DEFAULT NOW(),

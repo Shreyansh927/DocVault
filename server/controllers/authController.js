@@ -120,7 +120,13 @@ export const login = async (req, res) => {
         .json({ error: "Account blocked. try again later" });
     }
 
+    console.log("Entered password:", JSON.stringify(password));
+    console.log("Stored hash:", user.password_hash);
+
     const valid = await bcrypt.compare(password, user.password_hash);
+
+    console.log("Password match:", valid);
+    
     if (!valid) {
       await db.query(
         `UPDATE users SET failed_attempts = failed_attempts + 1, locked_until = CASE WHEN failed_attempts + 1 >= 5 THEN NOW() + INTERVAL '15 minutes' ELSE locked_until END WHERE id =$1`,

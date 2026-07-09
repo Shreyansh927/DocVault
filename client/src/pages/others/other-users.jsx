@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { saveUsers, getUsers } from "../../utils/offlineDB";
 import axios from "axios";
 import Header from "../../components/header/header";
 import Cookies from "js-cookie";
@@ -18,19 +19,49 @@ const OtherUsers = () => {
     fetchUsers();
   }, []);
 
+
+
   const fetchUsers = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/all-users`, {
         withCredentials: true,
       });
       setOriginalUsers(res.data.otherUsers || []);
+      await saveUsers(res.data.otherUsers);
     } catch (err) {
-      console.error("Fetch users error:", err);
-      toast.error("Failed to load users");
+      console.error(err);
+
+      const cachedUsers = await getUsers();
+
+      if (cachedUsers.length > 0) {
+        setOriginalUsers(cachedUsers);
+        toast.info("Showing offline data");
+      } else {
+        toast.error("No offline data available");
+      }
     } finally {
       setLoading(false);
     }
   }, [API_BASE_URL]);
+
+    useEffect(() => {
+      const handleOnline = () => {
+        toast.success("Back online");
+        fetchUsers();
+      };
+
+      const handleOffline = () => {
+        toast.warning("Offline mode");
+      };
+
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+
+      return () => {
+        window.removeEventListener("online", handleOnline);
+        window.removeEventListener("offline", handleOffline);
+      };
+    }, [fetchUsers]);
 
   const filtered = useMemo(() => {
     return originalUsers.filter((u) =>

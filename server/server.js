@@ -83,5 +83,5 @@ app.listen(PORT, "0.0.0.0", () => {
 });
 
 initDB()
-  .then(() => console.log("DB initialized"))
+  .then(() => {console.log("DB initialized"); console.log(process.env.REDIS_URL)})
   .catch((err) => console.error("DB failed:", err));

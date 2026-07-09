@@ -10,6 +10,7 @@ import {
 import { ChatOllama } from "@langchain/ollama";
 
 import { z } from "zod";
+// import { query } from "express";
 
 let currentUserId = null;
 let userCurrentQuery = null;
@@ -387,6 +388,9 @@ export const aiQueryResponse = async (req, res) => {
     let userId = req.user.id;
     currentUserId = userId;
 
+    let qurEmbedding = "";
+    let resEmbedding = "";
+
     let { q } = req.query;
     userCurrentQuery = q;
 
@@ -408,7 +412,7 @@ export const aiQueryResponse = async (req, res) => {
           }
 
           const finalEmbedding = `[${queryEmbedding.join(",")}]`;
-
+          qurEmbedding = finalEmbedding;
           const { rows } = await db.query(
             `
             SELECT
@@ -535,6 +539,18 @@ User Query: ${q}`,
       "No response generated.";
 
     console.log("Final agent response:", finalAnswer);
+
+    const re = await embeddings.embedQuery(finalAnswer);
+    resEmbedding = `[${re.join(",")}]`;
+
+    await db.query(
+      `
+      INSERT INTO semantic_search_logs (user_id, query, query_embedding, response, response_embedding, created_at)
+      VALUES ($1, $2, $3, $4, $5, NOW())
+      
+      `,
+      [userId, q, qurEmbedding, finalAnswer, resEmbedding],
+    );
 
     return res.json({
       response: finalAnswer,

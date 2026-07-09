@@ -28,7 +28,7 @@ export const usersBackup = async (user) => {
     });
 
   if (error) {
-    console.error("❌ Supabase user backup failed:", error.message);
+    console.error(" Supabase user backup failed:", error.message);
     throw error;
   }
 
@@ -53,7 +53,7 @@ export const uploadProfileImageToSupabase = async (user, file) => {
     });
 
   if (error) {
-    console.error("❌ Profile image upload failed:", error.message);
+    console.error(" Profile image upload failed:", error.message);
     throw error;
   }
 
@@ -81,7 +81,7 @@ export const uploadFilesToSupabase = async (userId, folderId, file) => {
     });
 
   if (error) {
-    console.error("❌ Supabase file upload failed:", error.message);
+    console.error(" Supabase file upload failed:", error.message);
     throw error;
   }
 

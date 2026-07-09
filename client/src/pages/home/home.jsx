@@ -7,6 +7,7 @@ import axios from "axios";
 import "./home.css";
 import { useNavigate } from "react-router-dom";
 import AskAi from "../../ask-ai/ask-ai";
+import { getUserFolders, saveUserFolders } from "../../utils/offlineDB";
 
 /* ================= CONSTANTS ================= */
 const CATEGORIES = ["PUBLIC", "PRIVATE"];
@@ -34,7 +35,7 @@ const Home = () => {
   /* ================= FETCH FOLDERS ================= */
   useEffect(() => {
     fetchAllFolders();
-  }, []);
+  }, [allFolders]);
 
   const fetchAllFolders = async () => {
     try {
@@ -46,9 +47,12 @@ const Home = () => {
       const folders = res.data.allUserFolders || [];
       setSorted(folders);
       setAllFolders(folders);
+      await saveUserFolders(folders);
     } catch (err) {
       console.error(err);
-      setAllFolders([]);
+      const indexedDbCachedFolders = await getUserFolders();
+      setAllFolders(indexedDbCachedFolders);
+      // setAllFolders([]);
     }
   };
 

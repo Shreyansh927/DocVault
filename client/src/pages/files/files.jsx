@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import "./files.css";
 import Header from "../../components/header/header";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,6 +7,8 @@ import { MdUpload, MdClose, MdDelete } from "react-icons/md";
 import { TbRestore } from "react-icons/tb";
 import Cookies from "js-cookie";
 import AskAi from "../../ask-ai/ask-ai";
+import { getFolder, saveUserIndivisualFolder } from "../../utils/offlineDB";
+import { toast } from "react-toastify";
 
 const Files = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -38,7 +40,7 @@ const Files = () => {
   const [view, setView] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState(null);
 
-  const getGoogleDriveFiles = async () => {
+  const getGoogleDriveFiles = useCallback(async () => {
     try {
       setLoadingDriveFiles(true);
 
@@ -55,7 +57,7 @@ const Files = () => {
     } finally {
       setLoadingDriveFiles(false);
     }
-  };
+  }, []);
 
   // const selectFile = (f) => {
   //   setSelectedFiles((prev) => [...prev, f.id]);
@@ -119,7 +121,7 @@ const Files = () => {
     localStorage.setItem("trash", JSON.stringify(trashMode));
   }, [trashMode, folderId, timeline]);
 
-  const fetchAllFiles = async () => {
+  const fetchAllFiles = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get(
@@ -129,13 +131,20 @@ const Files = () => {
         },
       );
       setAllFiles(res.data.allFiles || []);
+      await saveUserIndivisualFolder(res.data.allFiles, folderId);
     } catch (err) {
       console.error(err);
-      setAllFiles([]);
+      toast.info("Serving offline data")
+      const indexedDbFolderFiles = await getFolder(folderId);
+      if (indexedDbFolderFiles.length > 0) {
+        setAllFiles(indexedDbFolderFiles);
+      } else {
+        setAllFiles([]);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [folderId, timeline]);
 
   const nextTimeline = () => {
     setTimeline(allFiles[allFiles.length - 1]?.created_at);
@@ -325,8 +334,6 @@ const Files = () => {
                           <span>{folder.children.length} files</span>
                         </div>
                       </div>
-
-                      
                     </div>
 
                     {view && currentFolderId === folder.id && (
@@ -460,7 +467,6 @@ const Files = () => {
               <input
                 type="file"
                 multiple
-                hidden
                 onChange={(e) => setSelectedFiles([...e.target.files])}
               />
               <MdUpload size={36} />

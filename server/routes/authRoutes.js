@@ -31,13 +31,16 @@ router.get("/me", authMiddleware, (req, res) => {
 });
 router.get("/current-sessions", authMiddleware, getAllCurrentSessions);
 router.post("/logout-session", authMiddleware, logoutSession);
-router.post("/refresh", async (req, res) => {
+router.get("/refresh", async (req, res) => {
+  console.log("refresh endpoint hit!!")
   try {
     const refreshToken = req.cookies.refreshToken;
+    
 
     if (!refreshToken) {
-      return res.status(401).json({ error: "No refresh token" });
+      return res.status(401).json({ error: "No token" });
     }
+
 
     // verify refresh token
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
@@ -65,10 +68,10 @@ router.post("/refresh", async (req, res) => {
 
     const user = userRes.rows[0];
 
-    //TOKEN VERSION CHECK (VERY IMPORTANT)
-    if (decoded.tokenVersion !== user.token_version) {
-      return res.status(401).json({ error: "Session expired" });
-    }
+    // //TOKEN VERSION CHECK (VERY IMPORTANT)
+    // if (decoded.tokenVersion !== user.token_version) {
+    //   return res.status(401).json({ error: "Session expired" });
+    // }
 
     //create new access token
     const newAccessToken = jwt.sign(
@@ -92,7 +95,7 @@ router.post("/refresh", async (req, res) => {
     return res.json({ message: "Token refreshed" });
   } catch (err) {
     console.error(err);
-    return res.status(401).json({ error: "Invalid refresh token" });
+    return res.status(401).json({ error: err});
   }
 });
 

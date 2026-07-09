@@ -1,18 +1,21 @@
 import React from "react";
 import Cookies from "js-cookie";
-import api from "./api";
+
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
 import { useEffect } from "react";
+import api from "../api-interceptor.jsx";
 
 const ProtectedRoute = ({ children }) => {
   const [ok, setOk] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     api
-      .get("/api/auth/me")
+      .get("/api/auth/me", { signal: controller.signal })
       .then(() => setOk(true))
       .catch(() => setOk(false));
+    return () => controller.abort();
   }, []);
 
   if (ok === null) {

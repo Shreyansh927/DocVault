@@ -1,15 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import "./login.css";
-import { useEffect } from "react";
+
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
+import api from "../../api-interceptor";
 
 export default function Login() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
+  const [isAuth, setIsAuth] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // const controller = new AbortController();
+
+    api
+      .get("/api/auth/me")
+      .then(() => setIsAuth(true))
+      .catch(() => setIsAuth(false));
+
+    // return () => controller.abort();
+  }, [isAuth]);
+
+  if (isAuth) {
+    navigate("/home");
+  }
 
   const [form, setForm] = useState({
     email: "",
@@ -41,20 +57,20 @@ export default function Login() {
     }
   };
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await axios.get(`${API_BASE_URL}/api/auth/me`, {
-          withCredentials: true,
-        });
-        navigate("/home", { replace: true });
-      } catch {
-        // Not logged in → stay on login page
-      }
-    };
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     try {
+  //       await axios.get(`${API_BASE_URL}/api/auth/me`, {
+  //         withCredentials: true,
+  //       });
+  //       navigate("/home", { replace: true });
+  //     } catch {
+  //       // Not logged in → stay on login page
+  //     }
+  //   };
 
-    checkAuth();
-  }, [navigate]);
+  //   checkAuth();
+  // }, [navigate]);
 
   const submit = async (e) => {
     e.preventDefault();

@@ -2,9 +2,31 @@ import { db } from "../db.js";
 import { redis } from "../redis.js";
 import supabase from "../supabase.js";
 import { uploadFilesToSupabase } from "../utils/supabase-cloud-storage-users-backup.js";
+import { fileProcessingQueue } from "../queue/queue.js";
+
 import { GoogleGenAI } from "@google/genai";
 import officeParser from "officeparser";
+import Tesseract from "tesseract.js";
+import sharp from "sharp";
 
+const tessractTextExtraction = async (file) => {
+  try {
+    const processedImage = await sharp(file.buffer)
+      .grayscale()
+      .normalize()
+      .sharpen()
+      .toBuffer();
+
+    const {
+      data: { text },
+    } = await Tesseract.recognize(processedImage, "eng");
+
+    return text;
+  } catch (err) {
+    console.error("OCR Error:", err);
+    return null;
+  }
+};
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is missing in environment variables");
 }
@@ -90,10 +112,6 @@ export const summarizeFileWithAI = async (file) => {
 
     /* ---------- IMAGE ---------- */
     if (file.mimetype.startsWith("image/")) {
-      if (file.size > 5 * 1024 * 1024) return null;
-
-      const base64Image = file.buffer.toString("base64");
-
       const result = await genAI.models.generateContent({
         model: "gemini-3.5-flash",
         contents: [
@@ -106,7 +124,7 @@ export const summarizeFileWithAI = async (file) => {
               {
                 inlineData: {
                   mimeType: file.mimetype,
-                  data: base64Image,
+                  data: file,
                 },
               },
             ],
@@ -143,17 +161,25 @@ export const uploadFiles = async (req, res) => {
     const userId = req.user.id;
 
     if (!folderId || !files?.length) {
-      return res.status(400).json({ error: "Missing data" });
+      return res.status(400).json({
+        error: "Missing data",
+      });
     }
 
-    // validate folder ownership
-    const folderRes = await db.query(
-      `SELECT id FROM folders WHERE id=$1 AND user_id=$2`,
+    const folder = await db.query(
+      `
+      SELECT id
+      FROM folders
+      WHERE id=$1
+      AND user_id=$2
+      `,
       [folderId, userId],
     );
 
-    if (!folderRes.rows.length) {
-      return res.status(403).json({ error: "Unauthorized folder access" });
+    if (!folder.rows.length) {
+      return res.status(403).json({
+        error: "Unauthorized folder access",
+      });
     }
 
     const uploadedFiles = [];
@@ -165,27 +191,23 @@ export const uploadFiles = async (req, res) => {
         file,
       );
 
-      const aiSummary = await summarizeFileWithAI(file);
-
-      let embeddingString = null;
-
-      if (aiSummary) {
-        const embedding = await generateEmbedding(aiSummary);
-
-        if (embedding && Array.isArray(embedding)) {
-          embeddingString = `[${embedding.join(",")}]`;
-          console.log("Generated embedding");
-        } else {
-          console.warn("Embedding generation failed");
-        }
-      }
-
-      // await redis?.del(`folderFiles:${userId}:${folderId}`);
       const dbRes = await db.query(
         `
         INSERT INTO files
-        (folder_id, filename, encrypted_name, encrypted_link, file_type, size, storage, ai_summary, new_embedding)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        (
+            folder_id,
+            filename,
+            encrypted_name,
+            encrypted_link,
+            file_type,
+            size,
+            storage,
+            ai_summary,
+            tessract_extracted_text,
+            new_embedding
+        )
+        VALUES
+        ($1,$2,$3,$4,$5,$6,$7,NULL,NULL,NULL)
         RETURNING *
         `,
         [
@@ -196,21 +218,31 @@ export const uploadFiles = async (req, res) => {
           file.mimetype,
           file.size,
           "supabase",
-          aiSummary,
-          embeddingString,
         ],
       );
 
-      uploadedFiles.push(dbRes.rows[0]);
+      const savedFile = dbRes.rows[0];
+
+      await fileProcessingQueue.add("process-file", {
+        fileId: savedFile.id,
+      });
+
+      uploadedFiles.push(savedFile);
     }
 
     return res.status(201).json({
-      message: "Files uploaded successfully",
+      success: true,
+
+      message: "Files uploaded successfully. AI processing started.",
+
       files: uploadedFiles,
     });
   } catch (err) {
-    console.error("UPLOAD ERROR:", err);
-    return res.status(500).json({ error: "Upload failed" });
+    console.error(err);
+
+    return res.status(500).json({
+      error: "Upload failed",
+    });
   }
 };
 
@@ -495,8 +527,7 @@ export const accessFile = async (req, res) => {
     if (file.owner_id === userId) {
       hasAccess = true;
     } else {
-
-    /*
+      /*
        FRIEND
     */
       const permission = await db.query(

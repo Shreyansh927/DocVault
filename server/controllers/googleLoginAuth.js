@@ -131,25 +131,36 @@ export const googleLoginAuth = async (req, res) => {
     await db.query(
       `
       INSERT INTO refresh_tokens
-      (
-        user_id,
-        token,
-        session_uuid,
-        expires_at,
-        user_agent,
-        ip_address,
-        ip_location
-      )
-      VALUES
-      (
-        $1,
-        $2,
-        $3,
-        NOW() + INTERVAL '7 days',
-        $4,
-        $5,
-        $6
-      )
+(
+    user_id,
+    token,
+    session_uuid,
+    expires_at,
+    user_agent,
+    ip_address,
+    ip_location
+)
+VALUES
+(
+    $1,
+    $2,
+    $3,
+    NOW() + INTERVAL '7 days',
+    $4,
+    $5,
+    $6
+)
+
+ON CONFLICT (user_id,user_agent,ip_address)
+
+DO UPDATE
+SET
+    token = EXCLUDED.token,
+    session_uuid = EXCLUDED.session_uuid,
+    expires_at = EXCLUDED.expires_at,
+    ip_location = EXCLUDED.ip_location,
+    revoked = FALSE,
+    login_at = NOW();
       `,
       [user.id, refreshToken, sessionUuid, deviceName, ip, ipLocation],
     );
