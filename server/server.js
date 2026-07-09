@@ -5,6 +5,9 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
 
+if (process.env.NODE_ENV === "production") {
+  await import("./queue/worker.js");
+}
 import { initDB } from "./db.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 
@@ -83,5 +86,8 @@ app.listen(PORT, "0.0.0.0", () => {
 });
 
 initDB()
-  .then(() => {console.log("DB initialized"); console.log(process.env.REDIS_URL)})
+  .then(() => {
+    console.log("DB initialized");
+    console.log(process.env.REDIS_URL);
+  })
   .catch((err) => console.error("DB failed:", err));

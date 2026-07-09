@@ -5,8 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "server": "nodemon server.js",
-    "worker": "nodemon queue/worker.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "worker": "node queue/worker.js",
+    "worker:dev": "nodemon queue/worker.js"
   },
   "keywords": [],
   "author": "",
