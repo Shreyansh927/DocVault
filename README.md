@@ -1,177 +1,305 @@
-<h1>📁 DocVault — AI-Powered Document Vault</h1>
 
-<p>
-DocVault is a secure and intelligent document management system that allows users to upload,
-organize, and query their documents using AI-assisted search and summarization.
-</p>
+# 🚀 DocVault
+> **AI-Powered Secure Document Management Platform**
 
-<p>
-Built with a modern full-stack architecture, DocVault emphasizes privacy, scalability,
-and free-tier safety, making it suitable for real-world applications, learning projects,
-and resume portfolios.
-</p>
+DocVault is a full-stack AI SaaS platform that combines secure cloud storage, Retrieval-Augmented Generation (RAG), semantic search, OCR, offline-first architecture, collaboration, and natural-language automation into one intelligent document workspace.
 
-<h1>🚀 Features</h1>
+---
 
-<h3>🔐 Authentication & Security</h3>
-<p>
-DocVault ensures strict user isolation so that documents are accessible only to their
-respective owners. All APIs are protected, and sensitive configuration values are managed
-through environment variables to follow security best practices.
-</p>
+# ✨ Features
 
-<h3>📂 Document Management</h3>
-<p>
-Users can upload files into organized folders for better structure and accessibility.
-The system supports soft deletion, allowing documents to remain recoverable until they
-are permanently removed by scheduled background cleanup jobs.
-</p>
+## 🔐 Authentication & Security
+- JWT Authentication
+- Access + Refresh Token architecture
+- HTTP-only Secure Cookies
+- Refresh Token Rotation
+- Multi-device session management
+- Logout single/all devices
+- OTP based password reset
+- Google OAuth Login
+- bcrypt password hashing
+- RBAC
+- CORS, Helmet, Rate Limiting
+- Protected Routes
 
-<h3>🤖 AI-Powered Querying</h3>
-<p>
-Users can ask natural-language questions about their uploaded documents. The AI generates
-responses strictly based on the content of those documents, ensuring accurate and
-trustworthy answers without hallucinations.
-</p>
+![Login](Screenshot%202026-07-12%20144654.png)
 
-<h3>🧠 Smart Context Building</h3>
-<p>
-DocVault builds AI prompts using document summaries to maintain relevance.
-Context size is carefully limited to improve efficiency, and a graceful fallback
-message is returned when the requested information is not found.
-</p>
+![Forgot Password](Screenshot%202026-07-12%20144713.png)
 
-<h3>🧠 Vector Embedding & Semantic Search</h3>
+![OTP](Screenshot%202026-07-12%20144749.png)
 
-Implemented semantic document search using 1536-dimensional vector embeddings.
+---
 
-Stored embeddings in PostgreSQL using pgvector.
+# 📂 Intelligent Document Management
 
-Used cosine similarity (<->) for top-K nearest neighbor retrieval.
+- Folder hierarchy
+- Public / Private folders
+- Upload/Delete/Restore/Permanent Delete
+- Trash Management
+- Pagination
+- Search
+- Google Drive Import
+- File Metadata
+- Soft Delete
 
-Built a Retrieval-Augmented Generation (RAG) pipeline for context-aware AI responses.
+![Folders](Screenshot%202026-07-12%20141742.png)
 
-Optimized performance with ANN indexing (ivfflat) and Redis embedding caching.
+![Files](Screenshot%202026-07-12%20144921.png)
 
-<h3>🌐 Offline Retry Messaging</h3>
+![Trash](Screenshot%202026-07-12%20145131.png)
 
-Designed an offline-first messaging system.
+![Google Drive](Screenshot%202026-07-12%20145204.png)
 
-Failed messages are stored locally and automatically retried on network reconnection.
+---
 
-Uses browser online event to trigger queued message delivery.
+# 🤖 AI Features
 
-Ensures no message loss during temporary connectivity issues.
+## AI Assistant
+Supports natural language commands:
 
-<h3>💸 Free-Tier Friendly Architecture</h3>
-<p>
-The system is designed to run without mandatory paid cloud services.
-It avoids embedding-based AI quotas and prioritizes cost-safe architectural decisions,
-making it ideal for students and independent developers.
-</p>
+- Create folders
+- Delete folders
+- Move files
+- Rename folders
+- Share folders
+- Grant permissions
+- Revoke permissions
+- Summarize documents
+- Ask questions from uploaded documents
 
+### AI Automation Flow
 
-## 📸 Screenshots
+User Prompt
+→ Gemini Intent Detection
+→ LangChain Processing
+→ Entity Extraction
+→ Backend Validation
+→ Database Update
+→ Response
 
-### Auth Section
-<img width="1000" height="700" alt="Screenshot 2026-01-30 001619" src="https://github.com/user-attachments/assets/91bd581c-ad91-4df7-bd17-ae74a52b22bb" />
+Supported examples:
 
+```text
+Create a folder named Study
+Move DMGT.pdf to Study
+Grant Rahul access to Resume folder
+Summarize Aadhaar.pdf
+Where is my PAN card?
+```
 
-### Home Page
-<img width="1000" height="700" alt="Screenshot 2026-01-29 230151" src="https://github.com/user-attachments/assets/6716ad96-5b98-4b8c-af6d-1fb647096da1" />
+![AI Assistant](Screenshot%202026-07-12%20145059.png)
 
+![AI Result](Screenshot%202026-07-12%20145100.png)
 
-### Real Time Collaboration
-<img width="1000" height="700" alt="Screenshot 2026-01-30 001352" src="https://github.com/user-attachments/assets/f8b347b4-5d97-453d-8f7a-081de7b59ab2" />
+---
 
+# 🧠 RAG Pipeline
 
+Upload
+→ OCR (Tesseract)
+→ Chunking
+→ Google Generative AI Embeddings
+→ PGVector
+→ Semantic Similarity Search
+→ Top-K Retrieval
+→ Gemini
+→ Context-aware Answer
 
+### Technologies
+- LangChain
+- Google Gemini
+- Google Generative AI Embeddings
+- PGVector
+- Retrieval Augmented Generation (RAG)
+- Semantic Search
+- Vector Search
+- Prompt Engineering
 
-<h1>🏗️ Tech Stack</h1>
+---
 
-<h3>Frontend</h3>
-<p>
-The frontend is built using React with Vite for fast development and optimized builds.
-Axios is used for API communication, and the application follows a clean,
-component-based UI structure for maintainability and scalability.
-</p>
+# 📄 OCR & Summarization
 
-<h3>Backend</h3>
-<p>
-The backend is implemented with Node.js and Express.js, exposing secure REST APIs
-for authentication, document management, and AI-powered querying.
-Gemini AI is used exclusively for text generation.
-</p>
+- OCR using Tesseract.js
+- English + Hindi OCR
+- Automatic AI summaries
+- Metadata generation
+- Embedding generation
 
-<h3>Database</h3>
-<p>
-PostgreSQL is used as the primary database with parameterized SQL queries instead of an ORM,
-providing greater control and transparency. A soft-delete strategy is implemented along
-with scheduled background cleanup jobs.
-</p>
+---
 
-<h3>Cloud & Infrastructure</h3>
-<p>
-Supabase is used as a managed cloud backend, providing a production-ready PostgreSQL database
-along with built-in authentication and row-level security. Supabase Auth is leveraged for
-secure user management, while database-level constraints ensure strict per-user data isolation.
-The architecture remains cloud-agnostic and can be migrated easily if required.
-</p>
+# ⚙️ Background Processing
 
-<h1>🧩 Architecture Overview</h1>
+Heavy tasks execute asynchronously using:
 
-<p>
-The client communicates with a REST API built on Node.js and Express.
-Data is stored in PostgreSQL, and AI responses are generated using Gemini
-based strictly on document context.
-</p>
+- BullMQ
+- Redis
+- Background Workers
+- Retry Logic
+- Exponential Backoff
 
-<p>
-AI is used only for text generation, ensuring predictable usage and stability
-within free-tier limits.
-</p>
+Pipeline:
 
-<h1>🧠 Design Philosophy</h1>
+Upload
+→ Queue
+→ Worker
+→ OCR
+→ Summary
+→ Embedding
+→ PostgreSQL
+→ Ready
 
-<p>
-DocVault avoids expensive AI embeddings and vendor lock-in.
-The system is designed with clear separation of concerns, predictable costs,
-and the flexibility to introduce vector search or advanced AI features later
-without major refactoring.
-</p>
+---
 
-<h1>🧪 AI Query Behavior</h1>
+# 💾 Offline Support
 
-<p>
-If the requested information exists in the documents, the AI provides a concise
-and factual response. If the information does not exist, the system clearly states
-that it could not be found in the user’s documents.
-</p>
+Offline-first experience powered by IndexedDB.
 
-<p>
-This approach ensures transparency, reliability, and user trust.
-</p>
+Features:
 
-<h1>📈 Future Enhancements</h1>
+- Cached metadata
+- Cached files
+- Offline browsing
+- Automatic synchronization
+- Queue pending operations
+- Instant loading
 
-<p>
-Planned enhancements include optional vector search with pgvector,
-local HuggingFace embeddings, file-level citations, answer caching,
-role-based access control, and Dockerized deployment.
-</p>
+---
 
-<h1>🧠 Interview Talking Point</h1>
+# 👥 Collaboration
 
-<p>
-DocVault uses a controlled, RAG-like approach. Embeddings were intentionally avoided
-due to free-tier limitations, and the system was designed to be modular so advanced
-features can be added later without changing the core architecture.
-</p>
+- Friend Requests
+- Connections
+- Folder Sharing
+- Public Links
+- Permission Management
+- Revoke Access
+- Notifications
 
-<h1>👨‍💻 Author</h1>
+![Users](Screenshot%202026-07-12%20141607.png)
 
-<p>
-<strong>Shreyansh Dixit</strong><br />
-Aspiring Full-Stack Developer focused on backend systems,
-clean APIs, and AI-assisted applications.
-</p>
+![Notifications](Screenshot%202026-07-12%20142010.png)
+
+![Connections](Screenshot%202026-07-12%20142024.png)
+
+![Access Control](Screenshot%202026-07-12%20142035.png)
+
+---
+
+# 📊 Dashboard
+
+- User Profile
+- Active Sessions
+- AI Query History
+- Session Logout
+- Recent Semantic Queries
+
+![Dashboard](Screenshot%202026-07-12%20141945.png)
+
+![AI History](Screenshot%202026-07-09%20015223.png)
+
+---
+
+# ☁️ Google Drive Integration
+
+- OAuth2 Authentication
+- Browse Drive
+- Import Files
+- Upload to Supabase Storage
+- Automatic AI Indexing
+
+---
+
+# 🏗 Architecture
+
+Frontend (React + Vite)
+↓
+Express REST API
+↓
+Authentication Middleware
+↓
+BullMQ + Redis
+↓
+LangChain + Gemini
+↓
+PostgreSQL + PGVector
+↓
+Supabase Storage
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
+- React.js
+- Vite
+- React Router
+- Axios
+- Axios Interceptors
+- CSS3
+- Responsive UI
+- IndexedDB
+- AbortController
+
+## Backend
+- Node.js
+- Express.js
+- JWT
+- Cookie Parser
+- bcrypt
+- Multer
+- BullMQ
+- Redis
+- node-cron
+- Express Middleware
+
+## AI
+- Google Gemini
+- LangChain
+- Google Generative AI Embeddings
+- RAG
+- Semantic Search
+- Vector Search
+- Prompt Engineering
+
+## Database
+- PostgreSQL
+- PGVector
+- Supabase Database
+
+## Storage
+- Supabase Storage
+- Google Drive API
+
+## Deployment
+- Docker
+- Docker Compose
+- Render
+
+---
+
+# 🔒 Security
+
+- HTTP-only Cookies
+- Refresh Token Rotation
+- Access Tokens
+- Session Revocation
+- Rate Limiting
+- Password Hashing
+- Input Validation
+- Authorization Middleware
+- Protected APIs
+- Row Level Security (Supabase RLS Policy)
+
+---
+
+# 📈 Future Roadmap
+
+- Voice AI
+- MCP Integration
+- Multi-Agent AI
+- Real-time Collaboration
+- WebSocket Notifications (Using supabase realtime)
+- Document Versioning
+- Enterprise RBAC
+
+---
