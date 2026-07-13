@@ -38,8 +38,8 @@ const Header = () => {
 
       setShowLogoutModal(false);
       setLoggingOut(true);
-      navigate("/login", { replace: true });
-      window.location.href = "/login";
+      
+      navigate("/login")
     } catch (err) {
       console.error(err);
 

@@ -8,7 +8,10 @@ export const authMiddleware = async (req, res, next) => {
     return res.status(401).json({ error: "No token" });
   }
 
+
   try {
+    // console.log("Access Token:", accessToken);
+    console.log("Auth middleware hit:", req.method, req.originalUrl);
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
     const sessionUuidFromDb = await db.query(

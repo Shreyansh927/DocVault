@@ -103,14 +103,13 @@ const AskAi = () => {
 
           <form className="ai-panel-footer" onSubmit={handleSubmit}>
             <div className="ai-input-wrap">
-              <input
+              <textarea
                 id="ai-query-input"
-                type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Type your question here..."
                 disabled={loading}
-              />
+              ></textarea>
             </div>
             <button
               type="submit"

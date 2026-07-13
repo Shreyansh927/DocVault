@@ -26,8 +26,10 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await refreshApi.get("/api/auth/refresh");
-        return api(originalRequest);
+        if (window.location.pathname !== "/login" || message !== "No token") {
+          await refreshApi.get("/api/auth/refresh");
+          return api(originalRequest);
+        }
       } catch {
         window.location.href = "/login";
       }

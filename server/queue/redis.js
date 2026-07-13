@@ -17,7 +17,7 @@ rediss.on("ready", () => {
 });
 
 rediss.on("error", (err) => {
-  console.log(process.env.REDIS_URL);
+  
   console.error("Redis Error:", err);
 });
 

@@ -180,15 +180,16 @@ Create a new folder for the authenticated user.`,
 // tool for controlling access to public folder to any friend
 
 const accessControlTool = tool(
-  async ({ userId, friendName, accessType }) => {
+  async ({ userId, friendNames, accessType }) => {
     try {
+      console.log("function called")
       const friend = await db.query(
         `SELECT id FROM users WHERE LOWER(name)=LOWER($1)`,
-        [friendName],
+        [friendNames],
       );
 
       if (!friend.rows.length) {
-        return `User '${friendName}' not found.`;
+        return `User '${friendNames}' not found.`;
       }
 
       const friendId = friend.rows[0].id;
@@ -206,7 +207,7 @@ const accessControlTool = tool(
       );
 
       if (!authenticateFriend.rows.length) {
-        return `${friendName} is not in your connections list.`;
+        return `${friendNames} is not in your connections list.`;
       }
 
       if (accessType === "allow") {
@@ -220,7 +221,7 @@ const accessControlTool = tool(
           [userId, friendId],
         );
 
-        return `Folder access allowed for ${friendName}.`;
+        return `Folder access allowed for ${friendNames}.`;
       }
 
       await db.query(
@@ -233,7 +234,7 @@ const accessControlTool = tool(
         [userId, friendId],
       );
 
-      return `Folder access revoked for ${friendName}.`;
+      return `Folder access revoked for ${friendNames}.`;
     } catch (err) {
       console.error(err);
 

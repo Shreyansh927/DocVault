@@ -16,7 +16,6 @@ const router = express.Router();
 
 router.post("/signup", signup);
 
-
 router.post("/google", googleLoginAuth);
 router.post("/login", login);
 router.post("/logout", authMiddleware, logout);
@@ -32,17 +31,16 @@ router.get("/me", authMiddleware, (req, res) => {
 router.get("/current-sessions", authMiddleware, getAllCurrentSessions);
 router.post("/logout-session", authMiddleware, logoutSession);
 router.get("/refresh", async (req, res) => {
-  console.log("refresh endpoint hit!!")
+  console.log("refresh endpoint hit!!");
   try {
     const refreshToken = req.cookies.refreshToken;
-    
 
     if (!refreshToken) {
       return res.status(401).json({ error: "No token" });
     }
 
-
     // verify refresh token
+    // console.log("Access Token:", accessToken);
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
 
     // check DB
@@ -77,11 +75,17 @@ router.get("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       {
         id: user.id,
+
         email: user.email,
+
         tokenVersion: user.token_version,
+
+        session_uuid: tokenRes.rows[0].session_uuid,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" },
+      {
+        expiresIn: "15m",
+      },
     );
 
     res.cookie("accessToken", newAccessToken, {
@@ -95,7 +99,7 @@ router.get("/refresh", async (req, res) => {
     return res.json({ message: "Token refreshed" });
   } catch (err) {
     console.error(err);
-    return res.status(401).json({ error: err});
+    return res.status(401).json({ error: err.message });
   }
 });
 

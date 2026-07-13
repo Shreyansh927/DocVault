@@ -8,6 +8,7 @@ import "./home.css";
 import { useNavigate } from "react-router-dom";
 import AskAi from "../../ask-ai/ask-ai";
 import { getUserFolders, saveUserFolders } from "../../utils/offlineDB";
+console.log("Home rendered");
 
 /* ================= CONSTANTS ================= */
 const CATEGORIES = ["PUBLIC", "PRIVATE"];
@@ -34,8 +35,10 @@ const Home = () => {
 
   /* ================= FETCH FOLDERS ================= */
   useEffect(() => {
+    console.log("Fetching folders");
+
     fetchAllFolders();
-  }, [allFolders]);
+  }, []);
 
   const fetchAllFolders = async () => {
     try {
@@ -56,22 +59,22 @@ const Home = () => {
     }
   };
 
-  /* ================= FILTER ================= */
-  useEffect(() => {
-    let data = [...sorted];
+  // /* ================= FILTER ================= */
+  // useEffect(() => {
+  //   let data = [...sorted];
 
-    if (activeCategory !== "All") {
-      data = data.filter((f) => f.category === activeCategory);
-    }
+  //   if (activeCategory !== "All") {
+  //     data = data.filter((f) => f.category === activeCategory);
+  //   }
 
-    if (search.trim()) {
-      data = data.filter((f) =>
-        f.folder_name.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
+  //   if (search.trim()) {
+  //     data = data.filter((f) =>
+  //       f.folder_name.toLowerCase().includes(search.toLowerCase()),
+  //     );
+  //   }
 
-    setAllFolders(data);
-  }, [search, activeCategory, sorted]);
+  //   setAllFolders(data);
+  // }, [search, activeCategory, sorted]);
 
   /* ================= CREATE FOLDER ================= */
   const submit = async (e) => {

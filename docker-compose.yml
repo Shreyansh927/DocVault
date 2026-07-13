@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+
+    ports:
+      - "5173:5173"
+
+    env_file:
+      - ./client/.env
+
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+
+    ports:
+      - "5000:5000"
+
+    env_file:
+      - ./server/.env
