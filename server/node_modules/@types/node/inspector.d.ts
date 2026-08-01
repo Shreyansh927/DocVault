@@ -1,8 +1,3 @@
-/**
- * The `node:inspector` module provides an API for interacting with the V8
- * inspector.
- * @see [source](https://github.com/nodejs/node/blob/v25.x/lib/inspector.js)
- */
 declare module "node:inspector" {
     import { EventEmitter } from "node:events";
     /**
@@ -39,7 +34,7 @@ declare module "node:inspector" {
      * If wait is `true`, will block until a client has connected to the inspect port
      * and flow control has been passed to the debugger client.
      *
-     * See the [security warning](https://nodejs.org/docs/latest-v25.x/api/cli.html#warning-binding-inspector-to-a-public-ipport-combination-is-insecure)
+     * See the [security warning](https://nodejs.org/docs/latest-v26.x/api/cli.html#warning-binding-inspector-to-a-public-ipport-combination-is-insecure)
      * regarding the `host` parameter usage.
      * @param port Port to listen on for inspector connections. Defaults to what was specified on the CLI.
      * @param host Host to listen on for inspector connections. Defaults to what was specified on the CLI.
@@ -217,6 +212,51 @@ declare module "node:inspector" {
          * @experimental
          */
         function put(url: string, data: string): void;
+    }
+    namespace DOMStorage {
+        /**
+         * This feature is only available with the
+         * `--experimental-storage-inspection` flag enabled.
+         *
+         * Broadcasts the `DOMStorage.domStorageItemAdded` event to connected frontends.
+         * This event indicates that a new item has been added to the storage.
+         * @since v25.5.0
+         */
+        function domStorageItemAdded(params: DomStorageItemAddedEventDataType): void;
+        /**
+         * This feature is only available with the
+         * `--experimental-storage-inspection` flag enabled.
+         *
+         * Broadcasts the `DOMStorage.domStorageItemRemoved` event to connected frontends.
+         * This event indicates that an item has been removed from the storage.
+         * @since v25.5.0
+         */
+        function domStorageItemRemoved(params: DomStorageItemRemovedEventDataType): void;
+        /**
+         * This feature is only available with the
+         * `--experimental-storage-inspection` flag enabled.
+
+         * Broadcasts the `DOMStorage.domStorageItemUpdated` event to connected frontends.
+         * This event indicates that a storage item has been updated.
+         * @since v25.5.0
+         */
+        function domStorageItemUpdated(params: DomStorageItemUpdatedEventDataType): void;
+        /**
+         * This feature is only available with the
+         * `--experimental-storage-inspection` flag enabled.
+         *
+         * Broadcasts the `DOMStorage.domStorageItemsCleared` event to connected
+         * frontends. This event indicates that all items have been cleared from the
+         * storage.
+         * @since v25.5.0
+         */
+        function domStorageItemsCleared(params: DomStorageItemsClearedEventDataType): void;
+        /**
+         * This feature is only available with the
+         * `--experimental-storage-inspection` flag enabled.
+         * @since v25.5.0
+         */
+        function registerStorage(params: unknown): void;
     }
 }
 declare module "inspector" {

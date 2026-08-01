@@ -1,25 +1,7 @@
-/**
- * A stream is an abstract interface for working with streaming data in Node.js.
- * The `node:stream` module provides an API for implementing the stream interface.
- *
- * There are many stream objects provided by Node.js. For instance, a [request to an HTTP server](https://nodejs.org/docs/latest-v25.x/api/http.html#class-httpincomingmessage)
- * and [`process.stdout`](https://nodejs.org/docs/latest-v25.x/api/process.html#processstdout) are both stream instances.
- *
- * Streams can be readable, writable, or both. All streams are instances of [`EventEmitter`](https://nodejs.org/docs/latest-v25.x/api/events.html#class-eventemitter).
- *
- * To access the `node:stream` module:
- *
- * ```js
- * import stream from 'node:stream';
- * ```
- *
- * The `node:stream` module is useful for creating new types of stream instances.
- * It is usually not necessary to use the `node:stream` module to consume streams.
- * @see [source](https://github.com/nodejs/node/blob/v25.x/lib/stream.js)
- */
 declare module "node:stream" {
     import { Blob } from "node:buffer";
     import { Abortable, EventEmitter } from "node:events";
+    import { ByteReadableStream, toAsyncStreamable } from "node:stream/iter";
     import * as promises from "node:stream/promises";
     import * as web from "node:stream/web";
     class Stream extends EventEmitter {
@@ -81,6 +63,7 @@ declare module "node:stream" {
         interface ArrayOptions extends ReadableOperatorOptions {}
         interface ReadableToWebOptions {
             strategy?: web.QueuingStrategy | undefined;
+            type?: web.ReadableStreamType | undefined;
         }
         interface ReadableEventMap {
             "close": [];
@@ -146,13 +129,13 @@ declare module "node:stream" {
              */
             readonly readableEncoding: BufferEncoding | null;
             /**
-             * Becomes `true` when [`'end'`](https://nodejs.org/docs/latest-v25.x/api/stream.html#event-end) event is emitted.
+             * Becomes `true` when [`'end'`](https://nodejs.org/docs/latest-v26.x/api/stream.html#event-end) event is emitted.
              * @since v12.9.0
              */
             readonly readableEnded: boolean;
             /**
              * This property reflects the current state of a `Readable` stream as described
-             * in the [Three states](https://nodejs.org/docs/latest-v25.x/api/stream.html#three-states) section.
+             * in the [Three states](https://nodejs.org/docs/latest-v26.x/api/stream.html#three-states) section.
              * @since v9.4.0
              */
             readableFlowing: boolean | null;
@@ -485,13 +468,18 @@ declare module "node:stream" {
              *   }
              * }
              *
-             * const wordsStream = Readable.from(['this is', 'compose as operator']).compose(splitToWords);
+             * const wordsStream = Readable.from(['text passed through', 'composed stream']).compose(splitToWords);
              * const words = await wordsStream.toArray();
              *
-             * console.log(words); // prints ['this', 'is', 'compose', 'as', 'operator']
+             * console.log(words); // prints ['text', 'passed', 'through', 'composed', 'stream']
              * ```
              *
-             * See [`stream.compose`](https://nodejs.org/docs/latest-v25.x/api/stream.html#streamcomposestreams) for more information.
+             * `readable.compose(s)` is equivalent to `stream.compose(readable, s)`.
+             *
+             * This method also allows for an `AbortSignal` to be provided, which will destroy
+             * the composed stream when aborted.
+             *
+             * See [`stream.compose(...streams)`](https://nodejs.org/docs/latest-v26.x/api/stream.html#streamcomposestreams) for more information.
              * @since v19.1.0, v18.13.0
              * @returns a stream composed with the stream `stream`.
              */
@@ -664,6 +652,37 @@ declare module "node:stream" {
              * @since v10.0.0
              */
             [Symbol.asyncIterator](): NodeJS.AsyncIterator<any>;
+            /**
+             * When the `--experimental-stream-iter` flag is enabled, `Readable` streams
+             * implement the `Stream.toAsyncStreamable` protocol, enabling efficient
+             * consumption by the `stream/iter` API.
+             *
+             * This provides a batched async iterator that drains the stream's internal
+             * buffer into `Uint8Array[]` batches, amortizing the per-chunk Promise overhead
+             * of the standard `Symbol.asyncIterator` path. For byte-mode streams, chunks
+             * are yielded directly as `Buffer` instances (which are `Uint8Array` subclasses).
+             * For object-mode or encoded streams, each chunk is normalized to `Uint8Array`
+             * before batching.
+             *
+             * The returned iterator is tagged as a validated source, so `from()`
+             * passes it through without additional normalization.
+             *
+             * ```js
+             * import { Readable } from 'node:stream';
+             * import { text, from } from 'node:stream/iter';
+             *
+             * const readable = new Readable({
+             *   read() { this.push('hello'); this.push(null); },
+             * });
+             *
+             * // Readable is automatically consumed via toAsyncStreamable
+             * console.log(await text(from(readable))); // 'hello'
+             * ```
+             *
+             * Without the `--experimental-stream-iter` flag, calling this method throws
+             * `ERR_STREAM_ITER_MISSING_FLAG`.
+             */
+            [toAsyncStreamable](): ByteReadableStream;
             /**
              * Calls `readable.destroy()` with an `AbortError` and returns
              * a promise that fulfills when the stream is finished.
@@ -893,11 +912,20 @@ declare module "node:stream" {
              * @since v0.9.4
              * @param chunk Optional data to write. For streams not operating in object mode, `chunk` must be a {string}, {Buffer},
              * {TypedArray} or {DataView}. For object mode streams, `chunk` may be any JavaScript value other than `null`.
-             * @param [encoding='utf8'] The encoding, if `chunk` is a string.
              * @param callback Callback for when this chunk of data is flushed.
              * @return `false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.
              */
             write(chunk: any, callback?: (error: Error | null | undefined) => void): boolean;
+            /**
+             * Writes data to the stream, with an explicit encoding for string data.
+             * @see {@link Writable.write} for full details.
+             * @since v0.9.4
+             * @param chunk Optional data to write. For streams not operating in object mode, `chunk` must be a {string}, {Buffer},
+             * {TypedArray} or {DataView}. For object mode streams, `chunk` may be any JavaScript value other than `null`.
+             * @param encoding The encoding, if `chunk` is a string.
+             * @param callback Callback for when this chunk of data is flushed.
+             * @return `false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.
+             */
             write(chunk: any, encoding: BufferEncoding, callback?: (error: Error | null | undefined) => void): boolean;
             /**
              * The `writable.setDefaultEncoding()` method sets the default `encoding` for a `Writable` stream.
@@ -922,13 +950,27 @@ declare module "node:stream" {
              * // Writing more now is not allowed!
              * ```
              * @since v0.9.4
+             * @param cb Callback for when the stream is finished.
+             */
+            end(cb?: () => void): this;
+            /**
+             * Signals that no more data will be written, with one final chunk of data.
+             * @see {@link Writable.end} for full details.
+             * @since v0.9.4
+             * @param chunk Optional data to write. For streams not operating in object mode, `chunk` must be a {string}, {Buffer},
+             * {TypedArray} or {DataView}. For object mode streams, `chunk` may be any JavaScript value other than `null`.
+             * @param cb Callback for when the stream is finished.
+             */
+            end(chunk: any, cb?: () => void): this;
+            /**
+             * Signals that no more data will be written, with one final chunk of data.
+             * @see {@link Writable.end} for full details.
+             * @since v0.9.4
              * @param chunk Optional data to write. For streams not operating in object mode, `chunk` must be a {string}, {Buffer},
              * {TypedArray} or {DataView}. For object mode streams, `chunk` may be any JavaScript value other than `null`.
              * @param encoding The encoding if `chunk` is a string
-             * @param callback Callback for when the stream is finished.
+             * @param cb Callback for when the stream is finished.
              */
-            end(cb?: () => void): this;
-            end(chunk: any, cb?: () => void): this;
             end(chunk: any, encoding: BufferEncoding, cb?: () => void): this;
             /**
              * The `writable.cork()` method forces all written data to be buffered in memory.
@@ -1056,6 +1098,9 @@ declare module "node:stream" {
             writableHighWaterMark?: number | undefined;
             writableCorked?: number | undefined;
         }
+        interface DuplexToWebOptions {
+            readableType?: web.ReadableStreamType | undefined;
+        }
         interface DuplexEventMap extends ReadableEventMap, WritableEventMap {}
         /**
          * Duplex streams are streams that implement both the `Readable` and `Writable` interfaces.
@@ -1109,7 +1154,7 @@ declare module "node:stream" {
              * A utility method for creating a web `ReadableStream` and `WritableStream` from a `Duplex`.
              * @since v17.0.0
              */
-            static toWeb(streamDuplex: NodeJS.ReadWriteStream): web.ReadableWritablePair;
+            static toWeb(streamDuplex: NodeJS.ReadWriteStream, options?: DuplexToWebOptions): web.ReadableWritablePair;
             /**
              * A utility method for creating a `Duplex` from a web `ReadableStream` and `WritableStream`.
              * @since v17.0.0
@@ -1347,7 +1392,7 @@ declare module "node:stream" {
          * Especially useful in error handling scenarios where a stream is destroyed
          * prematurely (like an aborted HTTP request), and will not emit `'end'` or `'finish'`.
          *
-         * The `finished` API provides [`promise version`](https://nodejs.org/docs/latest-v25.x/api/stream.html#streamfinishedstream-options).
+         * The `finished` API provides [`promise version`](https://nodejs.org/docs/latest-v26.x/api/stream.html#streamfinishedstream-options).
          *
          * `stream.finished()` leaves dangling event listeners (in particular `'error'`, `'end'`, `'finish'` and `'close'`) after `callback` has been
          * invoked. The reason for this is so that unexpected `'error'` events (due to
@@ -1446,7 +1491,7 @@ declare module "node:stream" {
          * );
          * ```
          *
-         * The `pipeline` API provides a [`promise version`](https://nodejs.org/docs/latest-v25.x/api/stream.html#streampipelinesource-transforms-destination-options).
+         * The `pipeline` API provides a [`promise version`](https://nodejs.org/docs/latest-v26.x/api/stream.html#streampipelinesource-transforms-destination-options).
          *
          * `stream.pipeline()` will call `stream.destroy(err)` on all streams except:
          *
@@ -1653,7 +1698,8 @@ declare module "node:stream" {
          * console.log(res); // prints 'HELLOWORLD'
          * ```
          *
-         * See [`readable.compose(stream)`](https://nodejs.org/docs/latest-v25.x/api/stream.html#readablecomposestream-options) for `stream.compose` as operator.
+         * For convenience, the `readable.compose(stream)` method is available on
+         * `Readable` and `Duplex` streams as a wrapper for this function.
          * @since v16.9.0
          * @experimental
          */

@@ -1,8 +1,9 @@
 import { IcebergRestCatalog, IcebergError } from 'iceberg-js'
 import { DEFAULT_HEADERS } from '../lib/constants'
-import { isStorageError, StorageError } from '../lib/errors'
-import { Fetch, get, post, remove } from '../lib/fetch'
-import { isValidBucketName, resolveFetch } from '../lib/helpers'
+import { StorageError } from '../lib/common/errors'
+import { Fetch, get, post, remove } from '../lib/common/fetch'
+import { isValidBucketName } from '../lib/common/helpers'
+import BaseApiClient from '../lib/common/BaseApiClient'
 import { AnalyticBucket } from '../lib/types'
 
 type WrapAsyncMethod<T> = T extends (...args: infer A) => Promise<infer R>
@@ -17,12 +18,7 @@ export type WrappedIcebergRestCatalog = {
  * Client class for managing Analytics Buckets using Iceberg tables
  * Provides methods for creating, listing, and deleting analytics buckets
  */
-export default class StorageAnalyticsClient {
-  protected url: string
-  protected headers: { [key: string]: string }
-  protected fetch: Fetch
-  protected shouldThrowOnError = false
-
+export default class StorageAnalyticsClient extends BaseApiClient<StorageError> {
   /**
    * @alpha
    *
@@ -30,36 +26,31 @@ export default class StorageAnalyticsClient {
    *
    * **Public alpha:** This API is part of a public alpha release and may not be available to your account type.
    *
-   * @category Analytics Buckets
+   * @category Storage
+   * @subcategory Analytics Buckets
    * @param url - The base URL for the storage API
    * @param headers - HTTP headers to include in requests
    * @param fetch - Optional custom fetch implementation
    *
-   * @example
+   * @example Using supabase-js (recommended)
    * ```typescript
+   * import { createClient } from '@supabase/supabase-js'
+   *
+   * const supabase = createClient('https://xyzcompany.supabase.co', 'your-publishable-key')
+   * const { data, error } = await supabase.storage.analytics.listBuckets()
+   * ```
+   *
+   * @example Standalone import for bundle-sensitive environments
+   * ```typescript
+   * import { StorageAnalyticsClient } from '@supabase/storage-js'
+   *
    * const client = new StorageAnalyticsClient(url, headers)
    * ```
    */
   constructor(url: string, headers: { [key: string]: string } = {}, fetch?: Fetch) {
-    this.url = url.replace(/\/$/, '')
-    this.headers = { ...DEFAULT_HEADERS, ...headers }
-    this.fetch = resolveFetch(fetch)
-  }
-
-  /**
-   * @alpha
-   *
-   * Enable throwing errors instead of returning them in the response
-   * When enabled, failed operations will throw instead of returning { data: null, error }
-   *
-   * **Public alpha:** This API is part of a public alpha release and may not be available to your account type.
-   *
-   * @category Analytics Buckets
-   * @returns This instance for method chaining
-   */
-  public throwOnError(): this {
-    this.shouldThrowOnError = true
-    return this
+    const finalUrl = url.replace(/\/$/, '')
+    const finalHeaders = { ...DEFAULT_HEADERS, ...headers }
+    super(finalUrl, finalHeaders, fetch, 'storage')
   }
 
   /**
@@ -70,7 +61,8 @@ export default class StorageAnalyticsClient {
    *
    * **Public alpha:** This API is part of a public alpha release and may not be available to your account type.
    *
-   * @category Analytics Buckets
+   * @category Storage
+   * @subcategory Analytics Buckets
    * @param name A unique name for the bucket you are creating
    * @returns Promise with response containing newly created analytics bucket or error
    *
@@ -95,6 +87,10 @@ export default class StorageAnalyticsClient {
    *   "error": null
    * }
    * ```
+   *
+   * @remarks
+   * - Creates a new analytics bucket using Iceberg tables
+   * - Analytics buckets are optimized for analytical queries and data processing
    */
   async createBucket(name: string): Promise<
     | {
@@ -106,19 +102,9 @@ export default class StorageAnalyticsClient {
         error: StorageError
       }
   > {
-    try {
-      const data = await post(this.fetch, `${this.url}/bucket`, { name }, { headers: this.headers })
-      return { data, error: null }
-    } catch (error) {
-      if (this.shouldThrowOnError) {
-        throw error
-      }
-      if (isStorageError(error)) {
-        return { data: null, error }
-      }
-
-      throw error
-    }
+    return this.handleOperation(async () => {
+      return await post(this.fetch, `${this.url}/bucket`, { name }, { headers: this.headers })
+    })
   }
 
   /**
@@ -129,7 +115,8 @@ export default class StorageAnalyticsClient {
    *
    * **Public alpha:** This API is part of a public alpha release and may not be available to your account type.
    *
-   * @category Analytics Buckets
+   * @category Storage
+   * @subcategory Analytics Buckets
    * @param options Query parameters for listing buckets
    * @param options.limit Maximum number of buckets to return
    * @param options.offset Number of buckets to skip
@@ -166,6 +153,10 @@ export default class StorageAnalyticsClient {
    *   "error": null
    * }
    * ```
+   *
+   * @remarks
+   * - Retrieves the details of all Analytics Storage buckets within an existing project
+   * - Only returns buckets of type 'ANALYTICS'
    */
   async listBuckets(options?: {
     limit?: number
@@ -183,7 +174,7 @@ export default class StorageAnalyticsClient {
         error: StorageError
       }
   > {
-    try {
+    return this.handleOperation(async () => {
       // Build query string from options
       const queryParams = new URLSearchParams()
       if (options?.limit !== undefined) queryParams.set('limit', options.limit.toString())
@@ -195,19 +186,8 @@ export default class StorageAnalyticsClient {
       const queryString = queryParams.toString()
       const url = queryString ? `${this.url}/bucket?${queryString}` : `${this.url}/bucket`
 
-      const data = await get(this.fetch, url, { headers: this.headers })
-
-      return { data: data, error: null }
-    } catch (error) {
-      if (this.shouldThrowOnError) {
-        throw error
-      }
-      if (isStorageError(error)) {
-        return { data: null, error }
-      }
-
-      throw error
-    }
+      return await get(this.fetch, url, { headers: this.headers })
+    })
   }
 
   /**
@@ -219,7 +199,8 @@ export default class StorageAnalyticsClient {
    *
    * **Public alpha:** This API is part of a public alpha release and may not be available to your account type.
    *
-   * @category Analytics Buckets
+   * @category Storage
+   * @subcategory Analytics Buckets
    * @param bucketName The unique identifier of the bucket you would like to delete
    * @returns Promise with response containing success message or error
    *
@@ -240,6 +221,9 @@ export default class StorageAnalyticsClient {
    *   "error": null
    * }
    * ```
+   *
+   * @remarks
+   * - Deletes an analytics bucket
    */
   async deleteBucket(bucketName: string): Promise<
     | {
@@ -251,24 +235,14 @@ export default class StorageAnalyticsClient {
         error: StorageError
       }
   > {
-    try {
-      const data = await remove(
+    return this.handleOperation(async () => {
+      return await remove(
         this.fetch,
         `${this.url}/bucket/${bucketName}`,
         {},
         { headers: this.headers }
       )
-      return { data, error: null }
-    } catch (error) {
-      if (this.shouldThrowOnError) {
-        throw error
-      }
-      if (isStorageError(error)) {
-        return { data: null, error }
-      }
-
-      throw error
-    }
+    })
   }
 
   /**
@@ -281,7 +255,8 @@ export default class StorageAnalyticsClient {
    *
    * **Public alpha:** This API is part of a public alpha release and may not be available to your account type.
    *
-   * @category Analytics Buckets
+   * @category Storage
+   * @subcategory Analytics Buckets
    * @param bucketName - The name of the analytics bucket (warehouse) to connect to
    * @returns The wrapped Iceberg catalog client
    * @throws {StorageError} If the bucket name is invalid
