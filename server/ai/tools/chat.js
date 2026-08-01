@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { db } from "../../db.js";
 import { tool } from "langchain/tools";
-import ModelManager from "../models/modelManager.js";
+import ModelManager from "../models/modelmanager.js";
 
 import { cohereRerank } from "../../utils/cohereReRankerClient.js";
 
