@@ -1,7 +1,7 @@
 import { tool } from "langchain/tools";
 import { z } from "zod";
 import { db } from "../../db.js";
-import ModelManager from "../models/modelManager.js";
+import ModelManager from "../models/modelmanager.js";
 
 export const movingFileTool = tool(
   async ({ userId, moves, query }) => {
