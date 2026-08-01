@@ -6,9 +6,10 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
 
-// if (process.env.NODE_ENV === "production") {
-//   await import("./queue/worker.js");
-// }
+if (process.env.NODE_ENV === "production") {
+  await import("./queue/worker.js");
+  await import("./queue/aiWorker.js");
+}
 import { initDB } from "./db.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 
