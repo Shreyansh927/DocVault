@@ -7,7 +7,7 @@ import rediss from "./redis.js";
 
 import { graph } from "../ai/graphs/graph.js";
 import { db } from "../db.js";
-import ModelManager from "../ai/models/modelManager.js";
+import ModelManager from "../ai/models/modelmanager.js";
 
 const worker = new Worker(
   "ai-query-processing",
