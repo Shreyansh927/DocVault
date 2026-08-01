@@ -283,26 +283,21 @@
   }
 }
 
-/* ================= MOBILE WITH BOTTOM NAV (520px) ================= */
+/* ================= MOBILE HEADER (520px) ================= */
 @media (max-width: 520px) {
-  body {
-    padding-bottom: 80px;
-  }
-
   .app-header {
-    position: fixed;
-    bottom: 0;
+    position: sticky;
+    top: 0;
     left: 0;
     right: 0;
-    top: auto;
-    border-bottom: none;
-    border-top: 1px solid var(--border);
-    padding: 8px 8px;
-    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    border-top: none;
+    padding: 8px 10px;
+    gap: 6px;
     background: linear-gradient(
       180deg,
       rgba(2, 6, 23, 1),
-      rgba(8, 10, 18,1)
+      rgba(8, 10, 18, 1)
     );
     z-index: 1000;
   }
@@ -315,32 +310,34 @@
     flex: 1;
     gap: 4px;
     margin: 0;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
   .nav-btn {
-    flex: 1;
-    width: 0;
-    height: 50px;
-    padding: 0;
+    flex: 0 1 auto;
+    min-width: 46px;
+    height: 44px;
+    padding: 0 8px;
     border-radius: 10px;
     gap: 4px;
     flex-direction: column;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
   }
 
   .nav-icon {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
 
   .nav-label {
     display: block;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 500;
     text-align: center;
   }
 
   .header-profile {
-    display: none;
+    display: flex;
   }
 
   .header-separator {

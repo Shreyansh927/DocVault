@@ -42,18 +42,21 @@ export const allFiles = async (req, res) => {
     const files = await db.query(
       `
       SELECT
-      
-        files.id,
-        files.filename,
-        files.encrypted_link,
-        files.file_type,
-        files.size,
-        files.ai_summary,
-        files.created_at
-      FROM files left join folders on files.folder_id = folders.id
-      WHERE folder_id=$1 AND is_deleted=false AND files.created_at < $2
-      ORDER BY created_at DESC
-      LIMIT 5
+    files.id,
+    files.filename,
+    files.encrypted_link,
+    files.file_type,
+    files.size,
+    files.ai_summary,
+    files.created_at
+FROM files
+LEFT JOIN folders
+ON files.folder_id = folders.id
+WHERE files.folder_id = $1
+  AND files.is_deleted = false
+  AND files.created_at < $2
+ORDER BY files.created_at DESC
+;
      
       `,
       [folderId, timeline],

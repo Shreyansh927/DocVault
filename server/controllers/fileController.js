@@ -8,150 +8,7 @@ import { GoogleGenAI } from "@google/genai";
 import officeParser from "officeparser";
 import Tesseract from "tesseract.js";
 import sharp from "sharp";
-
-const tessractTextExtraction = async (file) => {
-  try {
-    const processedImage = await sharp(file.buffer)
-      .grayscale()
-      .normalize()
-      .sharpen()
-      .toBuffer();
-
-    const {
-      data: { text },
-    } = await Tesseract.recognize(processedImage, "eng");
-
-    return text;
-  } catch (err) {
-    console.error("OCR Error:", err);
-    return null;
-  }
-};
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error("GEMINI_API_KEY is missing in environment variables");
-}
-
-/* = GEMINI SETUP == */
-const genAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
-const generateEmbedding = async (text) => {
-  try {
-    const result = await genAI.models.embedContent({
-      model: "gemini-embedding-001",
-      contents: [
-        {
-          role: "user",
-          parts: [{ text }],
-        },
-      ],
-    });
-
-    return result.embeddings[0].values.slice(0, 3072);
-  } catch (err) {
-    console.error("Gemini embedding failed:", err);
-    return null;
-  }
-};
-
-/* ================= TEXT EXTRACTION ================= */
-const extractTextFromFile = async (file) => {
-  try {
-    if (
-      file.mimetype.includes("presentation") ||
-      file.mimetype.includes("wordprocessingml")
-    ) {
-      return await officeParser.parseOfficeAsync(file.buffer);
-    }
-
-    if (file.mimetype === "text/plain") {
-      return file.buffer.toString("utf-8");
-    }
-
-    return null;
-  } catch (err) {
-    console.warn("Office parse failed:", err.message);
-    return null;
-  }
-};
-
-/*  AI SUMMARIZATION*/
-export const summarizeFileWithAI = async (file) => {
-  try {
-    if (!file) return null;
-
-    /* ---------- PDF ---------- */
-    if (file.mimetype === "application/pdf") {
-      if (file.size > 10 * 1024 * 1024) return null;
-
-      const base64PDF = file.buffer.toString("base64");
-
-      const result = await genAI.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: "Summarize this document briefly in 10-15 lines.and also store the type o document like is it a resume , giftcard etc store summary in brief 20-30 lines and also provide a title for the document",
-              },
-              {
-                inlineData: {
-                  mimeType: "application/pdf",
-                  data: base64PDF,
-                },
-              },
-            ],
-          },
-        ],
-      });
-
-      return result.text;
-    }
-
-    /* ---------- IMAGE ---------- */
-    if (file.mimetype.startsWith("image/")) {
-      const result = await genAI.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: "Summarize this document briefly in 10-15 lines.and also store the type o document like is it a resume , giftcard etc store summary in brief 20-30 lines and also provide a title for the document",
-              },
-              {
-                inlineData: {
-                  mimeType: file.mimetype,
-                  data: file,
-                },
-              },
-            ],
-          },
-        ],
-      });
-
-      return result.text;
-    }
-
-    /* ---------- DOC / TXT ---------- */
-    const extractedText = await extractTextFromFile(file);
-    if (!extractedText || extractedText.length < 100) return null;
-
-    const safeText = extractedText.slice(0, 12_000);
-
-    const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `Summarize the following content in detail:\n\n${safeText}`,
-    });
-
-    return result.text;
-  } catch (err) {
-    console.error("AI summary failed:", err.message);
-    return null;
-  }
-};
+import { auth } from "googleapis/build/src/apis/abusiveexperiencereport/index.js";
 
 /* ================= UPLOAD FILES ================= */
 export const uploadFiles = async (req, res) => {
@@ -165,6 +22,8 @@ export const uploadFiles = async (req, res) => {
         error: "Missing data",
       });
     }
+    const user = await db.query(`SELECT * FROM users WHERE id=$1`, [userId]);
+    const auth_uuid = user.rows[0].auth_uuid;
 
     const folder = await db.query(
       `
@@ -229,6 +88,19 @@ export const uploadFiles = async (req, res) => {
 
       uploadedFiles.push(savedFile);
     }
+    console.log(uploadedFiles);
+    let allUploadedFileNames = "";
+    for (let file of uploadedFiles) {
+      allUploadedFileNames += `${file.filename}`;
+    }
+    await db.query(
+      `INSERT INTO notifications (user_id, sender_id, type, text_notification, file_route, sender_name, sender_profile_image, status, created_at) VALUES ($1, NULL, 'FILE_UPLOAD', $2, $3, null, null, null, NOW())`,
+      [
+        auth_uuid,
+        `files ${allUploadedFileNames} are uploaded successfully!!!`,
+        `/files/${folderId}`,
+      ],
+    );
 
     return res.status(201).json({
       success: true,
@@ -246,31 +118,31 @@ export const uploadFiles = async (req, res) => {
   }
 };
 
-export const downloadFile = async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const userId = req.user.id;
+// export const downloadFile = async (req, res) => {
+//   try {
+//     const { fileId } = req.params;
+//     const userId = req.user.id;
 
-    const result = await db.query(
-      `
-      SELECT f.encrypted_link
-      FROM files f
-      JOIN folders fo ON f.folder_id = fo.id
-      WHERE f.id=$1 AND fo.user_id=$2 AND f.is_deleted=false
-      `,
-      [fileId, userId],
-    );
+//     const result = await db.query(
+//       `
+//       SELECT f.encrypted_link
+//       FROM files f
+//       JOIN folders fo ON f.folder_id = fo.id
+//       WHERE f.id=$1 AND fo.user_id=$2 AND f.is_deleted=false
+//       `,
+//       [fileId, userId],
+//     );
 
-    if (!result.rows.length) {
-      return res.status(404).json({ error: "File not found" });
-    }
+//     if (!result.rows.length) {
+//       return res.status(404).json({ error: "File not found" });
+//     }
 
-    return res.json({ url: result.rows[0].encrypted_link });
-  } catch (err) {
-    console.error("DOWNLOAD ERROR:", err.message);
-    return res.status(500).json({ error: "Cannot download file" });
-  }
-};
+//     return res.json({ url: result.rows[0].encrypted_link });
+//   } catch (err) {
+//     console.error("DOWNLOAD ERROR:", err.message);
+//     return res.status(500).json({ error: "Cannot download file" });
+//   }
+// };
 
 /* ================= SOFT DELETE SINGLE FILE ================= */
 export const deleteFile = async (req, res) => {

@@ -28,3 +28,17 @@ export const RelatedRag = async (req, res) => {
     return res.status(501).json({ error: err });
   }
 };
+
+export const getFullRagHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { rows } = await db.query(
+      `SELECT query, response, created_at, file_id, folder_id FROM ai_query_jobs WHERE user_id = $1 ORDER BY created_at DESC`,
+      [userId],
+    );
+    return res.status(200).json({ ragHistory: rows });
+  } catch (err) {
+    console.log(err);
+    return res.status(501).json({ error: err });
+  }
+};

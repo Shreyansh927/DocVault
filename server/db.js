@@ -71,7 +71,7 @@ export const initDB = async () => {
     );
   `);
 
-  /* ---------- VECTOR INDEX (IMPORTANT) ---------- */
+  // vector indexx using ivfflat
   await db.query(`
     CREATE INDEX IF NOT EXISTS idx_files_embedding
     ON files
@@ -126,9 +126,9 @@ export const initDB = async () => {
       user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
       sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
 
-      sender_name TEXT NOT NULL,
+      sender_name TEXT ,
       sender_profile_image TEXT,
-      type TEXT NOT NULL,
+      type TEXT ,
       status TEXT DEFAULT 'PENDING',
       seen BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP DEFAULT NOW(),
@@ -170,6 +170,42 @@ export const initDB = async () => {
 
 
   `);
+
+  await db.query(`
+   CREATE TABLE IF NOT EXISTS ai_query_jobs (
+    id SERIAL PRIMARY KEY,
+
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    query TEXT NOT NULL,
+
+    response TEXT,
+
+    query_embedding VECTOR(3072),
+
+    response_embedding VECTOR(3072),
+
+    status VARCHAR(20) NOT NULL DEFAULT 'QUEUED',
+
+    bullmq_job_id VARCHAR(100),
+
+    file_id INTEGER REFERENCES files(id) ON DELETE SET NULL,
+
+    folder_id INTEGER REFERENCES folders(id) ON DELETE SET NULL,
+
+    error_message TEXT,
+
+    retry_count INTEGER DEFAULT 0,
+
+    started_at TIMESTAMP,
+
+    completed_at TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    updated_at TIMESTAMP DEFAULT NOW()
+); 
+    `);
 
   await db.query(`
     CREATE INDEX IF NOT EXISTS idx_notifications_user_id

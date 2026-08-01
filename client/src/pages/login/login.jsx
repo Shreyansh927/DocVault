@@ -20,6 +20,14 @@ export default function Login() {
       .then(() => setIsAuth(true))
       .catch(() => setIsAuth(false));
 
+    if (window.location.pathname === "/login") {
+      const f = async () => {
+        await api.get("/api/auth/refresh");
+      };
+
+      f();
+    }
+
     // return () => controller.abort();
   }, [isAuth]);
 

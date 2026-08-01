@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import {Link} from "react-router-dom"
 import Header from "../../components/header/header.jsx";
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
@@ -25,7 +26,7 @@ const Notifications = () => {
       const res = await axios.get(`${API_BASE_URL}/api/notifications`, {
         withCredentials: true,
       });
-      setNotifications(res.data.notifications || []);
+      setNotifications(res.data?.notifications || []);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load notifications");
@@ -44,7 +45,7 @@ const Notifications = () => {
 
       setNotifications((prev) =>
         prev.map((n) =>
-          n.sender_id === senderId && n.type === "FRIEND_REQUEST"
+          n?.sender_id === senderId && n.type === "FRIEND_REQUEST"
             ? { ...n, status: "ACCEPTED" }
             : n,
         ),
@@ -161,57 +162,71 @@ const Notifications = () => {
                   <div className="notification-header">
                     <div>
                       <p className="notification-type">
-                        {n.type.replace(/_/g, " ")}
+                        {n?.type.replace(/_/g, " ")}
                       </p>
                       <p className="notification-body">
-                        {n.type === "FRIEND_REQUEST" &&
-                          n.status === "PENDING" && (
+                        {n?.type === "FRIEND_REQUEST" &&
+                          n?.status === "PENDING" && (
                             <>
-                              <strong>{n.sender_name}</strong> sent you a friend
+                              <strong>{n?.sender_name}</strong> sent you a
+                              friend request.
+                            </>
+                          )}
+                        {n?.type === "FRIEND_REQUEST" &&
+                          n?.status === "ACCEPTED" && (
+                            <>
+                              You accepted <strong>{n?.sender_name}</strong>'s
                               request.
                             </>
                           )}
-                        {n.type === "FRIEND_REQUEST" &&
-                          n.status === "ACCEPTED" && (
-                            <>
-                              You accepted <strong>{n.sender_name}</strong>'s
-                              request.
-                            </>
-                          )}
-                        {n.type === "FRIEND_REQUEST_ACCEPTED" && (
+                        {n?.type === "FRIEND_REQUEST_ACCEPTED" && (
                           <>
-                            <strong>{n.sender_name}</strong> accepted your
+                            <strong>{n?.sender_name}</strong> accepted your
                             friend request.
                           </>
                         )}
-                        {n.type === "FRIEND_REQUEST_REJECTED" && (
+                        {n?.type === "FRIEND_REQUEST_REJECTED" && (
                           <>
-                            <strong>{n.sender_name}</strong> rejected your
+                            <strong>{n?.sender_name}</strong> rejected your
                             friend request.
+                          </>
+                        )}
+                        {n?.type === "FILE_UPLOAD" && (
+                          <>
+                            <strong>{n?.text_notification}</strong>
                           </>
                         )}
                       </p>
                     </div>
                     <span className="notification-badge">
-                      {n.status.toLowerCase()}
+                      {n?.status?.toLowerCase()}
                     </span>
                   </div>
 
-                  {n.type === "FRIEND_REQUEST" && n.status === "PENDING" && (
+                  {n?.type === "FRIEND_REQUEST" && n?.status === "PENDING" && (
                     <div className="notification-actions">
                       <button
                         className="btn btn-primary"
-                        onClick={() => acceptRequest(n.sender_id)}
+                        onClick={() => acceptRequest(n?.sender_id)}
                       >
                         Accept
                       </button>
                       <button
                         className="btn btn-secondary"
-                        onClick={() => denyRequest(n.sender_id)}
+                        onClick={() => denyRequest(n?.sender_id)}
                       >
                         Deny
                       </button>
                     </div>
+                  )}
+                  {n?.type === "FILE_UPLOAD" && (
+                    <>
+                      <div className="notification-actions">
+                        <Link to={n?.file_route}>
+                          <button className="btn btn-primary">VIEW</button>
+                        </Link>
+                      </div>
+                    </>
                   )}
                 </article>
               ))}

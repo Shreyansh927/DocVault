@@ -1,10 +1,13 @@
 import { db } from "../db.js";
 
 /* ================= SEND REQUEST ================= */
+
 export const sendRequest = async (req, res) => {
   try {
     const senderId = req.user.id;
     const receiverId = Number(req.body.receiverId);
+
+    await db.query("BEGIN");
 
     if (!receiverId || senderId === receiverId) {
       return res.status(400).json({ error: "Invalid request" });
@@ -34,32 +37,37 @@ export const sendRequest = async (req, res) => {
       await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [receiverId])
     ).rows[0].auth_uuid;
 
-    await db.query(
+    const result = await db.query(
       `
       INSERT INTO notifications
       (user_id, sender_id, sender_name, sender_profile_image, type, status)
       VALUES ($1,$2,$3,$4,'FRIEND_REQUEST','PENDING')
       ON CONFLICT DO NOTHING
+      
       `,
       [receiverAuthUUID, senderId, sender.name, sender.profile_image],
     );
+
+    await db.query("COMMIT");
+
     console.log("REQ.USER:", req.user);
     res.json({ success: true });
   } catch (err) {
+    await db.query("ROLLBACK")
     console.error("SEND REQUEST ERROR:", err.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-/* ================= ACCEPT FRIEND REQUEST ================= */
+// ACCEPT FRIEND REQUEST
 export const acceptRequest = async (req, res) => {
-  const receiverId = req.user.id; // INTEGER
+  const receiverId = req.user.id; 
   const senderId = Number(req.body.senderId);
 
   try {
     await db.query("BEGIN");
 
-    /* ---------- FETCH AUTH UUIDS ---------- */
+    // fetching user
     const receiver = await db.query(
       `SELECT auth_uuid, name, profile_image FROM users WHERE id=$1`,
       [receiverId],
@@ -69,7 +77,7 @@ export const acceptRequest = async (req, res) => {
       senderId,
     ]);
 
-    /* ---------- UPDATE RECEIVER NOTIFICATION ---------- */
+    // UPDATE RECEIVER NOTIFICATION
     await db.query(
       `
       UPDATE notifications
@@ -316,8 +324,6 @@ export const restrictShowFolder = async (req, res) => {
     });
   }
 };
-
-
 
 /* ================= GET SHARED FOLDERS ================= */
 export const getSharedFoldersPractice = async (req, res) => {

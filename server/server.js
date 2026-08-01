@@ -1,13 +1,14 @@
 import express from "express";
+import os from "os";
 
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
 
-if (process.env.NODE_ENV === "production") {
-  await import("./queue/worker.js");
-}
+// if (process.env.NODE_ENV === "production") {
+//   await import("./queue/worker.js");
+// }
 import { initDB } from "./db.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 
@@ -31,7 +32,6 @@ import googleDriveConnectRouter from "./routes/googleDriveConnect.js";
 
 const app = express();
 
-/* ---------- CORE ---------- */
 app.use(helmet());
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
@@ -48,7 +48,7 @@ app.use(
   }),
 );
 
-/* ---------- ROUTES ---------- */
+// ROUTES
 app.get("/", (req, res) => {
   res.send("API is running");
 });
@@ -69,16 +69,23 @@ app.use("/api", connectionRouter);
 app.use("/api/google-drive", googleDriveConnectRouter);
 app.use("/api/messages", authMiddleware, messageRouter);
 app.get("/api/all-users", authMiddleware, allUsers);
-app.get("/test-db", async (req, res) => {
-  try {
-    const result = await db.query("SELECT NOW()");
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "DB failed" });
-  }
+// app.get("/test-db", async (req, res) => {
+//   try {
+//     const result = await db.query("SELECT NOW()");
+//     res.json(result.rows);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "DB failed" });
+//   }
+// });
+
+app.use((req, res, next) => {
+  console.log(
+    `Host: ${os.hostname()} | PID: ${process.pid} | ${req.method} ${req.originalUrl}`,
+  );
+  next();
 });
-/* ---------- START ---------- */
+// START
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {

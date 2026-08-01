@@ -1,146 +1,362 @@
-/* =========================================================
-   GLOBAL SAFETY
-========================================================= */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap");
+
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
 }
 
-/* =========================================================
-   ROOT LAYOUT
-========================================================= */
-.fileview-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  padding: 32px;
+.fileview-shell {
   min-height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
-  color: #e5e7eb;
+  padding: 28px;
   background:
-    radial-gradient(800px 400px at top right, rgba(99,102,241,0.18), transparent),
-    linear-gradient(180deg, #0f172a, #020617);
+    radial-gradient(
+      900px 480px at 100% 0%,
+      rgba(99, 102, 241, 0.24),
+      transparent 60%
+    ),
+    radial-gradient(
+      700px 360px at 0% 100%,
+      rgba(34, 211, 238, 0.18),
+      transparent 65%
+    ),
+    linear-gradient(135deg, #020617 0%, #0f172a 45%, #111827 100%);
+  color: #f8fafc;
 }
 
-/* =========================================================
-   FILE CARD
-========================================================= */
-.file-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 18px;
+.fileview-hero {
+  max-width: 1240px;
+  margin: 0 auto 24px;
   padding: 28px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
-  overflow: hidden;
-}
-
-/* =========================================================
-   FILE TITLE
-========================================================= */
-.file-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 14px;
-  word-break: break-word;       /* 🔑 prevents overflow */
-  overflow-wrap: anywhere;     /* 🔑 */
-}
-
-/* =========================================================
-   META
-========================================================= */
-.file-meta {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 28px;
+  background: rgba(15, 23, 42, 0.74);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.42);
+  backdrop-filter: blur(24px);
   display: flex;
-  flex-wrap: wrap;             /* 🔑 wrap instead of overflow */
-  gap: 16px;
-  font-size: 0.85rem;
-  color: #9ca3af;
-  margin-bottom: 28px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
 }
 
-/* =========================================================
-   BUTTON
-========================================================= */
-.primary-btn {
-  background: linear-gradient(135deg, #6366f1, #22d3ee);
+.fileview-hero__copy {
+  flex: 1;
+}
+
+.fileview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.16);
+  color: #c7d2fe;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.fileview-title {
+  margin: 0 0 10px;
+  font-family: "Manrope", "Inter", sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.fileview-subtitle {
+  margin: 0;
+  max-width: 720px;
+  color: #cbd5e1;
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.fileview-hero__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fileview-btn {
   border: none;
-  color: #020617;
-  padding: 12px 22px;
-  border-radius: 12px;
-  font-weight: 600;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
-.primary-btn:hover {
+.fileview-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
 }
 
-.primary-btn:active {
-  transform: scale(0.96);
+.fileview-btn--primary {
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  color: #020617;
+  box-shadow: 0 12px 28px rgba(56, 189, 248, 0.22);
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
-.summary-card {
+.fileview-btn--ghost {
   background: rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  backdrop-filter: blur(16px);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  overflow-wrap: anywhere;     /* 🔑 long AI text wraps */
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.summary-card h3 {
-  font-size: 1.2rem;
+.fileview-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 24px;
+}
+
+.fileview-panel {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 18px 45px rgba(2, 6, 23, 0.3);
+}
+
+.fileview-panel--primary {
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.88),
+    rgba(30, 41, 59, 0.8)
+  );
+}
+
+.fileview-panel--accent {
+  background: linear-gradient(
+    145deg,
+    rgba(30, 27, 75, 0.9),
+    rgba(15, 23, 42, 0.86)
+  );
+}
+
+.fileview-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.fileview-icon-badge {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(99, 102, 241, 0.2);
+  font-size: 1.1rem;
+}
+
+.fileview-icon-badge--accent {
+  background: rgba(34, 211, 238, 0.16);
+}
+
+.fileview-panel__eyebrow {
+  margin: 0 0 4px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.fileview-panel__title {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.fileview-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   margin-bottom: 16px;
 }
 
-.summary-text {
+.fileview-stat {
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fileview-stat__label {
+  display: block;
+  margin-bottom: 8px;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.fileview-stat strong,
+.fileview-meta-row strong {
+  color: #f8fafc;
+  font-size: 0.96rem;
+}
+
+.fileview-meta-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.fileview-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+}
+
+.fileview-summary-card {
+  min-height: 240px;
+  padding: 18px;
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+    rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.fileview-summary-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.fileview-summary-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #93c5fd;
+}
+
+.fileview-summary-card__status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  background: rgba(34, 211, 238, 0.12);
+  color: #bae6fd;
+}
+
+.fileview-summary-body {
+  display: grid;
+  gap: 12px;
+}
+
+.fileview-summary {
+  margin: 0;
+  color: #e2e8f0;
+  line-height: 1.85;
+  font-size: 0.98rem;
+}
+
+.fileview-summary-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 10px;
+  color: #e2e8f0;
+}
+
+.fileview-summary-list li {
   line-height: 1.7;
-  font-size: 0.95rem;
-  color: #e5e7eb;
+  color: #e2e8f0;
 }
 
-.summary-empty {
-  font-size: 0.9rem;
-  color: #9ca3af;
+.fileview-summary-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #dbeafe;
+  font-size: 0.84rem;
+}
+
+.fileview-empty {
+  margin: 0;
+  color: #94a3b8;
   font-style: italic;
-  text-align: center;
 }
 
-/* =========================================================
-   LOADING
-========================================================= */
-.loading {
-  padding: 40px;
-  color: #9ca3af;
-  text-align: center;
+.fileview-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
 }
 
-/* =========================================================
-   RESPONSIVE (MOST IMPORTANT)
-========================================================= */
-@media (max-width: 900px) {
-  .fileview-container {
-    grid-template-columns: 1fr; /* 🔑 stack vertically */
+.fileview-pill {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.12);
+  color: #bae6fd;
+  font-size: 0.84rem;
+}
+
+.fileview-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+@media (max-width: 920px) {
+  .fileview-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fileview-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 480px) {
-  .fileview-container {
-    padding: 20px;
+@media (max-width: 640px) {
+  .fileview-shell {
+    padding: 16px;
   }
 
-  .primary-btn {
+  .fileview-hero,
+  .fileview-panel {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .fileview-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .fileview-hero__actions {
     width: 100%;
+  }
+
+  .fileview-btn {
+    flex: 1;
+    justify-content: center;
   }
 }

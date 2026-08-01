@@ -15,6 +15,8 @@ export const getNotifications = async (req, res) => {
         sender_id,
         sender_name,
         sender_profile_image,
+        text_notification,
+        file_route,
         type,
         status,
         seen,

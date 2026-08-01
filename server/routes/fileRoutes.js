@@ -7,7 +7,7 @@ import {
   deleteAllFiles,
   restoreFile,
   restoreAllFiles,
-  downloadFile,
+  // downloadFile,
   accessFile,
 } from "../controllers/fileController.js";
 import { viewIndividualFile } from "../all-users/indivisualFile.js";
@@ -21,7 +21,7 @@ fileRoutes.post(
   uploadFiles,
 );
 
-fileRoutes.get("/:fileId/download", authMiddleware, downloadFile);
+// fileRoutes.get("/:fileId/download", authMiddleware, downloadFile);
 
 fileRoutes.get("/:fileId/access", authMiddleware, accessFile);
 fileRoutes.get("/:folderId/:fileId", authMiddleware, viewIndividualFile);

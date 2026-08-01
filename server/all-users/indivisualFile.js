@@ -8,13 +8,13 @@ export const viewIndividualFile = async (req, res) => {
     const cacheKey = `individualFile:${fileId}:folder:${folderId}:user:${userId}`;
 
     // Check Redis cache first
-    const cachedFile = await redis.get(cacheKey);
-    if (cachedFile) {
-      return res.json({
-        file: JSON.parse(cachedFile),
-        message: "FROM CACHE",
-      });
-    }
+    // const cachedFile = await redis.get(cacheKey);
+    // if (cachedFile) {
+    //   return res.json({
+    //     file: JSON.parse(cachedFile),
+    //     message: "FROM CACHE",
+    //   });
+    // }
 
     if (!folderId || !fileId) {
       return res.status(400).json({ error: "Missing parameters" });
@@ -42,11 +42,11 @@ export const viewIndividualFile = async (req, res) => {
       return res.status(404).json({ error: "File not found or access denied" });
     }
 
-    await redis.setEx(cacheKey, 300, JSON.stringify(result.rows[0]), (err) => {
-      if (err) {
-        console.warn("Redis write failed");
-      }
-    });
+    // await redis.setEx(cacheKey, 300, JSON.stringify(result.rows[0]), (err) => {
+    //   if (err) {
+    //     console.warn("Redis write failed");
+    //   }
+    // });
     res.status(200).json({ file: result.rows[0] });
   } catch (err) {
     console.error("VIEW FILE ERROR:", err);

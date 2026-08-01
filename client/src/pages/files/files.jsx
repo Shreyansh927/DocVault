@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import "./files.css";
 import Header from "../../components/header/header";
 import { useNavigate, useParams } from "react-router-dom";
-import axios, { all } from "axios";
+import axios from "axios";
 import { MdUpload, MdClose, MdDelete } from "react-icons/md";
 import { TbRestore } from "react-icons/tb";
 import Cookies from "js-cookie";
@@ -57,7 +57,7 @@ const Files = () => {
     } finally {
       setLoadingDriveFiles(false);
     }
-  }, []);
+  }, [API_BASE_URL]);
 
   // const selectFile = (f) => {
   //   setSelectedFiles((prev) => [...prev, f.id]);
@@ -108,7 +108,7 @@ const Files = () => {
       setIsDriveConnected(response.data.connected);
     };
     checkDriveConnection();
-  }, []);
+  }, [API_BASE_URL]);
 
   const viewFolder = (folderId) => {
     setCurrentFolderId(folderId);
@@ -134,7 +134,7 @@ const Files = () => {
       await saveUserIndivisualFolder(res.data.allFiles, folderId);
     } catch (err) {
       console.error(err);
-      toast.info("Serving offline data")
+      toast.info("Serving offline data");
       const indexedDbFolderFiles = await getFolder(folderId);
       if (indexedDbFolderFiles.length > 0) {
         setAllFiles(indexedDbFolderFiles);
@@ -144,13 +144,13 @@ const Files = () => {
     } finally {
       setLoading(false);
     }
-  }, [folderId, timeline]);
+  }, [API_BASE_URL, folderId, timeline]);
 
   const nextTimeline = () => {
     setTimeline(allFiles[allFiles.length - 1]?.created_at);
   };
 
-  const fetchAllTrashFiles = async () => {
+  const fetchAllTrashFiles = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get(`${API_BASE_URL}/api/get-all-trash-files`, {
@@ -164,13 +164,17 @@ const Files = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_BASE_URL, folderId]);
 
-  /* ---------- Upload ---------- */
+  // upload
   const uploadFiles = async () => {
     if (!selectedFiles.length) return;
 
     setIsUploading(true);
+    toast.info(
+      "uploading is being processed in bg you can continue browsing!!!",
+    );
+    setShowUploadModal(false);
 
     const formData = new FormData();
     selectedFiles.forEach((f) => formData.append("files", f));
@@ -184,7 +188,9 @@ const Files = () => {
         onUploadProgress: (p) =>
           setUploadProgress(Math.round((p.loaded * 100) / p.total)),
       });
-
+      toast.success(
+        "upload successfull!!! view latest notifications!!",
+      );
       setShowUploadModal(false);
       setSelectedFiles([]);
       setUploadProgress(0);
@@ -192,7 +198,7 @@ const Files = () => {
     } catch {
       alert("Upload failed");
     } finally {
-      setIsUploading(false);
+      fetchAllFiles();
     }
   };
 
@@ -237,7 +243,7 @@ const Files = () => {
 
   return (
     <div
-      className="files-container"
+      className="files-page"
       onClick={() => {
         setView(false);
         setCurrentFolderId(null);
@@ -246,302 +252,375 @@ const Files = () => {
       <Header />
       <AskAi />
 
-      <div className="files-top-bar">
-        <div>
-          <h2>{trashMode ? "Trash" : "Your Files"}</h2>
-          <span className="folder-size">
-            {(totalFolderSize / 1048576).toFixed(2)} MB used
-          </span>
-        </div>
-
-        <div className="files-top-right">
-          <input
-            className="search-input"
-            placeholder="Search files by name or content…"
-            value={searchFile}
-            onChange={(e) => setSearchFile(e.target.value)}
-          />
-
-          {!trashMode && (
-            <>
-              <button
-                className="primary-btn"
-                onClick={() => setShowUploadModal(true)}
-              >
-                <MdUpload /> Upload
-              </button>
-              <button
-                onClick={() => {
-                  if (isDriveConnected) {
-                    setShowDriveModal(true);
-                    getGoogleDriveFiles();
-                  } else {
-                    window.open(
-                      `${API_BASE_URL}/api/google-drive/connect`,
-                      "_blank",
-                      "width=600,height=700",
-                    );
-                  }
-                }}
-              >
-                Import From Google Drive
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-      {showDriveModal && (
-        <div className="drive-modal">
-          <div className="drive-header">
-            <h2>
-              Google Drive
-              <span className="drive-selection-count">
-                {selectedFiles.length}
-              </span>
-            </h2>
-
-            <button
-              className="close-drive-btn"
-              onClick={() => setShowDriveModal(false)}
-            >
-              ✕
-            </button>
+      <div className="files-shell">
+        <section className="files-hero">
+          <div className="files-hero__copy">
+            <span className="files-badge">
+              {trashMode ? "Trash workspace" : "Premium file workspace"}
+            </span>
+            <h2>{trashMode ? "Deleted files" : "Your files"}</h2>
+            <p>
+              {trashMode
+                ? "Recover anything you need without losing focus."
+                : "Organize uploads, search instantly, and keep your workspace feeling polished and fast."}
+            </p>
           </div>
 
-          {loadingDriveFiles ? (
-            <div className="drive-loading">
-              <div className="loader"></div>
-              <p>Loading Drive Files...</p>
+          <div className="files-hero__stats">
+            <div className="files-stat">
+              <span>Files</span>
+              <strong>{allFiles.length}</strong>
             </div>
-          ) : (
-            <>
-              <div className="folder-grid">
-                {driveFolders.map((folder) => (
-                  <div
-                    key={folder.id}
-                    className="folder-card"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      viewFolder(folder.id);
-                    }}
-                  >
-                    <div className="folder-top">
-                      <div className="folder-info">
-                        <div className="folder-icon">📁</div>
+            <div className="files-stat">
+              <span>Storage</span>
+              <strong>{(totalFolderSize / 1048576).toFixed(2)} MB</strong>
+            </div>
+            <div className="files-stat">
+              <span>Mode</span>
+              <strong>{trashMode ? "Trash" : "Active"}</strong>
+            </div>
+          </div>
+        </section>
 
-                        <div className="folder-meta">
-                          <h3>{folder.name}</h3>
-                          <span>{folder.children.length} files</span>
+        <section className="files-control-card">
+          <div className="files-search-wrap">
+            <input
+              className="files-search-input"
+              placeholder="Search by name or AI content…"
+              value={searchFile}
+              onChange={(e) => setSearchFile(e.target.value)}
+            />
+          </div>
+
+          <div className="files-action-group">
+            {!trashMode && (
+              <>
+                <button
+                  className="files-action-btn files-action-btn--primary"
+                  onClick={() => setShowUploadModal(true)}
+                >
+                  <MdUpload /> Upload
+                </button>
+                <button
+                  className="files-action-btn files-action-btn--ghost"
+                  onClick={() => {
+                    if (isDriveConnected) {
+                      setShowDriveModal(true);
+                      getGoogleDriveFiles();
+                    } else {
+                      window.open(
+                        `${API_BASE_URL}/api/google-drive/connect`,
+                        "_blank",
+                        "width=600,height=700",
+                      );
+                    }
+                  }}
+                >
+                  Import from Google Drive
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+        {showDriveModal && (
+          <div className="drive-modal">
+            <div className="drive-header">
+              <h2>
+                Google Drive
+                <span className="drive-selection-count">
+                  {selectedFiles.length}
+                </span>
+              </h2>
+
+              <button
+                className="close-drive-btn"
+                onClick={() => setShowDriveModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {loadingDriveFiles ? (
+              <div className="drive-loading">
+                <div className="loader"></div>
+                <p>Loading Drive Files...</p>
+              </div>
+            ) : (
+              <>
+                <div className="folder-grid">
+                  {driveFolders.map((folder) => (
+                    <div
+                      key={folder.id}
+                      className="folder-card"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        viewFolder(folder.id);
+                      }}
+                    >
+                      <div className="folder-top">
+                        <div className="folder-info">
+                          <div className="folder-icon">📁</div>
+
+                          <div className="folder-meta">
+                            <h3>{folder.name}</h3>
+                            <span>{folder.children.length} files</span>
+                          </div>
                         </div>
                       </div>
+
+                      {view && currentFolderId === folder.id && (
+                        <div className="file-list">
+                          {folder.children.map((file) => (
+                            <div className="file-card" key={file.id}>
+                              <label className="file-checkbox">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedFiles.includes(file.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedFiles((prev) => [
+                                        ...prev,
+                                        file.id,
+                                      ]);
+                                    } else {
+                                      setSelectedFiles((prev) =>
+                                        prev.filter((id) => id !== file.id),
+                                      );
+                                    }
+                                  }}
+                                />
+                                <span>{file.name}</span>
+                              </label>
+
+                              <button
+                                className="preview-btn"
+                                onClick={() =>
+                                  window.open(
+                                    `https://drive.google.com/file/d/${file.id}/view`,
+                                    "_blank",
+                                  )
+                                }
+                              >
+                                Preview
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                  ))}
+                </div>
 
-                    {view && currentFolderId === folder.id && (
-                      <div className="file-list">
-                        {folder.children.map((file) => (
-                          <div className="file-card" key={file.id}>
-                            <label className="file-checkbox">
-                              <input
-                                type="checkbox"
-                                checked={selectedFiles.includes(file.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedFiles((prev) => [
-                                      ...prev,
-                                      file.id,
-                                    ]);
-                                  } else {
-                                    setSelectedFiles((prev) =>
-                                      prev.filter((id) => id !== file.id),
-                                    );
-                                  }
-                                }}
-                              />
-                              <span>{file.name}</span>
-                            </label>
-
-                            <button
-                              className="preview-btn"
-                              onClick={() =>
-                                window.open(
-                                  `https://drive.google.com/file/d/${file.id}/view`,
-                                  "_blank",
-                                )
-                              }
-                            >
-                              Preview
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                className="upload-drive-btn"
-                onClick={uploadSelectedDriveFileToDocvault}
-              >
-                Upload {selectedFiles.length} Files To DocVault
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      <div className="files-toolbar">
-        {trashMode ? (
-          <button className="secondary-btn" onClick={restoreAllFiles}>
-            <TbRestore /> Restore all
-          </button>
-        ) : (
-          <button className="danger-outline-btn" onClick={deleteAll}>
-            <MdDelete /> Move all to trash
-          </button>
+                <button
+                  type="button"
+                  className="upload-drive-btn"
+                  onClick={uploadSelectedDriveFileToDocvault}
+                >
+                  Upload {selectedFiles.length} Files To DocVault
+                </button>
+              </>
+            )}
+          </div>
         )}
-      </div>
 
-      {/* ===== Files Grid ===== */}
-      <div className="files-grid">
-        {loading ? (
-          Array.from({ length: 8 }).map((_, i) => (
-            <div className="file-card skeleton" key={i} />
-          ))
-        ) : filteredFiles.length === 0 ? (
-          <div className="empty-state">
-            <h3>{trashMode ? "Trash is empty" : "No files uploaded yet"}</h3>
-            {!trashMode && (
+        <section className="files-toolbar">
+          <div className="files-toolbar__left">
+            <span className="files-toolbar__label">
+              {trashMode ? "Recovery mode" : "Live workspace"}
+            </span>
+          </div>
+          <div className="files-toolbar__right">
+            {trashMode ? (
               <button
-                className="primary-btn"
-                onClick={() => setShowUploadModal(true)}
+                className="files-action-btn files-action-btn--ghost"
+                onClick={restoreAllFiles}
               >
-                Upload your first file
+                <TbRestore /> Restore all
+              </button>
+            ) : (
+              <button
+                className="files-action-btn files-action-btn--danger"
+                onClick={deleteAll}
+              >
+                <MdDelete /> Move all to trash
               </button>
             )}
           </div>
-        ) : (
-          filteredFiles.map((file) => (
-            <div title={file.filename} className="file-card" key={file.id}>
+        </section>
+
+        {/* ===== Files Grid ===== */}
+        <div className="files-grid">
+          {loading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div className="files-grid-card skeleton" key={i} />
+            ))
+          ) : filteredFiles.length === 0 ? (
+            <div className="files-empty-state">
+              <div className="files-empty-state__icon">📦</div>
+              <h3>{trashMode ? "Trash is empty" : "No files uploaded yet"}</h3>
+              <p>
+                {trashMode
+                  ? "Everything you delete will appear here until you restore it."
+                  : "Drop in your first document and start building a premium file flow."}
+              </p>
+              {!trashMode && (
+                <button
+                  className="files-action-btn files-action-btn--primary"
+                  onClick={() => setShowUploadModal(true)}
+                >
+                  Upload your first file
+                </button>
+              )}
+            </div>
+          ) : (
+            filteredFiles.map((file) => (
               <div
-                className="file-main"
-                onClick={() =>
-                  !trashMode && navigate(`/file-view/${folderId}/${file.id}`)
-                }
+                title={file.filename}
+                className="files-grid-card"
+                key={file.id}
               >
-                <h4>{file.filename.slice(0, 7)}...</h4>
-                <small>{(file.size / 1024).toFixed(1)} KB</small>
-              </div>
+                <div
+                  className="files-grid-card__main"
+                  onClick={() =>
+                    !trashMode && navigate(`/file-view/${folderId}/${file.id}`)
+                  }
+                >
+                  <div className="files-grid-card__icon">📄</div>
+                  <div className="files-grid-card__meta">
+                    <h4>
+                      {file.filename.slice(0, 24)}
+                      {file.filename.length > 24 ? "…" : ""}
+                    </h4>
+                    <small>{(file.size / 1024).toFixed(1)} KB</small>
+                  </div>
+                </div>
 
-              <div className="file-actions">
-                {!trashMode ? (
-                  <MdDelete
-                    onClick={() => {
-                      setFileToDelete(file);
-                      setShowDeleteModal(true);
-                    }}
-                  />
-                ) : (
-                  <TbRestore onClick={() => restoreFile(file)} />
-                )}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* ===== Upload Modal ===== */}
-      {showUploadModal && (
-        <div
-          className="upload-overlay"
-          onClick={() => setShowUploadModal(false)}
-        >
-          <div className="upload-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="upload-header">
-              <h3>Upload files</h3>
-              <MdClose onClick={() => setShowUploadModal(false)} />
-            </div>
-
-            <label className="drop-zone">
-              <input
-                type="file"
-                multiple
-                onChange={(e) => setSelectedFiles([...e.target.files])}
-              />
-              <MdUpload size={36} />
-              <p>Drag & drop files here</p>
-              <span>or click to browse</span>
-            </label>
-
-            {isUploading && (
-              <div className="upload-status">
-                <span>Uploading… {uploadProgress}%</span>
-                <div className="progress-bar">
-                  <div style={{ width: `${uploadProgress}%` }} />
+                <div className="files-grid-card__actions">
+                  {!trashMode ? (
+                    <button
+                      className="files-grid-card__action"
+                      onClick={() => {
+                        setFileToDelete(file);
+                        setShowDeleteModal(true);
+                      }}
+                      aria-label="Delete file"
+                    >
+                      <MdDelete />
+                    </button>
+                  ) : (
+                    <button
+                      className="files-grid-card__action"
+                      onClick={() => restoreFile(file)}
+                      aria-label="Restore file"
+                    >
+                      <TbRestore />
+                    </button>
+                  )}
                 </div>
               </div>
-            )}
-
-            <button
-              className="primary-btn full-width"
-              onClick={uploadFiles}
-              disabled={isUploading}
-            >
-              {isUploading ? "Uploading..." : "Upload files"}
-            </button>
-          </div>
+            ))
+          )}
         </div>
-      )}
 
-      {/* ===== Delete Modal ===== */}
-      {showDeleteModal && (
-        <div
-          className="upload-overlay"
-          onClick={() => setShowDeleteModal(false)}
-        >
-          <div className="upload-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Delete file?</h3>
-            <p>{fileToDelete?.filename}</p>
+        {/* ===== Upload Modal ===== */}
+        {showUploadModal && (
+          <div
+            className="upload-overlay"
+            onClick={() => setShowUploadModal(false)}
+          >
+            <div className="upload-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="upload-header">
+                <h3>Upload files</h3>
+                <MdClose onClick={() => setShowUploadModal(false)} />
+              </div>
 
-            <div className="modal-actions">
+              <label className="drop-zone">
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => setSelectedFiles([...e.target.files])}
+                />
+                <MdUpload size={36} />
+                <p>Drag & drop files here</p>
+                <span>or click to browse</span>
+              </label>
+
+              {isUploading && (
+                <div className="upload-status">
+                  <span>Uploading… {uploadProgress}%</span>
+                  <div className="progress-bar">
+                    <div style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                </div>
+              )}
+
               <button
-                className="secondary-btn"
-                onClick={() => setShowDeleteModal(false)}
+                className="primary-btn full-width"
+                onClick={uploadFiles}
+                disabled={isUploading}
               >
-                Cancel
-              </button>
-              <button className="danger-btn" onClick={deleteFile}>
-                Delete
+                {isUploading ? "Uploading..." : "Upload files"}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ===== Footer ===== */}
-      <div className="files-footer">
-        <button
-          className="link-btn"
-          onClick={() => setTrashMode((prev) => !prev)}
-        >
-          {trashMode ? "← Back to files" : "🗑️ Open Trash"}
-        </button>
-      </div>
-      <ul>
-        {pages.map((e, id) => (
-          <button
-            onClick={() => setcurrentPage(e)}
-            className={id + 1 === currentPage ? "a" : "b"}
-            key={id}
+        {/* ===== Delete Modal ===== */}
+        {showDeleteModal && (
+          <div
+            className="upload-overlay"
+            onClick={() => setShowDeleteModal(false)}
           >
-            {e}
+            <div className="upload-modal" onClick={(e) => e.stopPropagation()}>
+              <h3>Delete file?</h3>
+              <p>{fileToDelete?.filename}</p>
+
+              <div className="modal-actions">
+                <button
+                  className="secondary-btn"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+                <button className="danger-btn" onClick={deleteFile}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== Footer ===== */}
+        <div className="files-footer">
+          <button
+            className="files-footer__btn"
+            onClick={() => setTrashMode((prev) => !prev)}
+          >
+            {trashMode ? "← Back to files" : "🗑️ Open Trash"}
           </button>
-        ))}
-      </ul>
-      {allFiles.length > 0 && (
-        <button onClick={() => nextTimeline()}>Next</button>
-      )}
+        </div>
+
+        <div className="files-pagination">
+          {pages.map((e, id) => (
+            <button
+              onClick={() => setcurrentPage(e)}
+              className={
+                id + 1 === currentPage
+                  ? "files-page-btn files-page-btn--active"
+                  : "files-page-btn"
+              }
+              key={id}
+            >
+              {e}
+            </button>
+          ))}
+          {allFiles.length > 0 && (
+            <button className="files-page-btn" onClick={() => nextTimeline()}>
+              Next
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

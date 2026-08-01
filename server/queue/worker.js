@@ -79,12 +79,14 @@ const worker = new Worker(
       extractedText = await tessractTextExtraction(uploadedFile);
     }
 
+    console.log(extractedText)
+
     /*
       Summary
     */
 
     const aiSummary = await summarizeFileWithAI(uploadedFile);
-
+    // console.log(aiSummary)
     /*
       Embedding
     */
@@ -97,6 +99,7 @@ const worker = new Worker(
       if (embedding) {
         embeddingString = `[${embedding.join(",")}]`;
       }
+      // console.log(embedding)
     }
 
     /*
@@ -136,6 +139,8 @@ const worker = new Worker(
 
 worker.on("completed", (job) => {
   console.log(`Completed ${job.id}`);
+
+  
 });
 
 worker.on("failed", (job, err) => {

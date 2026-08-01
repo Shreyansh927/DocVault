@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import "./other-users.css";
 import AskAi from "../../ask-ai/ask-ai";
+import api from "../../api-interceptor";
 
 const OtherUsers = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -13,13 +14,15 @@ const OtherUsers = () => {
   const [originalUsers, setOriginalUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const pendingRequests = useRef(new Set());
 
   useEffect(() => {
+    const f = async () => {
+      await api.get("/api/auth/refresh");
+      // toast.info("session re-created");
+    };
+    f();
     fetchUsers();
   }, []);
-
-
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -44,24 +47,24 @@ const OtherUsers = () => {
     }
   }, [API_BASE_URL]);
 
-    useEffect(() => {
-      const handleOnline = () => {
-        toast.success("Back online");
-        fetchUsers();
-      };
+  useEffect(() => {
+    const handleOnline = () => {
+      toast.success("Back online");
+      fetchUsers();
+    };
 
-      const handleOffline = () => {
-        toast.warning("Offline mode");
-      };
+    const handleOffline = () => {
+      toast.warning("Offline mode");
+    };
 
-      window.addEventListener("online", handleOnline);
-      window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
-      return () => {
-        window.removeEventListener("online", handleOnline);
-        window.removeEventListener("offline", handleOffline);
-      };
-    }, [fetchUsers]);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [fetchUsers]);
 
   const filtered = useMemo(() => {
     return originalUsers.filter((u) =>
@@ -70,9 +73,6 @@ const OtherUsers = () => {
   }, [search, originalUsers]);
 
   const connect = async (receiverId, name) => {
-    if (pendingRequests.current.has(receiverId)) return;
-
-    pendingRequests.current.add(receiverId);
     try {
       await axios.post(
         `${API_BASE_URL}/api/connect`,
@@ -83,11 +83,10 @@ const OtherUsers = () => {
         },
       );
       toast.success(`Request sent to ${name}`);
+      fetchUsers()
     } catch (err) {
       console.error("Connect error:", err);
       toast.error("Failed to send request");
-    } finally {
-      pendingRequests.current.delete(receiverId);
     }
   };
 
@@ -146,13 +145,15 @@ const OtherUsers = () => {
                     </div>
 
                     <button
-                      className="connect-btn"
+                      className={
+                        u.status === "PENDING"
+                          ? "connect-btn-pending"
+                          : "connect-btn"
+                      }
                       onClick={() => connect(u.id, u.name)}
-                      disabled={pendingRequests.current.has(u.id)}
+                      disabled={u.status === "PENDING"}
                     >
-                      {pendingRequests.current.has(u.id)
-                        ? "Sending..."
-                        : "Connect"}
+                      {u.status === "PENDING" ? "PENDING..." : "SEND"}
                     </button>
                   </div>
                 ))}

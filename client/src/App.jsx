@@ -22,6 +22,8 @@ import AccessControl from "./pages/access-control/access-control.jsx";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AskAi from "./ask-ai/ask-ai.jsx";
+import AiAssistant from "./pages/ai-assistant-route/app.jsx";
 
 const App = () => {
   return (
@@ -66,6 +68,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Files />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/assistant"
+          element={
+            <ProtectedRoute>
+              <AiAssistant />
             </ProtectedRoute>
           }
         />

@@ -201,6 +201,26 @@
     opacity 0.2s ease;
 }
 
+
+.connect-btn-pending {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(86, 146, 255, 0.25);
+  background: linear-gradient(
+    135deg,
+    rgba(7, 48, 158, 0.98),
+    rgba(255, 84, 110, 0.95)
+  );
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: ;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
 .connect-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 16px 32px rgba(40, 100, 255, 0.24);

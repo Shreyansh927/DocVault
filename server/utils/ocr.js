@@ -13,6 +13,8 @@ export const tessractTextExtraction = async (file) => {
       data: { text },
     } = await Tesseract.recognize(processedImage, "eng");
 
+    console.log("ocr text data:" + text);
+
     return text;
   } catch (err) {
     console.error("OCR Error:", err);

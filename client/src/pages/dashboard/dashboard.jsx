@@ -3,6 +3,8 @@ import "./dashboard.css";
 import Header from "../../components/header/header.jsx";
 import axios from "axios";
 import AskAi from "../../ask-ai/ask-ai.jsx";
+import api from "../../api-interceptor.jsx";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -104,6 +106,11 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    const f = async () => {
+      await api.get("/api/auth/refresh");
+      // toast.info("session re-created");
+    };
+    f();
     fetchUserPersonalInfo();
     fetchCurrentSessions();
   }, [fetchUserPersonalInfo, fetchCurrentSessions]);

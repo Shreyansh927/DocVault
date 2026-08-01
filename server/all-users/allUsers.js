@@ -13,21 +13,21 @@ export const allUsers = async (req, res) => {
     const result = await db.query(
       `
       SELECT
-        u.id,
-        u.public_id,
-        u.name,
-        u.profile_image
-      FROM users u
-      WHERE u.id <> $1
-        AND NOT EXISTS (
-          SELECT 1
-          FROM friends f
-          WHERE f.user_id = $1
-            AND f.friend_id = u.id
-        )
-      ORDER BY u.created_at DESC
+    u.id,
+    u.public_id,
+    u.name,
+    u.profile_image,
+    n.status
+FROM users u
+
+LEFT JOIN notifications n
+ON n.sender_id = $1
+AND n.user_id = u.auth_uuid
+AND n.type = 'FRIEND_REQUEST'
+
+WHERE u.id <> $1;
       `,
-      [currentUserId]
+      [currentUserId],
     );
 
     return res.status(200).json({
@@ -39,4 +39,3 @@ export const allUsers = async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch users" });
   }
 };
-

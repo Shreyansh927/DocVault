@@ -8,6 +8,8 @@ import "./home.css";
 import { useNavigate } from "react-router-dom";
 import AskAi from "../../ask-ai/ask-ai";
 import { getUserFolders, saveUserFolders } from "../../utils/offlineDB";
+import api from "../../api-interceptor";
+import { toast } from "react-toastify";
 console.log("Home rendered");
 
 /* ================= CONSTANTS ================= */
@@ -35,7 +37,11 @@ const Home = () => {
 
   /* ================= FETCH FOLDERS ================= */
   useEffect(() => {
-    console.log("Fetching folders");
+    const f = async () => {
+      await api.get("/api/auth/refresh");
+      // toast.info("session re-created");
+    };
+    f();
 
     fetchAllFolders();
   }, []);
@@ -145,72 +151,103 @@ const Home = () => {
       <Header />
       <AskAi />
 
-      <div className="home-header">
-        <h3>Your Folders</h3>
+      <div className="home-shell">
+        <section className="home-hero">
+          <div className="home-hero__copy">
+            <span className="home-badge">Premium workspace</span>
+            <h3>Your folders</h3>
+            <p>
+              Organize your documents with a calm, polished workspace designed for speed and clarity.
+            </p>
+          </div>
 
-        <div className="search-wrapper">
-          <Rings height="26" width="26" color="#2563eb" />
-          <input
-            type="text"
-            placeholder="Search folders..."
-            className="search-input"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
+          <div className="home-hero__stats">
+            <div className="home-stat">
+              <span>Folders</span>
+              <strong>{allFolders.length}</strong>
+            </div>
+            <div className="home-stat">
+              <span>Status</span>
+              <strong>Live</strong>
+            </div>
+          </div>
+        </section>
 
-      <div className="category-filters">
-        {["All", ...CATEGORIES].map((c) => (
-          <button
-            key={c}
-            className={`category-pill ${activeCategory === c ? "active" : ""}`}
-            onClick={() => setActiveCategory(c)}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
+        <section className="home-toolbar">
+          <div className="search-wrapper">
+            <Rings height="24" width="24" color="#60a5fa" />
+            <input
+              type="text"
+              placeholder="Search folders..."
+              className="search-input"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-      <div className="folders">
-        {allFolders.length === 0
-          ? Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="folder-card skeleton-card">
-                <div className="skeleton skeleton-title" />
-                <div className="skeleton skeleton-subtitle" />
-              </div>
-            ))
-          : allFolders.map((folder) => (
-              <div
-                key={folder.id}
-                className="folder-card"
-                onClick={() => navigate(`/files/${folder.id}`)}
+          <div className="category-filters">
+            {["All", ...CATEGORIES].map((c) => (
+              <button
+                key={c}
+                className={`category-pill ${activeCategory === c ? "active" : ""}`}
+                onClick={() => setActiveCategory(c)}
               >
-                <div>
-                  <h3>{folder.folder_name}</h3>
-                  <span className="folder-category">{folder.category}</span>
-                </div>
-
-                <div className="folder-actions">
-                  <MdDelete
-                    className="delete-icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFolderToDelete(folder);
-                      setShowDeleteModal(true);
-                    }}
-                  />
-                  <IoMdSettings
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setToggleFolderSettings(true);
-                      setFolderToUpdate(folder);
-                      setCategory(folder.category);
-                    }}
-                  />
-                </div>
-              </div>
+                {c}
+              </button>
             ))}
+          </div>
+        </section>
+
+        <div className="folders">
+          {allFolders.length === 0
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="folder-card skeleton-card">
+                  <div className="skeleton skeleton-title" />
+                  <div className="skeleton skeleton-subtitle" />
+                </div>
+              ))
+            : allFolders.map((folder) => (
+                <div
+                  key={folder.id}
+                  className="folder-card"
+                  onClick={() => navigate(`/files/${folder.id}`)}
+                >
+                  <div className="folder-card__main">
+                    <div className="folder-card__icon">📁</div>
+                    <div>
+                      <h3>{folder.folder_name}</h3>
+                      <span className="folder-category">{folder.category}</span>
+                    </div>
+                  </div>
+
+                  <div className="folder-actions">
+                    <button
+                      className="folder-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFolderToDelete(folder);
+                        setShowDeleteModal(true);
+                      }}
+                      aria-label="Delete folder"
+                    >
+                      <MdDelete />
+                    </button>
+                    <button
+                      className="folder-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setToggleFolderSettings(true);
+                        setFolderToUpdate(folder);
+                        setCategory(folder.category);
+                      }}
+                      aria-label="Edit folder"
+                    >
+                      <IoMdSettings />
+                    </button>
+                  </div>
+                </div>
+              ))}
+        </div>
       </div>
 
       <button className="fab-btn" onClick={() => setToggleForm(true)}>

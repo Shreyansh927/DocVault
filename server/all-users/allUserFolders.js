@@ -36,7 +36,7 @@ export const allUserFolders = async (req, res) => {
         folders.created_at,
         folders.category
       FROM folders INNER JOIN users ON folders.user_id = users.id
-      WHERE user_id = $1
+      WHERE user_id = $1 AND is_deleted= false
       ORDER BY created_at DESC
       `,
       [userId],

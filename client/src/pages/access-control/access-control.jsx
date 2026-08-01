@@ -4,6 +4,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import "./access-control.css";
 import AskAi from "../../ask-ai/ask-ai";
+import api from "../../api-interceptor";
+import { toast } from "react-toastify";
 
 const AccessControl = () => {
   const [connections, setConnections] = useState([]);
@@ -26,6 +28,11 @@ const AccessControl = () => {
   }, [base_url]);
 
   useEffect(() => {
+    const f = async () => {
+      await api.get("/api/auth/refresh");
+      toast.info("session re-created");
+    };
+    f();
     fetchConnections();
   }, [fetchConnections]);
 
