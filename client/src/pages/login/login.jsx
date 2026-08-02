@@ -6,6 +6,7 @@ import "./login.css";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 import api from "../../api-interceptor";
+import socket from "../../../socket/socket.js";
 
 export default function Login() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -28,6 +29,11 @@ export default function Login() {
       f();
     }
 
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
     // return () => controller.abort();
   }, [isAuth]);
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { saveUsers, getUsers } from "../../utils/offlineDB";
 import axios from "axios";
 import Header from "../../components/header/header";
@@ -30,18 +30,18 @@ const OtherUsers = () => {
         withCredentials: true,
       });
       setOriginalUsers(res.data.otherUsers || []);
-      await saveUsers(res.data.otherUsers);
+      // await saveUsers(res.data.otherUsers);
     } catch (err) {
       console.error(err);
 
-      const cachedUsers = await getUsers();
+      // const cachedUsers = await getUsers();
 
-      if (cachedUsers.length > 0) {
-        setOriginalUsers(cachedUsers);
-        toast.info("Showing offline data");
-      } else {
-        toast.error("No offline data available");
-      }
+      // if (cachedUsers.length > 0) {
+      //   setOriginalUsers(cachedUsers);
+      //   toast.info("Showing offline data");
+      // } else {
+      //   toast.error("No offline data available");
+      // }
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ const OtherUsers = () => {
         { receiverId },
         {
           withCredentials: true,
-          headers: { "x-csrf-token": Cookies.get("csrfToken") },
+          // headers: { "x-csrf-token": Cookies.get("csrfToken") },
         },
       );
       toast.success(`Request sent to ${name}`);

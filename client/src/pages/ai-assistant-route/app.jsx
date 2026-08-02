@@ -33,6 +33,20 @@ const AiAssistant = () => {
 
   const hasQuery = query.trim().length > 0;
 
+  const markResponsesAsSeen = async () => {
+    try {
+      await axios.get(`${base_url}/ai-query-response/mark-as-seen`, {
+        withCredentials: true,
+      });
+    } catch (err) {
+      console.error("Error marking responses as seen:", err);
+    }
+  };
+
+  useEffect(() => {
+    markResponsesAsSeen();
+  }, []);
+
   const filteredHistory = useMemo(() => {
     const term = historyQuery.toLowerCase();
     return ragHistory.filter((chat) => {
@@ -102,7 +116,9 @@ const AiAssistant = () => {
   const displayAnswer =
     typeof answer === "string" && answer.trim()
       ? answer
-      : answer?.response || answer?.resp || "Ask a question to receive a contextual answer from your workspace.";
+      : answer?.response ||
+        answer?.resp ||
+        "Ask a question to receive a contextual answer from your workspace.";
 
   return (
     <>
@@ -121,8 +137,8 @@ const AiAssistant = () => {
               </div>
               <h1>Turn your documents into a premium AI workspace.</h1>
               <p>
-                Search smarter, summarize faster, and jump straight to the source
-                with one polished conversation.
+                Search smarter, summarize faster, and jump straight to the
+                source with one polished conversation.
               </p>
             </div>
 
@@ -185,7 +201,9 @@ const AiAssistant = () => {
                   <p>{status}</p>
                 </div>
               </div>
+            </aside>
 
+            <main className="assistant-main">
               <div className="glass-card history-card">
                 <div className="card-heading">
                   <div className="heading-icon">
@@ -210,7 +228,10 @@ const AiAssistant = () => {
                 <ul className="history-list">
                   {filteredHistory.length > 0 ? (
                     filteredHistory.map((item, index) => (
-                      <li key={`${item.created_at || index}-${index}`} className="history-item">
+                      <li
+                        key={`${item.created_at || index}-${index}`}
+                        className="history-item"
+                      >
                         <div className="history-item-top">
                           <strong>{item.query || "Untitled query"}</strong>
                           <span>
@@ -222,13 +243,19 @@ const AiAssistant = () => {
                             })}
                           </span>
                         </div>
-                        <p>{item.response ? item.response : "Retrieving response..."}</p>
+                        <p>
+                          {item.response
+                            ? item.response
+                            : "Retrieving response..."}
+                        </p>
                         {item.file_id && item.folder_id && (
                           <button
                             type="button"
                             className="source-btn"
                             onClick={() =>
-                              navigate(`/file-view/${item.folder_id}/${item.file_id}`)
+                              navigate(
+                                `/file-view/${item.folder_id}/${item.file_id}`,
+                              )
                             }
                           >
                             View source
@@ -242,53 +269,6 @@ const AiAssistant = () => {
                     </li>
                   )}
                 </ul>
-              </div>
-            </aside>
-
-            <main className="assistant-main">
-              <div className="glass-card chat-card">
-                <div className="chat-header">
-                  <div>
-                    <h3>Live workspace insights</h3>
-                    <p>Context-aware assistance with a polished, SaaS-style experience.</p>
-                  </div>
-                  <span className="chat-badge">Online</span>
-                </div>
-
-                <div className="chat-body">
-                  {messages.map((message, index) => (
-                    <div key={`${message.role}-${index}`} className={`bubble-row ${message.role}`}>
-                      <div className="bubble-avatar">
-                        {message.role === "assistant" ? "AI" : "You"}
-                      </div>
-                      <div className="bubble-card">
-                        <p>{message.text}</p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {loading ? (
-                    <div className="bubble-row assistant">
-                      <div className="bubble-avatar">AI</div>
-                      <div className="bubble-card typing-card">
-                        <div className="typing-dots">
-                          <span />
-                          <span />
-                          <span />
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    displayAnswer && (
-                      <div className="bubble-row assistant">
-                        <div className="bubble-avatar">AI</div>
-                        <div className="bubble-card answer-card">
-                          <p>{displayAnswer}</p>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
               </div>
             </main>
           </section>

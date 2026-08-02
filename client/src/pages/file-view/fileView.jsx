@@ -60,15 +60,15 @@ const FileView = () => {
       );
 
       const blobUrl = URL.createObjectURL(res.data);
-      const blob = res.data;
-      await saveFileLink(blob, folderId, fileId);
+      // const blob = res.data;
+      // await saveFileLink(blob, folderId, fileId);
 
       window.open(blobUrl, "_blank");
     } catch (err) {
       console.error("DOWNLOAD ERROR:", err);
-      const indexedDBCachedBlobLink = await getFileBlobLink(folderId, fileId);
-      const blobUrl = URL.createObjectURL(indexedDBCachedBlobLink);
-      window.open(blobUrl, "_blank");
+      // const indexedDBCachedBlobLink = await getFileBlobLink(folderId, fileId);
+      // const blobUrl = URL.createObjectURL(indexedDBCachedBlobLink);
+      // window.open(blobUrl, "_blank");
     }
   };
 

@@ -17,7 +17,7 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    /* ---------- CHECK DUPLICATES ---------- */
+    // check duplication
     const exists = await db.query(
       `SELECT 1 FROM users WHERE email=$1 OR phone_number=$2`,
       [email, phoneNumber],
@@ -26,7 +26,7 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "Email or phone already exists" });
     }
 
-    /* ---------- CREATE SUPABASE AUTH USER ---------- */
+    // create supabase auth user
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -37,7 +37,7 @@ export const signup = async (req, res) => {
 
     const authUuid = data.user.id;
 
-    /* ---------- CREATE APP USER ---------- */
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     const publicId = `${name}_${crypto.randomUUID()}`;
 
@@ -83,7 +83,7 @@ const ipLocation = async (ip) => {
   }
 };
 
-/* -- LOGIN ----- */
+// login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -219,7 +219,7 @@ DO UPDATE SET
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    console.log("Cookies:", req.cookies);
+    // console.log("Cookies:", req.cookies);
 
     res.status(200).json({
       message: "Login successful",
@@ -236,7 +236,7 @@ DO UPDATE SET
   }
 };
 
-/* -- LOGOUT -- */
+// logout
 export const logout = async (req, res) => {
   try {
     const userId = req.user.id;

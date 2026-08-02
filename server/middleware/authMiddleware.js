@@ -32,9 +32,9 @@ export const authMiddleware = async (req, res, next) => {
 
     const user = userRes.rows[0];
 
-    // if (decoded.tokenVersion !== user.token_version || !sessionUuidFromDb.rows.length) {
-    //   return res.status(401).json({ error: "Session expired" });
-    // }
+    if (decoded.tokenVersion !== user.token_version || !sessionUuidFromDb.rows.length) {
+      return res.status(401).json({ error: "Session expired" });
+    }
 
     req.user = user;
 

@@ -77,7 +77,9 @@ const worker = new Worker(
 
       status='COMPLETED',
 
-      completed_at=NOW()
+      completed_at=NOW(),
+
+      is_seen=false
 
       WHERE id=$6
       `,

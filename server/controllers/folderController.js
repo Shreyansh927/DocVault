@@ -102,7 +102,7 @@ export const updateFolder = async (req, res) => {
     const userId = req.user.id;
     const { folderToUpdate, category, folderId } = req.body;
 
-    // ✅ validation
+    // validation
     if (!folderId || !folderToUpdate || !category) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -120,7 +120,7 @@ export const updateFolder = async (req, res) => {
       [folderToUpdate.trim(), category, folderId, userId]
     );
 
-    // ✅ check ownership & existence
+    //  check ownership & existence
     if (result.rowCount === 0) {
       return res
         .status(404)

@@ -119,6 +119,7 @@ const Files = () => {
   useEffect(() => {
     trashMode ? fetchAllTrashFiles() : fetchAllFiles();
     localStorage.setItem("trash", JSON.stringify(trashMode));
+    
   }, [trashMode, folderId, timeline]);
 
   const fetchAllFiles = useCallback(async () => {
@@ -131,16 +132,16 @@ const Files = () => {
         },
       );
       setAllFiles(res.data.allFiles || []);
-      await saveUserIndivisualFolder(res.data.allFiles, folderId);
+      // await saveUserIndivisualFolder(res.data.allFiles, folderId);
     } catch (err) {
       console.error(err);
-      toast.info("Serving offline data");
-      const indexedDbFolderFiles = await getFolder(folderId);
-      if (indexedDbFolderFiles.length > 0) {
-        setAllFiles(indexedDbFolderFiles);
-      } else {
-        setAllFiles([]);
-      }
+      // toast.info("Serving offline data");
+      // const indexedDbFolderFiles = await getFolder(folderId);
+      // if (indexedDbFolderFiles.length > 0) {
+      //   setAllFiles(indexedDbFolderFiles);
+      // } else {
+      //   setAllFiles([]);
+      // }
     } finally {
       setLoading(false);
     }
