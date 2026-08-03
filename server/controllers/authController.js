@@ -288,10 +288,10 @@ export const getAllCurrentSessions = async (req, res) => {
 export const logoutSession = async (req, res) => {
   try {
     const userId = req.user.id;
-    const currentLoggedDevice = await db.query(
-      `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1`,
-      [userId],
-    );
+    // const currentLoggedDevice = await db.query(
+    //   `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1`,
+    //   [userId],
+    // );
     // const currentLoggedDeviceSessionId = await db.query(
     //   `SELECT id as "refresh_token_id" FROM refresh_tokens WHERE user_id = $1 AND `,
     //   [userId],
