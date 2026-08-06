@@ -1,13 +1,14 @@
 import "dotenv/config";
 import IORedis from "ioredis";
 
-const rediss = new IORedis(process.env.REDIS_URL, {
+const rediss = new IORedis({
+  host: process.env.REDIS_HOST,
+  port: Number(process.env.REDIS_PORT),
   maxRetriesPerRequest: null,
-  tls: {},
 });
 
 rediss.on("connect", () => {
-  console.log("Connected to Upstash");
+  console.log("Connected to Redis");
 });
 
 rediss.on("ready", () => {

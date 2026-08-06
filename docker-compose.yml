@@ -16,24 +16,27 @@ services:
       - backend
 
   backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+  build:
+    context: ./server
+    dockerfile: Dockerfile
 
-    expose:
-      - "5000"
+  expose:
+    - "5000"
 
-    env_file:
-      - ./server/.env
+  env_file:
+    - ./server/.env
+
+  depends_on:
+    - redis
 
   worker:
-    build:
-      context: ./server
-
-    command: npm run worker
-
-    env_file:
-      - ./server/.env
+  build:
+    context: ./server
+  command: npm run worker
+  env_file:
+    - ./server/.env
+  depends_on:
+    - redis
 
   nginx:
     image: nginx:alpine
@@ -46,3 +49,10 @@ services:
 
     depends_on:
       - backend
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"

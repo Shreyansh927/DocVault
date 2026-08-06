@@ -41,6 +41,7 @@ const FileView = () => {
   }, [API_BASE_URL, folderId, fileId]);
 
   useEffect(() => {
+    window.speechSynthesis.cancel();
     const f = async () => {
       await api.get("/api/auth/refresh");
       toast.info("session re-created");
@@ -189,8 +190,12 @@ const FileView = () => {
 
             <div className="fileview-summary-card">
               <div className="fileview-summary-card__header">
-                <span className="fileview-summary-card__eyebrow">✦ Executive summary</span>
-                <span className="fileview-summary-card__status">AI generated</span>
+                <span className="fileview-summary-card__eyebrow">
+                  ✦ Executive summary
+                </span>
+                <span className="fileview-summary-card__status">
+                  AI generated
+                </span>
               </div>
 
               {fileData.ai_summary ? (

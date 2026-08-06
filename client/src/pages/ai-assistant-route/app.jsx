@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import {
   FiClock,
   FiCpu,
@@ -9,25 +9,22 @@ import {
   FiShield,
   FiZap,
 } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import Header from "../../components/header/header";
 import "./app.css";
+import AskAi from "../../ask-ai/ask-ai.jsx";
 
 const AiAssistant = () => {
   const base_url = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState("");
   const [ragHistory, setRagHistory] = useState([]);
   const [historyQuery, setHistoryQuery] = useState("");
-  const [messages] = useState([
-    {
-      role: "assistant",
-      text: "Hello 👋 I'm your DocVault AI Assistant. Ask me anything about your uploaded documents.",
-    },
-  ]);
+
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("Ready to assist");
 
@@ -43,9 +40,17 @@ const AiAssistant = () => {
     }
   };
 
-  useEffect(() => {
+
+
+useEffect(() => {
+  console.log("pathname:", location.pathname);
+  window.speechSynthesis.cancel(); // Cancel any ongoing speech synthesis
+
+  if (location.pathname === "/assistant") {
+    // alert("You are on the assistant page. Marking responses as seen.");
     markResponsesAsSeen();
-  }, []);
+  }
+}, [location.pathname]);
 
   const filteredHistory = useMemo(() => {
     const term = historyQuery.toLowerCase();
@@ -56,7 +61,7 @@ const AiAssistant = () => {
     });
   }, [ragHistory, historyQuery]);
 
-  const fetchFullRagHistory = async () => {
+  const fetchFullRagHistory = useCallback(async () => {
     try {
       const res = await axios.get(
         `${base_url}/ai-query-response/full-rag-history`,
@@ -64,19 +69,25 @@ const AiAssistant = () => {
           withCredentials: true,
         },
       );
+
       setRagHistory(res.data.ragHistory || []);
+
+      // const lastSpokenResponse = res.data.ragHistory?.[0]?.response;
+      // const latestResponseSeen = res.data.ragHistory?.[0]?.is_seen;
+
+      //  readResponseAloud(latestResponseSeen, lastSpokenResponse);
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [base_url]);
 
   useEffect(() => {
     fetchFullRagHistory();
-
-    const interval = setInterval(fetchFullRagHistory, 5000);
-
+    const interval = setInterval(() => {
+      fetchFullRagHistory();
+    }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [answer]);
 
   const fetchResult = async () => {
     if (!hasQuery) {
@@ -95,10 +106,13 @@ const AiAssistant = () => {
         withCredentials: true,
       });
 
-      setAnswer(res.data.resp || "No response returned from AI.");
+      setAnswer(res.data.resp);
+      // if (res.data.resp) {
+      //   readResponseAloud(res.data.is_seen, res.data.resp);
+      // }
       setQuery("");
       setStatus("Answer delivered");
-      toast.success("Response is ready, view it!!");
+      
     } catch (error) {
       setAnswer("Unable to fetch response. Please try again.");
       setStatus("Something went wrong");
@@ -119,6 +133,19 @@ const AiAssistant = () => {
       : answer?.response ||
         answer?.resp ||
         "Ask a question to receive a contextual answer from your workspace.";
+
+  const startListening = () => {
+    const recognition = new (
+      window.SpeechRecognition || window.webkitSpeechRecognition
+    )();
+
+    recognition.lang = "en-US";
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      setQuery(event.results[0][0].transcript);
+    };
+  };
 
   return (
     <>
@@ -193,6 +220,14 @@ const AiAssistant = () => {
                     disabled={!query.trim() || loading}
                   >
                     <FiSend />
+                  </button>
+                  <br />
+                  <button
+                    type="button"
+                    className="send-btn"
+                    onClick={startListening}
+                  >
+                    🎤 Voice
                   </button>
                 </form>
 
@@ -272,6 +307,7 @@ const AiAssistant = () => {
               </div>
             </main>
           </section>
+          <AskAi />
         </div>
       </div>
     </>

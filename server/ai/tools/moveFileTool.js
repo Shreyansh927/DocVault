@@ -51,7 +51,7 @@ export const movingFileTool = tool(
         const destinationFolderId = folderResult.rows[0].id;
 
         const similarfileName =
-          await ModelManager.embeddings().embedQuery(query);
+          await ModelManager.embeddings().embedQuery(fileName);
 
         // Find file
         const fileResult = await db.query(

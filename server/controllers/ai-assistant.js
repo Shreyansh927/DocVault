@@ -5,20 +5,37 @@ export const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const result = await db.query(
+    const countResult = await db.query(
       `
-            SELECT COUNT(*) AS count
-            FROM ai_query_jobs
-            WHERE
-                user_id = $1
-                AND status='COMPLETED'
-                AND is_seen=false
-            `,
+  SELECT COUNT(*) AS count
+  FROM ai_query_jobs
+  WHERE
+    user_id = $1
+    AND status='COMPLETED'
+    AND is_seen=false
+  `,
+      [userId],
+    );
+
+    const latestResult = await db.query(
+      `
+  SELECT query, response, is_seen
+  FROM ai_query_jobs
+  WHERE
+    user_id = $1
+    AND status='COMPLETED'
+    AND is_seen=false
+  ORDER BY completed_at DESC
+  LIMIT 1
+  `,
       [userId],
     );
 
     return res.json({
-      count: Number(result.rows[0].count),
+      count: Number(countResult.rows[0].count),
+      query: latestResult.rows[0]?.query ?? "",
+      response: latestResult.rows[0]?.response ?? "",
+      is_seen: latestResult.rows[0]?.is_seen ?? true,
     });
   } catch (err) {
     console.log(err);
@@ -30,7 +47,7 @@ export const getUnreadCount = async (req, res) => {
 };
 
 export const markResponsesAsSeen = async (req, res) => {
-  try{
+  try {
     const userId = req.user.id;
 
     await db.query(
@@ -41,14 +58,13 @@ export const markResponsesAsSeen = async (req, res) => {
       `,
       [userId],
     );
-  }
-   catch(err){
+  } catch (err) {
     console.log(err);
     res.status(500).json({
       error: "Something went wrong",
     });
-   }
-}
+  }
+};
 
 export const aiQueryResponse = async (req, res) => {
   try {
@@ -79,11 +95,13 @@ export const aiQueryResponse = async (req, res) => {
 
     const jobId = jobEntry.rows[0].id;
 
-    await aiQueryQueue.add("ai-query", {
+    const job = await aiQueryQueue.add("ai-query", {
       jobId,
       userId,
       query,
     });
+
+    console.log("Job Added:", job.id);
 
     return res.status(202).json({
       success: true,
