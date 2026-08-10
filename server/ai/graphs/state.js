@@ -17,5 +17,11 @@ export const GraphState = Annotation.Root({
 
   retrievedContextFolderId: Annotation(),
 
+  retrievalTimings: Annotation(),
+
+  rerankedDocuments: Annotation(),
+
+  retrievalContext: Annotation(),
+
   finalResponse: Annotation(),
 });

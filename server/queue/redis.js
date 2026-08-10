@@ -1,10 +1,9 @@
 import "dotenv/config";
 import IORedis from "ioredis";
 
-const rediss = new IORedis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
+const rediss = new IORedis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
+  enableReadyCheck: false,
 });
 
 rediss.on("connect", () => {

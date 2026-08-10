@@ -3,6 +3,7 @@ import "./ask-ai.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { markResponsesAsSeen } from "../pages/ai-assistant-route/app.jsx";
 
 const AskAi = () => {
   const navigate = useNavigate();
@@ -12,9 +13,11 @@ const AskAi = () => {
 
   const readUnseenResponse = (res) => {
     try {
+      // markResponsesAsSeen(); // Refresh unseen count after reading
       const speech = new SpeechSynthesisUtterance(res);
       speech.lang = "hi-in";
       window.speechSynthesis.speak(speech);
+      markResponsesAsSeen(); // Refresh unseen count after reading
     } catch (err) {
       console.error(err);
     }

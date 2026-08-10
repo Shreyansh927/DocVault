@@ -12,6 +12,11 @@ export async function responseNode(state) {
       res: state.toolResult,
       FileId: state.retrievedContextFileId,
       FolderId: state.retrievedContextFolderId,
+      Timing: state.retrievalTimings,
+      retrievedDocuments: state.retrievedDocuments,
+      rerankedDocuments: state.rerankedDocuments,
+
+      context: state.retrievalContext,
     },
   };
 }

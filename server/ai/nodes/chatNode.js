@@ -19,10 +19,18 @@ export async function chatNode(state) {
       userId: state.userId,
     });
 
+    console.log(result.retrievedDocuments);
+    console.log(result.rerankedDocuments);
+
     return {
       toolResult: result.content,
       retrievedContextFolderId: result.folderId,
       retrievedContextFileId: result.fileId,
+      retrievalTimings: result.timings,
+      retrievedDocuments: result.retrievedDocuments,
+      rerankedDocuments: result.rerankedDocuments,
+
+      retrievalContext: result.context,
     };
   }
 
@@ -34,6 +42,8 @@ export async function chatNode(state) {
 
     return {
       toolResult: result,
+      retrievedContextFolderId: null,
+      retrievedContextFileId: null,
     };
   }
 }

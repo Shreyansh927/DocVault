@@ -9,6 +9,10 @@ import { graph } from "../ai/graphs/graph.js";
 import { db } from "../db.js";
 import ModelManager from "../ai/models/modelmanager.js";
 
+console.log("Tracing:", process.env.LANGCHAIN_TRACING_V2);
+console.log("Project:", process.env.LANGCHAIN_PROJECT);
+console.log("API Key exists:", !!process.env.LANGCHAIN_API_KEY);
+
 const worker = new Worker(
   "ai-query-processing",
 
@@ -34,8 +38,17 @@ const worker = new Worker(
       },
       {
         configurable: {
-          thread_id: userId.toString(),
+          thread_id: `${userId}:${jobId}`,
         },
+        runName: "DocVault AI Query",
+        metadata: {
+          jobId,
+          userId,
+          queue: "ai-query-processing",
+          source: "bullmq-worker",
+          app: "docvault",
+        },
+        tags: ["docvault", "rag", "bullmq"],
       },
     );
 
@@ -45,13 +58,28 @@ const worker = new Worker(
         : JSON.stringify(result.finalResponse.res);
 
     let queryembeddingString = null;
-    let respembeddingString = null
+    let respembeddingString = null;
 
     try {
-      const qembedding = await ModelManager.embeddings().embedQuery(query);
-      const rembedding = await ModelManager.embeddings().embedQuery(response);
+      console.log("===== EMBEDDING DEBUG =====");
+      console.log("query:", query);
+      console.log("query type:", typeof query);
+      console.log("response:", response);
+      console.log("response type:", typeof response);
 
-      console.log("Embedding length:", qembedding.length);
+      const embeddings = ModelManager.embeddings();
+
+      console.log("Generating QUERY embedding...");
+
+      const qembedding = await embeddings.embedQuery(query);
+
+      console.log("QUERY embedding successful:", qembedding.length);
+
+      console.log("Generating RESPONSE embedding...");
+
+      const rembedding = await embeddings.embedQuery(response);
+
+      console.log("RESPONSE embedding successful:", rembedding.length);
 
       queryembeddingString = `[${qembedding.join(",")}]`;
       respembeddingString = `[${rembedding.join(",")}]`;

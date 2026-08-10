@@ -15,8 +15,19 @@ import Header from "../../components/header/header";
 import "./app.css";
 import AskAi from "../../ask-ai/ask-ai.jsx";
 
+const base_url = import.meta.env.VITE_API_BASE_URL;
+export const markResponsesAsSeen = async () => {
+  try {
+    await axios.get(`${base_url}/ai-query-response/mark-as-seen`, {
+      withCredentials: true,
+    });
+  } catch (err) {
+    console.error("Error marking responses as seen:", err);
+  }
+};
+
 const AiAssistant = () => {
-  const base_url = import.meta.env.VITE_API_BASE_URL;
+  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,27 +41,15 @@ const AiAssistant = () => {
 
   const hasQuery = query.trim().length > 0;
 
-  const markResponsesAsSeen = async () => {
-    try {
-      await axios.get(`${base_url}/ai-query-response/mark-as-seen`, {
-        withCredentials: true,
-      });
-    } catch (err) {
-      console.error("Error marking responses as seen:", err);
+  useEffect(() => {
+    console.log("pathname:", location.pathname);
+    window.speechSynthesis.cancel(); // Cancel any ongoing speech synthesis
+
+    if (location.pathname === "/assistant") {
+      // alert("You are on the assistant page. Marking responses as seen.");
+      markResponsesAsSeen();
     }
-  };
-
-
-
-useEffect(() => {
-  console.log("pathname:", location.pathname);
-  window.speechSynthesis.cancel(); // Cancel any ongoing speech synthesis
-
-  if (location.pathname === "/assistant") {
-    // alert("You are on the assistant page. Marking responses as seen.");
-    markResponsesAsSeen();
-  }
-}, [location.pathname]);
+  }, [location.pathname]);
 
   const filteredHistory = useMemo(() => {
     const term = historyQuery.toLowerCase();
@@ -112,7 +111,6 @@ useEffect(() => {
       // }
       setQuery("");
       setStatus("Answer delivered");
-      
     } catch (error) {
       setAnswer("Unable to fetch response. Please try again.");
       setStatus("Something went wrong");

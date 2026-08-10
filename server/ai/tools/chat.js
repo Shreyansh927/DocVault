@@ -2,20 +2,30 @@ import { z } from "zod";
 import { db } from "../../db.js";
 import { tool } from "langchain/tools";
 import ModelManager from "../models/modelmanager.js";
+import { performance } from "node:perf_hooks";
 
 import { cohereRerank } from "../../utils/cohereReRankerClient.js";
 
 export const searchDocsInfo = tool(
   async ({ query, userId }) => {
     console.log("search tool called !!!");
-    const searchEmbedding = await ModelManager.embeddings().embedQuery(query);
+    const timings = {};
+    const startTime = performance.now();
 
+    // embedding
+    const embedStart = performance.now();
+    const searchEmbedding = await ModelManager.embeddings().embedQuery(query);
+    timings.embeddingEnds = performance.now() - embedStart;
+
+    // pgvector search
+    const pgvectorStart = performance.now();
     try {
       const { rows } = await db.query(
         `SELECT f.filename, f.ai_summary, fo.folder_name, f.id , f.folder_id FROM files as f LEFT JOIN folders as fo 
             ON fo.id = f.folder_id WHERE fo.user_id = $1 AND f.deleted_at IS NULL ORDER BY (f.new_embedding <-> $2) LIMIT 6`,
         [userId, `[${searchEmbedding.join(",")}]`],
       );
+      timings.pgvectorEnds = performance.now() - pgvectorStart;
 
       // const friendsWhoAllowedAccessToMe = await db.query(
       //   `SELECT * FROM friends as f WHERE f.show_folders = TRUE AND friend_id = $1`,
@@ -71,12 +81,16 @@ export const searchDocsInfo = tool(
          FolderId: ${c.folder_id}
       `,
       );
+
+      // cohere rerank
+      const rerankStart = performance.now();
       const reRankedResponse = await cohereRerank.rerank({
         model: "rerank-multilingual-v3.0",
         query: query,
         documents: context,
         topN: 3,
       });
+      timings.rerankEnds = performance.now() - rerankStart;
 
       const rerankedRows = reRankedResponse.results.map(
         (result) => rows[result.index],
@@ -105,8 +119,10 @@ export const searchDocsInfo = tool(
 
       const schema = z.object({
         content: z.string(),
-        
       });
+
+      // cohere llm
+      const llmStart = performance.now();
 
       const model = ModelManager.cohere();
 
@@ -146,7 +162,7 @@ ${finalReRankedResponse}
         },
       ]);
 
-      console.log("========== RAW COHERE RESPONSE ==========");
+      console.log(" RAW COHERE RESPONSE==");
       console.dir(res, { depth: null });
 
       console.log("typeof res.content:", typeof res.content);
@@ -170,11 +186,36 @@ ${finalReRankedResponse}
 
       console.log(parsed);
       console.log(typeof parsed);
-      
+      timings.llmEnds = performance.now() - llmStart;
+
+      const totalTime = performance.now() - startTime;
+      console.log("Timings:", timings);
+      console.log("Total time taken:", totalTime, "ms");
+
       return {
         content: parsed.content,
         folderId,
         fileId,
+        timings: {
+          embeddingMs: Number(timings.embeddingEnds.toFixed(2)),
+          pgVectorMs: Number(timings.pgvectorEnds.toFixed(2)),
+          rerankMs: Number(timings.rerankEnds.toFixed(2)),
+          llmMs: Number(timings.llmEnds.toFixed(2)),
+          totalMs: Number(totalTime.toFixed(2)),
+        },
+        retrievedDocuments: rows.map((row) => ({
+          fileId: row.id,
+          folderId: row.folder_id,
+          filename: row.filename,
+        })),
+
+        rerankedDocuments: rerankedRows.map((row) => ({
+          fileId: row.id,
+          folderId: row.folder_id,
+          filename: row.filename,
+        })),
+
+        context: finalReRankedResponse,
       };
     } catch (err) {
       console.log(err);
@@ -217,6 +258,7 @@ export const searchInfoUsingTravilyTool = tool(
           content: `
 You only answer question from the provided tavily search results as context.
 Always prioritize the first search result.
+answer in a concise manner in between 50-60 words.
 `,
         },
         {
@@ -249,11 +291,9 @@ ${tavilyContext}
     }
   },
   {
-    name: "",
-    description: "",
-    schema: z.object({
-      query: z.string(),
-      userId: z.number(),
-    }),
+    name: "search_web_with_tavily",
+    description:
+      "Search the web using Tavily and answer the user question using the search results.",
+    schema: z.object({ query: z.string(), userId: z.number() }),
   },
 );
