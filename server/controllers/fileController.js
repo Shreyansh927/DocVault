@@ -9,6 +9,7 @@ import officeParser from "officeparser";
 import Tesseract from "tesseract.js";
 import sharp from "sharp";
 import { auth } from "googleapis/build/src/apis/abusiveexperiencereport/index.js";
+import { check } from "zod";
 
 /* ================= UPLOAD FILES ================= */
 export const uploadFiles = async (req, res) => {
@@ -22,15 +23,21 @@ export const uploadFiles = async (req, res) => {
         error: "Missing data",
       });
     }
-    const user = await db.query(`SELECT * FROM users WHERE id=$1`, [userId]);
-    const auth_uuid = user.rows[0].auth_uuid;
 
+    // Get user
+    const user = await db.query(`SELECT auth_uuid FROM users WHERE id = $1`, [
+      userId,
+    ]);
+
+    const auth_uuid = user.rows[0]?.auth_uuid;
+
+    // Validate folder ownership
     const folder = await db.query(
       `
       SELECT id
       FROM folders
-      WHERE id=$1
-      AND user_id=$2
+      WHERE id = $1
+      AND user_id = $2
       `,
       [folderId, userId],
     );
@@ -42,31 +49,66 @@ export const uploadFiles = async (req, res) => {
     }
 
     const uploadedFiles = [];
+    const duplicateFiles = [];
 
     for (const file of files) {
+      // ----------------------------------------------------
+      // 1. Fast filename duplicate check
+      // ----------------------------------------------------
+      const checkDuplicate = await db.query(
+        `
+        SELECT 1
+        FROM files f
+        JOIN folders fo ON f.folder_id = fo.id
+        WHERE f.folder_id = $1
+          AND fo.user_id = $2
+          AND LOWER(f.filename) = LOWER($3)
+          AND f.is_deleted = FALSE
+        LIMIT 1
+        `,
+        [folderId, userId, file.originalname],
+      );
+
+      if (checkDuplicate.rows.length > 0) {
+        duplicateFiles.push(file.originalname);
+
+        return res.status(409).json({
+          success: false,
+          message: `File "${file.originalname}" already exists in this folder.`,
+        });
+      }
+
+      // ----------------------------------------------------
+      // 2. Upload to Supabase
+      // ----------------------------------------------------
       const { storagePath } = await uploadFilesToSupabase(
         userId,
         folderId,
         file,
       );
 
+      // ----------------------------------------------------
+      // 3. Insert into database
+      // ----------------------------------------------------
       const dbRes = await db.query(
         `
         INSERT INTO files
         (
-            folder_id,
-            filename,
-            encrypted_name,
-            encrypted_link,
-            file_type,
-            size,
-            storage,
-            ai_summary,
-            tessract_extracted_text,
-            new_embedding
+          folder_id,
+          filename,
+          encrypted_name,
+          encrypted_link,
+          file_type,
+          size,
+          storage,
+          ai_summary,
+          tessract_extracted_text,
+          new_embedding,
+          is_duplicate,
+          duplicate_of
         )
         VALUES
-        ($1,$2,$3,$4,$5,$6,$7,NULL,NULL,NULL)
+        ($1,$2,$3,$4,$5,$6,$7,NULL,NULL,NULL,FALSE,NULL)
         RETURNING *
         `,
         [
@@ -82,35 +124,61 @@ export const uploadFiles = async (req, res) => {
 
       const savedFile = dbRes.rows[0];
 
+      // ----------------------------------------------------
+      // 4. Add background AI processing job
+      // ----------------------------------------------------
       await fileProcessingQueue.add("process-file", {
         fileId: savedFile.id,
+        folderId: savedFile.folder_id,
+        userId,
       });
 
       uploadedFiles.push(savedFile);
     }
-    console.log(uploadedFiles);
-    let allUploadedFileNames = "";
-    for (let file of uploadedFiles) {
-      allUploadedFileNames += `${file.filename}`;
+
+    // ----------------------------------------------------
+    // 5. Send a single notification
+    // ----------------------------------------------------
+    if (uploadedFiles.length > 0) {
+      const allUploadedFileNames = uploadedFiles
+        .map((f) => f.filename)
+        .join(", ");
+
+      await db.query(
+        `
+        INSERT INTO notifications
+        (
+          user_id,
+          sender_id,
+          type,
+          text_notification,
+          file_route,
+          sender_name,
+          sender_profile_image,
+          status,
+          created_at
+        )
+        VALUES
+        ($1, NULL, 'FILE_UPLOAD', $2, $3, NULL, NULL, 'UNREAD', NOW())
+        `,
+        [
+          auth_uuid,
+          `Files ${allUploadedFileNames} uploaded successfully.`,
+          `/files/${folderId}`,
+        ],
+      );
     }
-    await db.query(
-      `INSERT INTO notifications (user_id, sender_id, type, text_notification, file_route, sender_name, sender_profile_image, status, created_at) VALUES ($1, NULL, 'FILE_UPLOAD', $2, $3, null, null, null, NOW())`,
-      [
-        auth_uuid,
-        `files ${allUploadedFileNames} are uploaded successfully!!!`,
-        `/files/${folderId}`,
-      ],
-    );
 
     return res.status(201).json({
       success: true,
-
       message: "Files uploaded successfully. AI processing started.",
-
+      uploadedCount: uploadedFiles.length,
+      duplicateCount: duplicateFiles.length,
+      duplicatesSkipped: duplicateFiles,
       files: uploadedFiles,
     });
   } catch (err) {
-    console.error(err);
+    console.error("UPLOAD ERROR:", err);
 
     return res.status(500).json({
       error: "Upload failed",

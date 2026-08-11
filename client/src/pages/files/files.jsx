@@ -119,7 +119,6 @@ const Files = () => {
   useEffect(() => {
     trashMode ? fetchAllTrashFiles() : fetchAllFiles();
     localStorage.setItem("trash", JSON.stringify(trashMode));
-    
   }, [trashMode, folderId, timeline]);
 
   const fetchAllFiles = useCallback(async () => {
@@ -168,40 +167,60 @@ const Files = () => {
   }, [API_BASE_URL, folderId]);
 
   // upload
-  const uploadFiles = async () => {
-    if (!selectedFiles.length) return;
+ const uploadFiles = async () => {
+   if (!selectedFiles.length) return;
 
-    setIsUploading(true);
-    toast.info(
-      "uploading is being processed in bg you can continue browsing!!!",
-    );
-    setShowUploadModal(false);
+   setIsUploading(true);
 
-    const formData = new FormData();
-    selectedFiles.forEach((f) => formData.append("files", f));
-    formData.append("email", currentUser);
-    formData.append("folderId", folderId);
+   toast.info(
+     "Uploading is being processed in background. You can continue browsing!",
+   );
 
-    try {
-      await axios.post(`${API_BASE_URL}/api/files/upload`, formData, {
-        withCredentials: true,
-        headers: { "x-csrf-token": csrfToken },
-        onUploadProgress: (p) =>
-          setUploadProgress(Math.round((p.loaded * 100) / p.total)),
-      });
-      toast.success(
-        "upload successfull!!! view latest notifications!!",
-      );
-      setShowUploadModal(false);
-      setSelectedFiles([]);
-      setUploadProgress(0);
-      fetchAllFiles();
-    } catch {
-      alert("Upload failed");
-    } finally {
-      fetchAllFiles();
-    }
-  };
+   setShowUploadModal(false);
+
+   const formData = new FormData();
+
+   selectedFiles.forEach((f) => formData.append("files", f));
+
+   formData.append("folderId", folderId);
+
+   try {
+     const res = await axios.post(
+       `${API_BASE_URL}/api/files/upload`,
+       formData,
+       {
+         withCredentials: true,
+         headers: {
+           "x-csrf-token": csrfToken,
+         },
+         onUploadProgress: (p) =>
+           setUploadProgress(Math.round((p.loaded * 100) / p.total)),
+       },
+     );
+
+     // Success toast
+     if (res.data.uploadedCount > 0) {
+       toast.success(`${res.data.uploadedCount} file(s) uploaded successfully`);
+     }
+
+     // Duplicate toast
+     if (res.data.duplicateCount > 0) {
+       toast.warning(
+         `Skipped duplicate file(s): ${res.data.duplicatesSkipped.join(", ")}`,
+       );
+     }
+
+     setSelectedFiles([]);
+     setUploadProgress(0);
+
+     fetchAllFiles();
+   } catch (err) {
+     toast.error(err.response?.data?.message || "Upload failed");
+   } finally {
+     setIsUploading(false);
+     fetchAllFiles();
+   }
+ };
 
   /* ---------- Delete ---------- */
   const deleteFile = async () => {
