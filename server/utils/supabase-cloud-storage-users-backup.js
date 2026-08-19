@@ -44,6 +44,7 @@ export const uploadProfileImageToSupabase = async (user, file) => {
   const storagePath = `profile-images/user_${
     user.public_id
   }/${Date.now()}_${safeName}`;
+  console.log(file.buffer);
 
   const { error } = await supabase.storage
     .from(BUCKET_NAME)
@@ -57,10 +58,10 @@ export const uploadProfileImageToSupabase = async (user, file) => {
     throw error;
   }
 
-  // const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
+  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
+  console.log(data.publicUrl)
 
-  // return data.publicUrl;
-  return storagePath;
+  return data.publicUrl;
 };
 
 /* ================= FILE UPLOAD (USER DATA) ================= */
@@ -92,5 +93,3 @@ export const uploadFilesToSupabase = async (userId, folderId, file) => {
     storagePath,
   };
 };
-
-

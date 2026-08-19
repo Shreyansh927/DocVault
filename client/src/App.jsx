@@ -24,6 +24,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AskAi from "./ask-ai/ask-ai.jsx";
 import AiAssistant from "./pages/ai-assistant-route/app.jsx";
+import TraceQiQuery from "./pages/trace-ai-query/trace-ai-query.jsx";
 
 const App = () => {
   return (
@@ -77,6 +78,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <AiAssistant />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/trace/query/langsmith/:queryId/:userId"
+          element={
+            <ProtectedRoute>
+              <TraceQiQuery />
             </ProtectedRoute>
           }
         />

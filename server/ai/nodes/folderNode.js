@@ -6,7 +6,7 @@ import {
 } from "../tools/foldertool.js";
 
 export async function folderNode(state) {
-  console.log("========== FOLDER NODE ==========");
+  console.log(" FOLDER NODE!!! ");
 
   console.log(state);
   const action = state.intent.action;

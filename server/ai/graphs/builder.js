@@ -19,7 +19,7 @@ builder.addNode("folders", folderNode);
 
 builder.addNode("chat", chatNode);
 
-builder.addNode("documents", async (state) => state);
+// builder.addNode("documents", async (state) => state);
 
 builder.addNode("moveFile", moveFileNode);
 
@@ -27,11 +27,11 @@ builder.addNode("permissions", permissionNode);
 
 builder.addNode("response", responseNode);
 
-builder.addEdge(START, "planner"); 
+builder.addEdge(START, "planner");
 
 builder.addConditionalEdges("planner", routeIntent, {
   folders: "folders",
-  documents: "documents",
+  // documents: "documents",
   permissions: "permissions",
   chat: "chat",
   moveFile: "moveFile",
@@ -39,12 +39,12 @@ builder.addConditionalEdges("planner", routeIntent, {
 
 builder.addEdge("folders", "response");
 
-builder.addEdge("response", END);
-
-builder.addEdge("documents", END);
+// builder.addEdge("documents", END);
 
 builder.addEdge("permissions", "response");
 
 builder.addEdge("chat", "response");
 
 builder.addEdge("moveFile", "response");
+
+builder.addEdge("response", END);

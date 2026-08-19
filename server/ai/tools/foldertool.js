@@ -63,9 +63,10 @@ export const deleteFoldersTool = tool(
     }
   },
   {
-    name: "create_folder",
+    name: "delete_folders",
 
-    description: "Creates one or more folders for the authenticated user.",
+    description:
+      "Soft-deletes one or more folders belonging to the authenticated user.",
 
     schema: z.object({
       folderNames: z.array(z.string()),
@@ -78,6 +79,7 @@ export const restoreFoldersTool = tool(
   async ({ folderNames, userId }) => {
     try {
       for (const folderName of folderNames) {
+        "BEGIN"
         const exists = await db.query(
           `SELECT 1 FROM folders WHERE folder_name=$1 AND user_id=$2 AND is_deleted=true`,
           [folderName.trim(), userId],

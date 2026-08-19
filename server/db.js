@@ -207,6 +207,12 @@ export const initDB = async () => {
 ); 
     `);
 
+  // await db.query(
+  //   `CREATE INDEX IF NOT EXISTS ai_query_jobs_hnsw_indexing 
+  //      ON ai_query_jobs
+  //      USING hnsw(query_embedding vector_cosine_ops)`,
+  // );
+
   await db.query(`
     CREATE INDEX IF NOT EXISTS idx_notifications_user_id
     ON notifications(user_id);

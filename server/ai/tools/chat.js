@@ -219,7 +219,7 @@ ${finalReRankedResponse}
       };
     } catch (err) {
       console.log(err);
-      return err;
+      throw err;
     }
   },
   {
@@ -235,59 +235,61 @@ ${finalReRankedResponse}
 
 export const searchInfoUsingTravilyTool = tool(
   async ({ query, userId }) => {
-    console.log("Travily tool called!!");
-    let tavilyContext = "";
-    const user = await db.query(`SELECT * from users WHERE id =$1`, [userId]);
-    if (user.rows[0].id) {
-      const tavilySearchResults = await ModelManager.searchWeb(query);
-      console.log(tavilySearchResults.results);
+    try {
+      console.log("Travily tool called!!");
+      let tavilyContext = "";
+      const user = await db.query(`SELECT * from users WHERE id =$1`, [userId]);
+      if (user.rows[0].id) {
+        const tavilySearchResults = await ModelManager.searchWeb(query);
+        console.log(tavilySearchResults.results);
 
-      for (const searchResult of tavilySearchResults.results.slice(0, 1)) {
-        const cont = `Title: ${searchResult.title}
+        for (const searchResult of tavilySearchResults.results.slice(0, 1)) {
+          const cont = `Title: ${searchResult.title}
         Content: ${searchResult.content}
         
         `;
-        tavilyContext += cont;
-      }
+          tavilyContext += cont;
+        }
 
-      const model = await ModelManager.cohere();
+        const model = await ModelManager.cohere();
 
-      const llmResponse = await model.invoke([
-        {
-          role: "system",
-          content: `
+        const llmResponse = await model.invoke([
+          {
+            role: "system",
+            content: `
 You only answer question from the provided tavily search results as context.
 Always prioritize the first search result.
 answer in a concise manner in between 50-60 words.
 `,
-        },
-        {
-          role: "user",
-          content: `
+          },
+          {
+            role: "user",
+            content: `
 Question:
 ${query}
 
 Context:
 ${tavilyContext}
 `,
-        },
-      ]);
+          },
+        ]);
 
-      console.log("===== FULL RESPONSE =====");
-      console.dir(llmResponse, { depth: null });
+        console.log("===== FULL RESPONSE =====");
+        console.dir(llmResponse, { depth: null });
 
-      console.log("===== TYPE =====");
-      console.log(typeof llmResponse.content);
+        console.log("===== TYPE =====");
+        console.log(typeof llmResponse.content);
 
-      console.log("===== CONTENT =====");
-      console.log(llmResponse.content);
+        console.log("===== CONTENT =====");
+        console.log(llmResponse.content);
 
-      console.log("===== STRINGIFIED =====");
-      console.log(JSON.stringify(llmResponse.content));
+        console.log("===== STRINGIFIED =====");
+        console.log(JSON.stringify(llmResponse.content));
 
-      return llmResponse.content;
-    } else {
-      return "unauthenticated";
+        return llmResponse.content;
+      }
+    } catch (err) {
+      throw err;
     }
   },
   {

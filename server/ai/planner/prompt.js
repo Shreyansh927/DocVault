@@ -422,6 +422,20 @@ Return
   }
 }
 
+
+if his query is pointing to multiple files at a time not just one 
+for example.
+
+Q} gather all files required to apply for driving licence, and suppose he have adhaar card, pan card, driving licence and     many more files, then return response in below structure?
+
+    {
+      "route":"chat",
+      "action":"search-thoroughly",
+      "parameters":{
+          "query":""
+      }
+    }
+
 if the query is compeletly unrelated to the given context then use return response as 
 
 eg: what is latest version of react.js, node.js, explain pandas library

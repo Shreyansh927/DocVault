@@ -13,6 +13,7 @@ export async function responseNode(state) {
       FileId: state.retrievedContextFileId,
       FolderId: state.retrievedContextFolderId,
       Timing: state.retrievalTimings,
+      intent: state.intent,
       retrievedDocuments: state.retrievedDocuments,
       rerankedDocuments: state.rerankedDocuments,
 

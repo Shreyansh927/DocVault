@@ -27,7 +27,6 @@ export const markResponsesAsSeen = async () => {
 };
 
 const AiAssistant = () => {
-  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -294,6 +293,16 @@ const AiAssistant = () => {
                             View source
                           </button>
                         )}
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/trace/query/langsmith/${item.id}/${item.user_id}`,
+                            )
+                          }
+                          className="source-btn"
+                        >
+                          View Trace
+                        </button>
                       </li>
                     ))
                   ) : (

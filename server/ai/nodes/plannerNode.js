@@ -8,24 +8,7 @@ export async function plannerNode(state) {
 
   const query = getCurrentQuery(state);
 
-
   const embedding = await ModelManager.embeddings().embedQuery(query);
-
-  await db.query(
-    `INSERT INTO semantic_search_logs
-        (
-            user_id,
-            query,
-            query_embedding,
-            status,
-            created_at
-        )
-        VALUES
-        (
-            $1,$2,$3,'PROCESSING',NOW()
-        )`,
-    [state.userId, query, `[${embedding.join(",")}]`],
-  );
 
   const intent = await planner(state.messages);
   console.log(

@@ -73,6 +73,7 @@ export const acceptRequest = async (req, res) => {
       [receiverId],
     );
 
+    
     const sender = await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [
       senderId,
     ]);

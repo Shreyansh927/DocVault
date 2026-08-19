@@ -29,6 +29,9 @@ export const personalInfo = async (req, res) => {
 /* ================= EDIT PROFILE ================= */
 export const editUserProfile = async (req, res) => {
   try {
+
+    // console.log("REQ FILE:", req.file);
+    // console.log("BODY:", req.body);
     const userId = req.user.id;
     const { name, phoneNumber } = req.body;
 
@@ -49,6 +52,8 @@ export const editUserProfile = async (req, res) => {
         req.file,
       );
     }
+
+    // console.log("PROFILE IMAGE URL:", profileImageUrl);
 
     await db.query(
       `UPDATE users

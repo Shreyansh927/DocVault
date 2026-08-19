@@ -1,10 +1,10 @@
-
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { UAParser } from "ua-parser-js";
 import { db } from "../db.js";
 import axios from "axios";
+import { supabaseAdmin } from "../supabaseAdmin.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -62,24 +62,41 @@ export const googleLoginAuth = async (req, res) => {
 
         user = updated.rows[0];
       } else {
-        /* ---- CREATE USER  */
+        /* ---- CREATE NEW GOOGLE USER ---- */
+
+        const { data: authData, error: authError } =
+          await supabaseAdmin.auth.admin.createUser({
+            email,
+            email_confirm: true,
+          });
+
+        if (authError) {
+          console.error("Supabase Auth creation failed:", authError);
+
+          return res.status(400).json({
+            error: authError.message,
+          });
+        }
+
+        const authUuid = authData.user.id;
 
         const publicId = `${name}_${crypto.randomUUID()}`;
 
         const inserted = await db.query(
           `
-          INSERT INTO users
-          (
-            google_id,
-            name,
-            email,
-            profile_image,
-            public_id
-          )
-          VALUES ($1, $2, $3, $4, $5)
-          RETURNING *
-          `,
-          [googleId, name, email, picture, publicId],
+  INSERT INTO users
+  (
+    auth_uuid,
+    google_id,
+    name,
+    email,
+    profile_image,
+    public_id
+  )
+  VALUES ($1, $2, $3, $4, $5, $6)
+  RETURNING *
+  `,
+          [authUuid, googleId, name, email, picture, publicId],
         );
 
         user = inserted.rows[0];
@@ -169,7 +186,7 @@ SET
       httpOnly: true,
       sameSite: "none",
       secure: true,
-      maxAge: 15 * 60 * 1000,
+      maxAge: 60 * 60 * 1000,
       path: "/",
     });
 
@@ -195,6 +212,7 @@ SET
 
     return res.status(500).json({
       error: "Google authentication failed",
+      details: err.message,
     });
   }
 };
