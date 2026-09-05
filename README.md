@@ -5,7 +5,6 @@
 AI-Powered Secure Document Management & Intelligent Knowledge Platform
 
 Secure documents. Search with meaning. Ask questions. Automate actions. Extend knowledge with the web.
-
 <p>
   <img src="https://img.shields.io/badge/React-Vite-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React">
   <img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
@@ -14,36 +13,27 @@ Secure documents. Search with meaning. Ask questions. Automate actions. Extend k
   <img src="https://img.shields.io/badge/**Docker**-**Nginx**-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="**Docker**">
   <img src="https://img.shields.io/badge/**Supabase**-Cloud-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="**Supabase**">
 </p>
-
 </div>
 
 📌 Overview
 
 DocVault is a full-stack AI SaaS platform for securely storing, organizing, searching, and interacting with documents.
-
 It combines a traditional document-management backend with an AI knowledge layer built around RAG, semantic search, agentic workflows, MCP, evaluation, and observability.
-
 The system is designed with a strong separation between:
 
-Application APIs & authorization
-
-Asynchronous document processing
-
-AI / RAG workflows
-
-Vector retrieval
-
-External tool execution
-
-Cloud storage & database
-
-Containerized infrastructure
+<p>• **Application APIs & authorization**</p>
+<p>• **Asynchronous document processing**</p>
+<p>• **AI / RAG workflows**</p>
+<p>• **Vector retrieval**</p>
+<p>• **External tool execution**</p>
+<p>• **Cloud storage & database**</p>
+<p>• **Containerized infrastructure**</p>
 
 ✨ What Makes DocVault Different?
 
-Capability
+CapabilityImplementation
 
-Implementation
+
 
 🔐 Secure Document Platform
 
@@ -98,92 +88,63 @@ Supabase PostgreSQL, pgvector, Storage, RLS
 🔐 Authentication & Security
 
 DocVault uses a layered authentication and authorization architecture.
-
 Authentication
 
-JWT access and refresh tokens
-
-HTTP-only secure cookies
-
-Refresh-token rotation
-
-Google OAuth
-
-OTP-based password reset
-
-bcrypt password hashing
+<p>• **JWT** access and refresh tokens</p>
+<p>• HTTP-only secure cookies</p>
+<p>• Refresh-token rotation</p>
+<p>• Google **OAuth**</p>
+<p>• OTP-based password reset</p>
+<p>• bcrypt password hashing</p>
 
 Session Management
 
-Multi-device sessions
-
-Single-device logout
-
-Logout from all devices
-
-Session revocation
+<p>• Multi-device sessions</p>
+<p>• Single-device logout</p>
+<p>• Logout from all devices</p>
+<p>• Session revocation</p>
 
 Application Security
 
-RBAC
-
-Protected routes
-
-Authorization middleware
-
-Input validation
-
-CORS
-
-Helmet
-
-Rate limiting
+<p>• **RBAC**</p>
+<p>• Protected routes</p>
+<p>• **Authorization** middleware</p>
+<p>• Input validation</p>
+<p>• CORS</p>
+<p>• Helmet</p>
+<p>• Rate limiting</p>
 
 Database Security
 
-Supabase Row Level Security (RLS)
-
-Permission checks
-
-Protected data access
+<p>• **Supabase** **Row Level Security (RLS)**</p>
+<p>• Permission checks</p>
+<p>• Protected data access</p>
 
 📂 Document Management
 
 DocVault provides a complete document lifecycle.
-
 Organization
 
-Hierarchical folders
-
-Public and private folders
-
-File metadata
-
-Search
-
-Pagination
+<p>• Hierarchical folders</p>
+<p>• Public and private folders</p>
+<p>• File metadata</p>
+<p>• Search</p>
+<p>• Pagination</p>
 
 Lifecycle
 
-Upload
-
-Soft delete
-
-Trash
-
-Restore
-
-Permanent deletion
+<p>• Upload</p>
+<p>• Soft delete</p>
+<p>• Trash</p>
+<p>• Restore</p>
+<p>• Permanent deletion</p>
 
 Sharing
 
-Folder sharing
-
-Public links
-
-Permission management
-
-Access revocation
+<p>• Folder sharing</p>
+<p>• Public links</p>
+<p>• Permission management</p>
+<p>• Access revocation</p>
 
 🤖 AI Assistant
 
@@ -191,25 +152,16 @@ Users interact with DocVault using natural language instead of navigating every 
 
 Supported Actions
 
-Create folders
-
-Rename folders
-
-Delete folders
-
-Move files
-
-Share folders
-
-Grant permissions
-
-Revoke permissions
-
-Search documents
-
-Summarize documents
-
-Ask questions about uploaded documents
+<p>• Create folders</p>
+<p>• Rename folders</p>
+<p>• Delete folders</p>
+<p>• Move files</p>
+<p>• Share folders</p>
+<p>• Grant permissions</p>
+<p>• Revoke permissions</p>
+<p>• Search documents</p>
+<p>• Summarize documents</p>
+<p>• Ask questions about uploaded documents</p>
 
 Example
 
@@ -223,10 +175,9 @@ Summarize Aadhaar.pdf
 
 Where is my PAN card?
 
-🧠 Agentic AI
+🧠 Agentic AI with LangGraph
 
 The AI assistant is orchestrated using LangGraph.
-
 Instead of allowing the LLM to directly modify application data, DocVault uses controlled tools and backend validation.
 
                     User Request
@@ -257,9 +208,9 @@ Instead of allowing the LLM to directly modify application data, DocVault uses c
 
 Tool Layer
 
-Tool Group
+Tool GroupOperations
 
-Operations
+
 
 Document Tools
 
@@ -319,23 +270,15 @@ Source Citations
 
 RAG Stack
 
-Google Gemini
-
-Google Generative AI Embeddings
-
-LangChain
-
-LangGraph
-
-PostgreSQL + pgvector
-
-Semantic Search
-
-Vector Search
-
-Re-ranking
-
-Prompt Engineering
+<p>• **Google Gemini**</p>
+<p>• **Google Generative AI Embeddings**</p>
+<p>• **LangChain**</p>
+<p>• **LangGraph**</p>
+<p>• **PostgreSQL + pgvector**</p>
+<p>• **Semantic Search**</p>
+<p>• **Vector Search**</p>
+<p>• **Re-ranking**</p>
+<p>• **Prompt Engineering**</p>
 
 🔎 Semantic Search & Re-ranking
 
@@ -377,18 +320,14 @@ Answer + Sources
 
 This improves:
 
-Traceability
-
-Answer verification
-
-Grounding
-
-Transparency
+<p>• **Traceability**</p>
+<p>• **Answer verification**</p>
+<p>• **Grounding**</p>
+<p>• **Transparency**</p>
 
 🌐 Tavily MCP
 
 DocVault integrates Tavily through the Model Context Protocol (MCP) to extend the AI assistant beyond the user's private document collection.
-
 The agent can combine private document knowledge with external web information.
 
                          User Query
@@ -438,25 +377,18 @@ Uploaded documents are processed automatically in the background.
 
 OCR
 
-Tesseract.js
-
-English OCR
-
-Hindi OCR
-
-Text extraction
+<p>• **Tesseract.js**</p>
+<p>• English **OCR**</p>
+<p>• Hindi **OCR**</p>
+<p>• Text extraction</p>
 
 AI Processing
 
-Automatic summaries
-
-Metadata generation
-
-Text chunking
-
-Embedding generation
-
-Search indexing
+<p>• Automatic summaries</p>
+<p>• Metadata generation</p>
+<p>• Text chunking</p>
+<p>• Embedding generation</p>
+<p>• Search indexing</p>
 
 ⚙️ Asynchronous Processing
 
@@ -484,17 +416,12 @@ Heavy document operations are moved out of the synchronous API request path.
 
 Reliability
 
-BullMQ
-
-Redis
-
-Dedicated workers
-
-Retry handling
-
-Exponential backoff
-
-Asynchronous job execution
+<p>• **BullMQ**</p>
+<p>• **Redis**</p>
+<p>• Dedicated workers</p>
+<p>• Retry handling</p>
+<p>• Exponential backoff</p>
+<p>• Asynchronous job execution</p>
 
 📊 RAG Evaluation
 
@@ -516,15 +443,11 @@ Evaluation Results
 
 Evaluation Dimensions
 
-Answer Relevance
-
-Context Relevance
-
-Faithfulness / Groundedness
-
-Retrieval Quality
-
-Overall Response Quality
+<p>• **Answer Relevance**</p>
+<p>• **Context Relevance**</p>
+<p>• **Faithfulness / Groundedness**</p>
+<p>• **Retrieval Quality**</p>
+<p>• **Overall Response Quality**</p>
 
 Improvement Loop
 
@@ -543,24 +466,16 @@ Evaluate Again
 📈 LangSmith Observability
 
 LangSmith provides tracing and observability across the AI pipeline.
-
 It helps inspect:
 
-LLM calls
-
-LangGraph executions
-
-Retrieval steps
-
-Tool execution
-
-Prompts and responses
-
-Latency
-
-Errors
-
-End-to-end AI traces
+<p>• LLM calls</p>
+<p>• **LangGraph** executions</p>
+<p>• Retrieval steps</p>
+<p>• Tool execution</p>
+<p>• Prompts and responses</p>
+<p>• Latency</p>
+<p>• Errors</p>
+<p>• End-to-end AI traces</p>
 
 User Request
       ↓
@@ -578,47 +493,33 @@ DocVault supports controlled document collaboration.
 
 Collaboration
 
-Friend requests
-
-User connections
-
-Folder sharing
-
-Public links
-
-Permission management
-
-Access revocation
+<p>• Friend requests</p>
+<p>• User connections</p>
+<p>• Folder sharing</p>
+<p>• Public links</p>
+<p>• Permission management</p>
+<p>• Access revocation</p>
 
 Notifications
 
 Users can receive notifications for:
 
-Folder sharing
-
-Permission changes
-
-Connection requests
-
-Access revocation
-
-Collaboration events
+<p>• Folder sharing</p>
+<p>• Permission changes</p>
+<p>• Connection requests</p>
+<p>• Access revocation</p>
+<p>• Collaboration events</p>
 
 📊 Dashboard
 
 The dashboard provides account and AI activity visibility.
 
-User profile
-
-Active sessions
-
-Session management
-
-AI query history
-
-Recent semantic queries
-
-Logout management
+<p>• User profile</p>
+<p>• Active sessions</p>
+<p>• Session management</p>
+<p>• AI query history</p>
+<p>• Recent semantic queries</p>
+<p>• Logout management</p>
 
 🏗️ System Architecture
 
@@ -672,9 +573,9 @@ Logout management
 
 DocVault uses Supabase for managed cloud persistence and storage.
 
-Service
+ServicePurpose
 
-Purpose
+
 
 PostgreSQL
 
@@ -716,19 +617,13 @@ Docker is used throughout the development and deployment architecture.
 
 Docker Responsibilities
 
-Backend containerization
-
-Worker containerization
-
-Local development
-
-Multi-container environments
-
-Environment isolation
-
-Reproducible builds
-
-Docker Compose orchestration
+<p>• Backend containerization</p>
+<p>• Worker containerization</p>
+<p>• Local development</p>
+<p>• Multi-container environments</p>
+<p>• Environment isolation</p>
+<p>• Reproducible builds</p>
+<p>• **Docker Compose** orchestration</p>
 
 Container Layout
 
@@ -759,15 +654,11 @@ Backend 1       Backend 2       Backend N
 
 Responsibilities
 
-Reverse proxying
-
-Request routing
-
-Load balancing
-
-Backend abstraction
-
-Traffic distribution
+<p>• **Reverse proxying**</p>
+<p>• **Request routing**</p>
+<p>• **Load balancing**</p>
+<p>• **Backend abstraction**</p>
+<p>• **Traffic distribution**</p>
 
 🔄 End-to-End Workflows
 
@@ -847,9 +738,9 @@ Private + External Knowledge
 
 🛠️ Technology Stack
 
-Layer
+LayerTechnologies
 
-Technologies
+
 
 Frontend
 
@@ -974,75 +865,48 @@ DocVault/
 
 The following capabilities are planned and are not currently presented as implemented:
 
-Gmail MCP integration
-
-Human-in-the-Loop (HITL)
-
-Multi-agent AI
-
-Advanced agent memory
-
-Additional MCP integrations
-
-Real-time collaboration
-
-WebSocket-based features
-
-Document versioning
-
-Enterprise RBAC
-
-Voice AI
+<p>• Gmail **MCP** integration</p>
+<p>• Human-in-the-Loop (HITL)</p>
+<p>• Multi-agent AI</p>
+<p>• Advanced agent memory</p>
+<p>• Additional **MCP** integrations</p>
+<p>• Real-time collaboration</p>
+<p>• WebSocket-based features</p>
+<p>• Document versioning</p>
+<p>• Enterprise **RBAC**</p>
+<p>• Voice AI</p>
 
 🎯 Engineering Focus
 
 DocVault brings together several areas of modern software engineering and applied AI:
-
 Backend Engineering
 
-REST API architecture
-
-Authentication and authorization
-
-PostgreSQL data modeling
-
-Asynchronous job processing
-
-Redis-backed workers
+<p>• REST API architecture</p>
+<p>• **Authentication** and authorization</p>
+<p>• **PostgreSQL** data modeling</p>
+<p>• Asynchronous job processing</p>
+<p>• **Redis**-backed workers</p>
 
 AI Engineering
 
-RAG
-
-Semantic search
-
-Vector databases
-
-Re-ranking
-
-Agentic workflows
-
-MCP
-
-RAG evaluation
-
-LLM observability
+<p>• **RAG**</p>
+<p>• Semantic search</p>
+<p>• Vector databases</p>
+<p>• **Re-ranking**</p>
+<p>• Agentic workflows</p>
+<p>• **MCP**</p>
+<p>• **RAG** evaluation</p>
+<p>• LLM observability</p>
 
 Infrastructure
 
-Docker
-
-Docker Compose
-
-Nginx
-
-Reverse proxying
-
-Load balancing
-
-Horizontal scaling architecture
-
-Managed cloud services
+<p>• **Docker**</p>
+<p>• **Docker Compose**</p>
+<p>• **Nginx**</p>
+<p>• Reverse proxying</p>
+<p>• Load balancing</p>
+<p>• Horizontal scaling architecture</p>
+<p>• Managed cloud services</p>
 
 📸 Screenshots
 
@@ -1051,74 +915,43 @@ Managed cloud services
 
 Login
 
-
-
 Forgot Password
-
-
 
 OTP Verification
 
-
-
 </details>
-
 <details>
 <summary><strong>Document Management</strong></summary>
 
 Folders
 
-
-
 Files
-
-
 
 Trash
 
-
-
 </details>
-
 <details>
 <summary><strong>AI Assistant</strong></summary>
 
 AI Assistant
 
-
-
 AI Result
 
-
-
 </details>
-
 <details>
 <summary><strong>Collaboration & Dashboard</strong></summary>
 
 Users
 
-
-
 Notifications
-
-
 
 Connections
 
-
-
 Access Control
-
-
 
 Dashboard
 
-
-
 AI History
-
-
 
 </details>
 
@@ -1126,21 +959,14 @@ AI History
 
 Prerequisites
 
-Node.js
-
-npm
-
-Docker
-
-Docker Compose
-
-Supabase project
-
-Redis
-
-Google Gemini / Generative AI credentials
-
-Tavily MCP configuration
+<p>• Node.js</p>
+<p>• npm</p>
+<p>• **Docker**</p>
+<p>• **Docker Compose**</p>
+<p>• **Supabase** project</p>
+<p>• **Redis**</p>
+<p>• **Google Gemini** / Generative AI credentials</p>
+<p>• **Tavily MCP** configuration</p>
 
 Installation
 
@@ -1150,19 +976,13 @@ npm install
 
 Configure the required environment variables for:
 
-Supabase
-
-PostgreSQL
-
-Redis
-
-Gemini
-
-Tavily MCP
-
-Authentication
-
-Application configuration
+<p>• **Supabase**</p>
+<p>• **PostgreSQL**</p>
+<p>• **Redis**</p>
+<p>• Gemini</p>
+<p>• **Tavily MCP**</p>
+<p>• **Authentication**</p>
+<p>• Application configuration</p>
 
 Docker
 
@@ -1172,30 +992,20 @@ docker compose up --build
 
 Before deployment:
 
-Keep secrets outside the repository
-
-Use environment variables or a secret manager
-
-Enable HTTPS
-
-Use secure HTTP-only cookies
-
-Configure Supabase RLS policies
-
-Protect database and Redis credentials
-
-Apply appropriate rate limits
-
-Use least-privilege permissions
-
-Keep dependencies updated
-
-Separate development and production configuration
+<p>• Keep secrets outside the repository</p>
+<p>• Use environment variables or a secret manager</p>
+<p>• Enable HTTPS</p>
+<p>• Use secure HTTP-only cookies</p>
+<p>• Configure **Supabase RLS** policies</p>
+<p>• Protect database and **Redis** credentials</p>
+<p>• Apply appropriate rate limits</p>
+<p>• Use least-privilege permissions</p>
+<p>• Keep dependencies updated</p>
+<p>• Separate development and production configuration</p>
 
 👨‍💻 Author
 
 Shreyansh Dixit
-
 B.Tech — Computer Science & Engineering
 
 <div align="center">
@@ -1203,5 +1013,4 @@ B.Tech — Computer Science & Engineering
 ⭐ DocVault
 
 A secure document platform evolving into an intelligent, agentic knowledge workspace.
-
 </div>
