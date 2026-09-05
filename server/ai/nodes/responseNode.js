@@ -17,7 +17,9 @@ export async function responseNode(state) {
       retrievedDocuments: state.retrievedDocuments,
       rerankedDocuments: state.rerankedDocuments,
 
-      context: state.retrievalContext,
+      context: state.retrievedContext,
+      evaluationResult: state.evaluationResult,
     },
+    evaluationResult: state.evaluationResult,
   };
 }

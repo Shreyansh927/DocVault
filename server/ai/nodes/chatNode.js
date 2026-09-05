@@ -30,7 +30,7 @@ export async function chatNode(state) {
       retrievedDocuments: result.retrievedDocuments,
       rerankedDocuments: result.rerankedDocuments,
 
-      retrievalContext: result.context,
+      retrievedContext: result.context,
     };
   }
   
@@ -42,7 +42,8 @@ export async function chatNode(state) {
     });
 
     return {
-      toolResult: result,
+      toolResult: result.content,
+      retrievedContext: result.tavilySources,
       retrievedContextFolderId: null,
       retrievedContextFileId: null,
     };

@@ -207,6 +207,7 @@ ${finalReRankedResponse}
           fileId: row.id,
           folderId: row.folder_id,
           filename: row.filename,
+          fileSummary: row.ai_summary,
         })),
 
         rerankedDocuments: rerankedRows.map((row) => ({
@@ -238,6 +239,7 @@ export const searchInfoUsingTravilyTool = tool(
     try {
       console.log("Travily tool called!!");
       let tavilyContext = "";
+      const tavilySources = [];
       const user = await db.query(`SELECT * from users WHERE id =$1`, [userId]);
       if (user.rows[0].id) {
         const tavilySearchResults = await ModelManager.searchWeb(query);
@@ -246,9 +248,15 @@ export const searchInfoUsingTravilyTool = tool(
         for (const searchResult of tavilySearchResults.results.slice(0, 1)) {
           const cont = `Title: ${searchResult.title}
         Content: ${searchResult.content}
-        
+        Source-link: ${searchResult.url}
         `;
           tavilyContext += cont;
+          tavilySources.push({
+            query,
+            title: searchResult.title,
+            content: searchResult.content,
+            url: searchResult.url,
+          });
         }
 
         const model = await ModelManager.cohere();
@@ -286,7 +294,11 @@ ${tavilyContext}
         console.log("===== STRINGIFIED =====");
         console.log(JSON.stringify(llmResponse.content));
 
-        return llmResponse.content;
+        return {
+          content: llmResponse.content,
+
+          tavilySources: tavilySources,
+        };
       }
     } catch (err) {
       throw err;

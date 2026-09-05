@@ -3,10 +3,10 @@ dotenv.config();
 
 import supabase from "../supabase.js";
 
-/* ================= CONSTANTS ================= */
+// CONSTANTS
 const BUCKET_NAME = "project2-bucket";
 
-/* ================= HELPERS ================= */
+// HELPERS
 const sanitizeFileName = (name) =>
   name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
 
@@ -14,7 +14,7 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-/* ================= USER JSON BACKUP ================= */
+// USER JSON BACKUP
 export const usersBackup = async (user) => {
   assert(user?.email, "Invalid user data");
 
@@ -35,7 +35,7 @@ export const usersBackup = async (user) => {
   return true;
 };
 
-/* ================= PROFILE IMAGE UPLOAD ================= */
+// profile image upload
 export const uploadProfileImageToSupabase = async (user, file) => {
   assert(user?.public_id, "Invalid user");
   assert(file, "Missing file");
@@ -59,12 +59,12 @@ export const uploadProfileImageToSupabase = async (user, file) => {
   }
 
   const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
-  console.log(data.publicUrl)
+  console.log(data.publicUrl);
 
   return data.publicUrl;
 };
 
-/* ================= FILE UPLOAD (USER DATA) ================= */
+// FILE UPLOAD (USER DATA)
 export const uploadFilesToSupabase = async (userId, folderId, file) => {
   assert(userId, "Missing userId");
   assert(folderId, "Missing folderId");

@@ -21,7 +21,9 @@ export const GraphState = Annotation.Root({
 
   rerankedDocuments: Annotation(),
 
-  retrievalContext: Annotation(),
+  retrievedContext: Annotation(),
 
   finalResponse: Annotation(),
+
+  evaluationResult: Annotation(),
 });

@@ -1,52 +1,53 @@
-version: "3.9"
-
 services:
+
   frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
-
     ports:
       - "5173:5173"
-
     env_file:
       - ./client/.env
-
     depends_on:
       - backend
 
   backend:
-  build:
-    context: ./server
-    dockerfile: Dockerfile
-
-  expose:
-    - "5000"
-
-  env_file:
-    - ./server/.env
-
-  depends_on:
-    - redis
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    expose:
+      - "5000"
+    env_file:
+      - ./server/.env
+    depends_on:
+      - redis
 
   worker:
-  build:
-    context: ./server
-  command: npm run worker
-  env_file:
-    - ./server/.env
-  depends_on:
-    - redis
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: npm run worker
+    env_file:
+      - ./server/.env
+    depends_on:
+      - redis
+
+  ai-worker:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: npm run ai-worker
+    env_file:
+      - ./server/.env
+    depends_on:
+      - redis
 
   nginx:
     image: nginx:alpine
-
     ports:
       - "5000:80"
-
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-
     depends_on:
       - backend
 

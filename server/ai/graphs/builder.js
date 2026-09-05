@@ -10,6 +10,7 @@ import { routeIntent } from "./router.js";
 import { chatNode } from "../nodes/chatNode.js";
 import { moveFileNode } from "../nodes/moveFileNode.js";
 import { permissionNode } from "../nodes/permissionNode.js";
+import { evaluationNode } from "../nodes/evaluationNode.js";
 
 export const builder = new StateGraph(GraphState);
 
@@ -26,6 +27,8 @@ builder.addNode("moveFile", moveFileNode);
 builder.addNode("permissions", permissionNode);
 
 builder.addNode("response", responseNode);
+
+builder.addNode("evaluation", evaluationNode);
 
 builder.addEdge(START, "planner");
 
@@ -47,4 +50,6 @@ builder.addEdge("chat", "response");
 
 builder.addEdge("moveFile", "response");
 
-builder.addEdge("response", END);
+builder.addEdge("response", "evaluation");
+
+builder.addEdge("evaluation", END);

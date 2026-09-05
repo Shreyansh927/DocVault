@@ -2,84 +2,102 @@ import ModelManager from "../models/modelmanager.js";
 
 export async function rewriteQuery(messages) {
   const prompt = `
-You are a conversational query rewriter.
+You are a conversational query rewriter for a document Q&A system.
 
-Your task is to rewrite ONLY the latest user question into a standalone question.
+Your ONLY task is to rewrite the LATEST USER MESSAGE into a
+standalone, self-contained question or request.
 
-Your task is to rewrite ONLY the latest user message into a standalone,
-self-contained request while preserving the user's exact intent.
+DO NOT answer the user's question.
 
-The rewritten request may be:
-- a question
-- a command
-- a request
-- an instruction
+DO NOT retrieve information.
 
-NEVER change the user's intent or action type.
+DO NOT invent names, people, documents, folders, or entities.
 
-If the user says "move", the rewritten request must remain a move request.
-If the user says "delete", keep it as a delete request.
-If the user says "summarize", keep it as a summarize request.
-If the user says "find", keep it as a find request.
+DO NOT change the user's intent.
 
-Conversation:
+==================================================
+REFERENCE RESOLUTION
+==================================================
+
+The latest user message may contain references such as:
+
+- it
+- this
+- that
+- he
+- him
+- his
+- she
+- her
+- they
+- them
+- previous file
+- previous folder
+- previous document
+
+Resolve these references ONLY when the referenced entity is
+clearly established by the immediately relevant conversation.
+
+Prefer the entity mentioned in the most recent relevant
+user/assistant exchange.
+
+NEVER guess an entity.
+
+NEVER introduce a person's name that was not clearly established
+as the referent of the pronoun.
+
+If the reference cannot be resolved with high confidence,
+KEEP THE ORIGINAL REFERENCE instead of guessing.
+
+==================================================
+IMPORTANT
+==================================================
+
+The conversation may contain multiple people, files, folders,
+or documents.
+
+Do NOT assume that the last person mentioned anywhere in the
+conversation is automatically the referent.
+
+Use semantic relevance, not merely name occurrence.
+
+For example 1:
 
 Human:
-Move my driving license to Personal.
+What is Shreyansh's Aadhaar number?
 
 Assistant:
-Done.
-
-Human:
-Now move his driving license back to its original location.
-
-Output:
-Move Avi's driving license back to its original folder.
-
-Rules:
-- Use previous conversation to resolve references.
-- Resolve pronouns like:
-  - it
-  - this
-  - that
-  - he
-  - him
-  - his
-  - she
-  - her
-  - they
-  - them
-  - previous file
-  - previous folder
-  - previous document
-
-Do NOT answer the question.
-
-Return ONLY the rewritten question.
-
-Examples:
-
-Conversation:
-
-Human:
-What is my Aadhaar number?
-
-Assistant:
-Your Aadhaar number is 6583 8917 0326.
+[answer]
 
 Human:
 What is its Virtual ID?
 
 Output:
-What is the Virtual ID of my Aadhaar card?
+What is the Virtual ID of Shreyansh's Aadhaar card?
 
-Conversation:
+
+Another example:
+
+Human:
+What is Shreyansh's Aadhaar number?
+
+Assistant:
+[answer]
+
+Human:
+What is his mother's name?
+
+Output:
+What is Shreyansh's mother's name?
+
+
+Another example:
 
 Human:
 Summarize Resume.pdf
 
 Assistant:
-
+[answer]
 
 Human:
 Explain the second paragraph.
@@ -87,7 +105,75 @@ Explain the second paragraph.
 Output:
 Explain the second paragraph of Resume.pdf.
 
-if it , him represent external source then use "action" : "search-travily"
+Another example:
+
+Human:
+what is java
+
+Assistant:
+[answer]
+
+Human:
+elaborate it in simple words
+
+Output:
+elaborate java in simple words.
+
+
+
+
+If the conversation is:
+
+Human:
+What is his mother's name?
+
+and there is no clearly established person,
+
+Output:
+What is his mother's name?
+
+DO NOT guess who "his" refers to.
+
+==================================================
+ACTION PRESERVATION
+==================================================
+
+NEVER change the user's requested action.
+
+If the user says:
+
+move → keep it a move request
+delete → keep it a delete request
+summarize → keep it a summarize request
+find → keep it a find request
+explain → keep it an explanation request
+
+==================================================
+EXTERNAL SEARCH
+==================================================
+
+If a reference such as "it", "him", "his", etc. clearly refers
+to an external/web source rather than a document or entity in
+the current conversation, preserve the intent for the external
+search system.
+
+Do not invent an "action" object unless the calling system
+explicitly expects structured JSON.
+
+==================================================
+OUTPUT
+==================================================
+
+Return ONLY the rewritten question/request.
+
+No explanation.
+
+No JSON.
+
+No markdown.
+
+No quotation marks.
+
 `;
 
   const response = await ModelManager.cohere().invoke([
@@ -98,20 +184,20 @@ if it , him represent external source then use "action" : "search-travily"
     ...messages,
   ]);
 
-  console.log("Full Rewrite Response:");
-  console.dir(response, { depth: null });
+  const content =
+    typeof response.content === "string"
+      ? response.content
+      : String(response.content);
 
-  console.log("Type of content:", typeof response.content);
-  console.log("Raw content:", response.content);
-  console.log("Escaped content:", JSON.stringify(response.content));
-
-  const content = response.content
+  const cleanedContent = content
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
-    .replace(/\s*```$/, "")
+    .replace(/\s*```$/i, "")
     .trim();
 
-  console.log("Cleaned content:", JSON.stringify(content));
+  console.log("===== QUERY REWRITE =====");
+  console.log("Original:", messages.at(-1)?.content);
+  console.log("Rewritten:", cleanedContent);
 
-  return content;
+  return cleanedContent;
 }

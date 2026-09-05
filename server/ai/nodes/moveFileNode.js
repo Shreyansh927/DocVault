@@ -10,7 +10,7 @@ export async function moveFileNode(state) {
   console.log("new query:" + rewrittenQuery)
 
   const result = await movingFileTool.invoke({
-    query: rewriteQuery,
+    query: rewrittenQuery,
     userId: state.userId,
     moves,
   });

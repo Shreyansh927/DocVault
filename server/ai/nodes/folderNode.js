@@ -3,7 +3,7 @@ import {
   deleteFoldersTool,
   toggleVisibiltyTool,
   restoreFoldersTool,
-} from "../tools/foldertool.js";
+} from "../tools/folderTool.js";
 
 export async function folderNode(state) {
   console.log(" FOLDER NODE!!! ");
