@@ -119,6 +119,18 @@ The system is designed with a strong separation between:
 
 
 
+https://github.com/user-attachments/assets/25e87eb6-1040-4ffc-ae84-c32056e60eb0
+
+
+
+https://github.com/user-attachments/assets/79bde9d9-d07e-4b8a-a4eb-f7867bf17fd9
+
+
+
+
+
+
+
 <p><strong>AI & RAG Demo</strong></p>
 <p>Demonstration of semantic search, document question answering, agentic workflows, retrieval, and grounded responses.</p>
 
@@ -127,6 +139,26 @@ The system is designed with a strong separation between:
 https://github.com/user-attachments/assets/fe747f85-5255-4ea1-91c0-aaa33568085f
 
 https://github.com/user-attachments/assets/ff11ce67-6997-4f94-934f-50f7666a905e
+
+
+
+https://github.com/user-attachments/assets/726ddb9f-74fa-4be3-96cb-d9bd5fead590
+
+
+
+https://github.com/user-attachments/assets/86467e82-6adf-4526-b668-1559731a98d8
+
+
+
+https://github.com/user-attachments/assets/95507f74-8214-417e-8a6e-cd05b99f7ca7
+
+
+
+
+
+
+
+
 
 
 
