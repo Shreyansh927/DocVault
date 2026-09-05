@@ -115,15 +115,25 @@ The system is designed with a strong separation between:
 <h2>🎥 **Demo Videos**</h2>
 
 <p><strong>Core Platform Demo</strong></p>
-<p>End-to-end walkthrough of document management, AI assistant interactions, RAG-based document querying, and collaboration.</p>
+<p>End-to-end walkthrough of document management and collaboration.</p>
+
+
 
 <p><strong>AI & RAG Demo</strong></p>
 <p>Demonstration of semantic search, document question answering, agentic workflows, retrieval, and grounded responses.</p>
-<p>▶️ <a href="YOUR_AI_RAG_DEMO_VIDEO_URL">Watch AI & RAG Demo</a></p>
 
-<p><strong>Architecture & Infrastructure Demo</strong></p>
-<p>Demonstration of the containerized backend, background workers, Nginx reverse proxy, and load-balancing architecture.</p>
-<p>▶️ <a href="YOUR_ARCHITECTURE_DEMO_VIDEO_URL">Watch Architecture Demo</a></p>
+
+
+https://github.com/user-attachments/assets/fe747f85-5255-4ea1-91c0-aaa33568085f
+
+https://github.com/user-attachments/assets/ff11ce67-6997-4f94-934f-50f7666a905e
+
+
+
+
+
+
+
 
 
 
