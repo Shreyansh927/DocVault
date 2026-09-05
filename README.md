@@ -31,53 +31,91 @@ The system is designed with a strong separation between:
 
 <h2>✨ What Makes **DocVault** Different?</h2>
 
-<h2>📸 **Screenshots**</h2>
+<h2>📸 <strong>Screenshots</strong></h2>
 
 <p><strong>Authentication & Home</strong></p>
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/dcbd03b6-834e-407d-946b-fbf0aea13b14" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/552e1d04-2d36-4b42-8bd8-1202d200e4a9" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/79ec311f-2051-480b-9e19-3f90fc1af58e" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6ffd1b94-e6c8-45d5-aaa5-8de7fb3eeec2" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8543865b-cfa0-4b55-87c6-e7ffc0b7d767" />
-
-
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/02105b95-a4eb-4dda-ba04-988541e44fef" />
-
+<table>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/dcbd03b6-834e-407d-946b-fbf0aea13b14" alt="Authentication & Home 1" width="100%">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/552e1d04-2d36-4b42-8bd8-1202d200e4a9" alt="Authentication & Home 2" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/79ec311f-2051-480b-9e19-3f90fc1af58e" alt="Authentication & Home 3" width="100%">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/6ffd1b94-e6c8-45d5-aaa5-8de7fb3eeec2" alt="Authentication & Home 4" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/8543865b-cfa0-4b55-87c6-e7ffc0b7d767" alt="Authentication & Home 5" width="100%">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/02105b95-a4eb-4dda-ba04-988541e44fef" alt="Authentication & Home 6" width="100%">
+    </td>
+  </tr>
+</table>
 
 <p><strong>Document Management</strong></p>
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c1df4c00-67fc-48a9-8cd9-1371e43d6390" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b56dec4e-a55f-4e49-bbd9-57ecb4ee6672" />
-
+<table>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/c1df4c00-67fc-48a9-8cd9-1371e43d6390" alt="Document Management 1" width="100%">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/b56dec4e-a55f-4e49-bbd9-57ecb4ee6672" alt="Document Management 2" width="100%">
+    </td>
+  </tr>
+</table>
 
 <p><strong>AI Assistant</strong></p>
 
-<img width="800" height="450" alt="image" src="https://github.com/user-attachments/assets/666e65f0-13fc-4d6f-8b7d-4d2047e3dc17" />
-
+<table>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/666e65f0-13fc-4d6f-8b7d-4d2047e3dc17" alt="AI Assistant" width="100%">
+    </td>
+    <td width="50%"></td>
+  </tr>
+</table>
 
 <p><strong>Collaboration & Dashboard</strong></p>
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f5b92ead-7154-42df-9aa9-14583ce5aba5" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6fd445b9-1faf-4e80-a30a-c4e52144eb78" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/086b3e50-0262-417b-82d6-26f8edaa8384" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/68aa35f3-e915-406e-b709-32931af8a462" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/99bded05-bb0a-467e-a9fc-85882b145cc9" />
-
-
+<table>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/f5b92ead-7154-42df-9aa9-14583ce5aba5" alt="Collaboration 1" width="100%">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/6fd445b9-1faf-4e80-a30a-c4e52144eb78" alt="Collaboration 2" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/086b3e50-0262-417b-82d6-26f8edaa8384" alt="Collaboration 3" width="100%">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/68aa35f3-e915-406e-b709-32931af8a462" alt="Collaboration 4" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/99bded05-bb0a-467e-a9fc-85882b145cc9" alt="Dashboard" width="100%">
+    </td>
+    <td width="50%"></td>
+  </tr>
+</table>
 <h2>🎥 **Demo Videos**</h2>
 
 <p><strong>Core Platform Demo</strong></p>
 <p>End-to-end walkthrough of document management, AI assistant interactions, RAG-based document querying, and collaboration.</p>
-<p>▶️ <a href="YOUR_CORE_DEMO_VIDEO_URL">Watch Core Platform Demo</a></p>
 
 <p><strong>AI & RAG Demo</strong></p>
 <p>Demonstration of semantic search, document question answering, agentic workflows, retrieval, and grounded responses.</p>
