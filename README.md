@@ -8,10 +8,10 @@ Secure documents. Search with meaning. Ask questions. Automate actions. Extend k
 <p>
   <img src="https://img.shields.io/badge/React-Vite-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React">
   <img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
-  <img src="https://img.shields.io/badge/**PostgreSQL**-**pgvector**-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="**PostgreSQL**">
-  <img src="https://img.shields.io/badge/**LangGraph**-Agentic%20AI-1C3C3C?style=for-the-badge" alt="**LangGraph**">
-  <img src="https://img.shields.io/badge/**Docker**-**Nginx**-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="**Docker**">
-  <img src="https://img.shields.io/badge/**Supabase**-Cloud-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="**Supabase**">
+  <img src="https://img.shields.io/badge/PostgreSQL-pgvector-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="**PostgreSQL**">
+  <img src="https://img.shields.io/badge/LangGraph-Agentic%20AI-1C3C3C?style=for-the-badge" alt="**LangGraph**">
+  <img src="https://img.shields.io/badge/Docker-Nginx-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="**Docker**">
+  <img src="https://img.shields.io/badge/Supabase-Cloud-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="**Supabase**">
 </p>
 </div>
 
