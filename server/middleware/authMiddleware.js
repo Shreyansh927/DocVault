@@ -38,8 +38,8 @@ export const authMiddleware = async (req, res, next) => {
 
     req.user = user;
 
-    console.log("Cookies:", req.cookies);
-    console.log("User:", req.user);
+    // console.log("Cookies:", req.cookies);
+    // console.log("User:", req.user);
 
     next();
   } catch (err) {

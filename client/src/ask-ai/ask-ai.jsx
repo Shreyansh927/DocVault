@@ -11,15 +11,40 @@ const AskAi = () => {
   const [unseenCount, setUnseenCount] = useState(0);
   const [transcript, setTranscript] = useState("");
 
-  const readUnseenResponse = (res) => {
+  const readUnseenResponse = (response, hitlRequest) => {
     try {
-      // markResponsesAsSeen(); // Refresh unseen count after reading
-      const speech = new SpeechSynthesisUtterance(res);
-      speech.lang = "hi-in";
+      let speechText = "";
+
+      if (hitlRequest?.moves?.length) {
+        const moves = hitlRequest.moves
+          .map((move) => `${move.fileName} to ${move.destinationFolderName}`)
+          .join(", ");
+
+        speechText =
+          `Human approval is required. ` + `Please approve moving ${moves}.`;
+      } else if (response) {
+        speechText = response;
+      } else {
+        speechText = "You have a new AI response.";
+      }
+
+      const speech = new SpeechSynthesisUtterance(speechText);
+
+      speech.lang = "en-US";
+
+      window.speechSynthesis.cancel();
+
+      speech.onend = async () => {
+        try {
+          await markResponsesAsSeen();
+        } catch (err) {
+          console.error("Failed to mark notification as seen:", err);
+        }
+      };
+
       window.speechSynthesis.speak(speech);
-      markResponsesAsSeen(); // Refresh unseen count after reading
     } catch (err) {
-      console.error(err);
+      console.error("Speech synthesis error:", err);
     }
   };
 
@@ -76,11 +101,16 @@ const AskAi = () => {
         },
       );
       setUnseenCount(res.data.count || 0);
-      if (res.data.is_seen === false && res.data.response) {
+      if (res.data.is_seen === false && res.data.hitl_request) {
+        toast.info("Human approval is required");
+
+        readUnseenResponse(null, res.data.hitl_request);
+      } else if (res.data.is_seen === false && res.data.response) {
         toast.info("You have a new AI response");
-        readUnseenResponse(res.data.response);
+
+        readUnseenResponse(res.data.response, null);
       } else {
-        console.log("No unseen response or already seen");
+        console.log("No unseen response or HITL request");
       }
     } catch (err) {
       console.error(err);

@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { redis } from "../redis.js";
+// import { redis } from "../redis.js";
 
 /* ================= GET ALL USERS (EXCEPT SELF) ================= */
 export const allUsers = async (req, res) => {

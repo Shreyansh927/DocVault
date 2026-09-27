@@ -3,7 +3,7 @@ import { db } from "../../db.js";
 import { tool } from "langchain/tools";
 
 export const accessControlTool = tool(
-  async ({ userId, permissions }) => {
+  async ({ permissions, userId }) => {
     try {
       console.log("Access control tool called");
 
@@ -83,8 +83,12 @@ export const accessControlTool = tool(
       }
       console.log(results);
       return {
-        success: true,
-        results,
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(results),
+          },
+        ],
       };
     } catch (err) {
       console.error(err);
@@ -97,7 +101,7 @@ export const accessControlTool = tool(
   },
 
   {
-    name: "toggle_folder_access",
+    name: "permission-access-control",
 
     description: `
 Allow or revoke access to the authenticated user's folders.

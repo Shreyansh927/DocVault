@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { redis } from "../redis.js";
+// import { redis } from "../redis.js";
 
 /* ---------------- ADD FOLDER ---------------- */
 export const addFolder = async (req, res) => {

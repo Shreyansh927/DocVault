@@ -6,12 +6,11 @@ import {
 import { ChatGroq } from "@langchain/groq";
 import { ChatOllama } from "@langchain/ollama";
 import { ChatCohere } from "@langchain/cohere";
-import { tavily } from "@tavily/core";
 
-const tavilyClient = tavily({
-  apiKey: process.env.TAVILY_API_KEY,
-});
-
+import {
+  tavilyClient,
+  searchWeb as tavilySearchWeb,
+} from "../../mcp/tavilyMcpClient.js";
 class ModelManager {
   static gemini() {
     return new ChatGoogleGenerativeAI({
@@ -53,11 +52,7 @@ class ModelManager {
   }
 
   static async searchWeb(query) {
-    return await tavilyClient.search(query, {
-      searchDepth: "advanced",
-      maxResults: 5,
-      topic: "general",
-    });
+    return await tavilySearchWeb(tavilyClient, query);
   }
 }
 

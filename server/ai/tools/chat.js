@@ -245,7 +245,7 @@ export const searchInfoUsingTravilyTool = tool(
         const tavilySearchResults = await ModelManager.searchWeb(query);
         console.log(tavilySearchResults.results);
 
-        for (const searchResult of tavilySearchResults.results.slice(0, 1)) {
+        for (const searchResult of tavilySearchResults.results) {
           const cont = `Title: ${searchResult.title}
         Content: ${searchResult.content}
         Source-link: ${searchResult.url}
@@ -259,7 +259,7 @@ export const searchInfoUsingTravilyTool = tool(
           });
         }
 
-        const model = await ModelManager.cohere();
+        const model = ModelManager.cohere();
 
         const llmResponse = await model.invoke([
           {

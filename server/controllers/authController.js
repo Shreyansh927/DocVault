@@ -37,7 +37,6 @@ export const signup = async (req, res) => {
 
     const authUuid = data.user.id;
 
-    
     const hashedPassword = await bcrypt.hash(password, 10);
     const publicId = `${name}_${crypto.randomUUID()}`;
 
@@ -126,7 +125,7 @@ export const login = async (req, res) => {
     const valid = await bcrypt.compare(password, user.password_hash);
 
     console.log("Password match:", valid);
-    
+
     if (!valid) {
       await db.query(
         `UPDATE users SET failed_attempts = failed_attempts + 1, locked_until = CASE WHEN failed_attempts + 1 >= 5 THEN NOW() + INTERVAL '15 minutes' ELSE locked_until END WHERE id =$1`,
@@ -275,10 +274,19 @@ export const getAllCurrentSessions = async (req, res) => {
   try {
     const userId = req.user.id;
     const { rows } = await db.query(
-      `SELECT id as "refreshTokenId", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1 AND id <> (SELECT id FROM refresh_tokens WHERE user_id = $1 AND token = $2)`,
+      `SELECT id as "refreshTokenId", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1`,
       [userId, req.cookies.refreshToken],
     );
-    return res.status(200).json({ allExistingSession: rows });
+
+    const getCurrentActiveDevice = await db.query(
+      `SELECT user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1 AND token = $2`,
+      [userId, req.cookies.refreshToken],
+    );
+
+    return res.status(200).json({
+      allExistingSession: rows,
+      currentActiveDevice: getCurrentActiveDevice.rows[0],
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: err });

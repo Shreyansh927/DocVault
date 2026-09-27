@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [editMode, setEditMode] = useState(false);
   const [preview, setPreview] = useState("");
   const [allExistingSessions, setAllExistingSessions] = useState([]);
+  const [currentDeviceSession, setCurrentDeviceSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userQuery, setUserQuery] = useState("");
   const [queryResponse, setQueryResponse] = useState([]);
@@ -45,27 +46,39 @@ const Dashboard = () => {
     }
   }, [API_BASE_URL]);
 
-  const fetchCurrentSessions = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/auth/current-sessions`, {
-        withCredentials: true,
-      });
-      const currentSessions = res.data.allExistingSession || [];
-      const formattedData = currentSessions.map((e) => ({
-        ipAddress: e.deviceIpAddress,
-        ipLocation: e.deviceIpLocation,
-        userAgent: e.userAgent,
-        sessionId: e.refreshTokenId,
-        sessionUuid: e.sessionUuid,
-      }));
-      setAllExistingSessions(formattedData);
-    } catch (err) {
-      console.error("FETCH SESSIONS ERROR:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [API_BASE_URL]);
+const fetchCurrentSessions = useCallback(async () => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/api/auth/current-sessions`, {
+      withCredentials: true,
+    });
 
+    console.log("CURRENT SESSIONS RESPONSE:", res.data);
+
+    const currentSessions = res.data.allExistingSession || [];
+    const currentDevice = res.data.currentActiveDevice || null;
+
+    console.log("ALL SESSIONS:", currentSessions);
+    console.log("CURRENT DEVICE:", currentDevice);
+
+    setCurrentDeviceSession(currentDevice);
+
+    const formattedData = currentSessions.map((e) => ({
+      ipAddress: e.deviceIpAddress,
+      ipLocation: e.deviceIpLocation,
+      userAgent: e.userAgent,
+      sessionId: e.refreshTokenId,
+      sessionUuid: e.sessionUuid,
+    }));
+
+    console.log("FORMATTED SESSIONS:", formattedData);
+
+    setAllExistingSessions(formattedData);
+  } catch (err) {
+    console.error("FETCH SESSIONS ERROR:", err);
+  } finally {
+    setLoading(false);
+  }
+}, [API_BASE_URL]);
   const sendQuery = useCallback(async () => {
     if (!userQuery.trim()) {
       alert("Please enter a query");
@@ -245,6 +258,12 @@ const Dashboard = () => {
                       {allExistingSessions.map((session, index) => (
                         <article key={index} className="session-card">
                           <div className="session-body">
+                            {session.sessionUuid ===
+                              currentDeviceSession.sessionUuid && (
+                              <span className="current-session-badge">
+                                Current Device
+                              </span>
+                            )}
                             <p className="session-device">
                               {session.userAgent}
                             </p>

@@ -208,7 +208,7 @@ export const initDB = async () => {
     `);
 
   // await db.query(
-  //   `CREATE INDEX IF NOT EXISTS ai_query_jobs_hnsw_indexing 
+  //   `CREATE INDEX IF NOT EXISTS ai_query_jobs_hnsw_indexing
   //      ON ai_query_jobs
   //      USING hnsw(query_embedding vector_cosine_ops)`,
   // );
@@ -217,6 +217,147 @@ export const initDB = async () => {
     CREATE INDEX IF NOT EXISTS idx_notifications_user_id
     ON notifications(user_id);
   `);
+
+  // ---------- ROOMS ----------
+
+  await db.query(`
+  CREATE TABLE IF NOT EXISTS rooms (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    host_id INTEGER NOT NULL
+      REFERENCES users(id)
+      ON DELETE CASCADE,
+
+    name VARCHAR(255),
+
+    status VARCHAR(30) NOT NULL DEFAULT 'active'
+      CHECK (status IN ('active', 'ended')),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    ended_at TIMESTAMPTZ
+    
+  );
+`);
+
+  // ---------- ROOM MEMBERS ----------
+
+  await db.query(`
+  CREATE TABLE IF NOT EXISTS room_members (
+    id BIGSERIAL PRIMARY KEY,
+
+    room_id UUID NOT NULL
+      REFERENCES rooms(id)
+      ON DELETE CASCADE,
+
+    user_id INTEGER NOT NULL
+      REFERENCES users(id)
+      ON DELETE CASCADE,
+
+    role VARCHAR(20) NOT NULL DEFAULT 'member'
+      CHECK (role IN ('host', 'member')),
+
+    status VARCHAR(20) NOT NULL DEFAULT 'active'
+      CHECK (status IN ('active', 'left', 'kicked')),
+
+    joined_at TIMESTAMPTZ,
+
+    left_at TIMESTAMPTZ,
+
+    kicked_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE(room_id, user_id)
+  );
+`);
+
+  // ---------- ROOM INVITATIONS ----------
+
+  await db.query(`
+  CREATE TABLE IF NOT EXISTS room_invitations (
+    id BIGSERIAL PRIMARY KEY,
+
+    room_id UUID NOT NULL
+      REFERENCES rooms(id)
+      ON DELETE CASCADE,
+
+    inviter_id INTEGER NOT NULL
+      REFERENCES users(id)
+      ON DELETE CASCADE,
+
+    invitee_id INTEGER NOT NULL
+      REFERENCES users(id)
+      ON DELETE CASCADE,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'pending'
+      CHECK (
+        status IN (
+          'pending',
+          'accepted',
+          'rejected',
+          'revoked',
+          'expired'
+        )
+      ),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    responded_at TIMESTAMPTZ,
+
+    UNIQUE(room_id, invitee_id)
+  );
+`);
+
+  // ---------- ROOM MESSAGES ----------
+
+  await db.query(`
+  CREATE TABLE IF NOT EXISTS room_messages (
+    id BIGSERIAL PRIMARY KEY,
+
+    room_id UUID NOT NULL
+      REFERENCES rooms(id)
+      ON DELETE CASCADE,
+
+    sender_id INTEGER NOT NULL
+      REFERENCES users(id)
+      ON DELETE CASCADE,
+
+    content TEXT NOT NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ,
+
+    deleted_at TIMESTAMPTZ
+  );
+`);
+
+  // ---------- ROOM EVENTS ----------
+
+  await db.query(`
+  CREATE TABLE IF NOT EXISTS room_events (
+    id BIGSERIAL PRIMARY KEY,
+
+    room_id UUID NOT NULL
+      REFERENCES rooms(id)
+      ON DELETE CASCADE,
+
+    actor_id INTEGER
+      REFERENCES users(id)
+      ON DELETE SET NULL,
+
+    target_user_id INTEGER
+      REFERENCES users(id)
+      ON DELETE SET NULL,
+
+    event_type VARCHAR(50) NOT NULL,
+
+    metadata JSONB,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+`);
 
   console.log(" PostgreSQL connected & tables initialized (pgvector enabled)");
 };

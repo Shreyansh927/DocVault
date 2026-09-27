@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { redis } from "../redis.js";
+// import { redis } from "../redis.js";
 
 /* ================= GET FILES ================= */
 export const allFiles = async (req, res) => {
@@ -63,13 +63,13 @@ ORDER BY files.created_at DESC
     );
 
     // /* ---------- CACHE WRITE ---------- */
-    if (redis) {
-      try {
-        await redis.setEx(cacheKey, 300, JSON.stringify(files.rows));
-      } catch {
-        console.warn("Redis write failed");
-      }
-    }
+    // if (redis) {
+    //   try {
+    //     await redis.setEx(cacheKey, 300, JSON.stringify(files.rows));
+    //   } catch {
+    //     console.warn("Redis write failed");
+    //   }
+    // }
 
     return res.status(200).json({
       message: "Files fetched",

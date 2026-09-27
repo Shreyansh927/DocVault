@@ -11,7 +11,6 @@ export const evaluationNode = async (state) => {
       retrievedDocuments,
       rerankedDocuments,
       retrievalTimings,
-      
     } = state;
 
     console.log("===== EVALUATION INPUT =====");
@@ -21,45 +20,57 @@ export const evaluationNode = async (state) => {
     console.log("Retrieved Documents:", retrievedDocuments);
     console.log("Reranked Documents:", rerankedDocuments);
 
-    const model = await ModelManager.cohere();
+    const model = ModelManager.cohere();
 
     const evaluationPrompt = `
 You are an expert evaluator for a RAG-based question answering system.
 
 USER QUESTION:
+
 ${JSON.stringify(messages)}
 
 GENERATED ANSWER:
+
 ${JSON.stringify(finalResponse)}
 
 RETRIEVED CONTEXT:
+
 ${JSON.stringify(retrievedContext)}
 
 RETRIEVED DOCUMENTS:
+
 ${JSON.stringify(retrievedDocuments)}
 
 RERANKED DOCUMENTS:
+
 ${JSON.stringify(rerankedDocuments)}
 
 Evaluate the generated answer using these metrics.
 
 1. Faithfulness
+
 Is the answer supported by the retrieved context?
+
 Does it contain unsupported claims?
 
 2. Answer Relevance
+
 Does the answer directly address the user's question?
 
 3. Context Relevance
+
 Is the retrieved context relevant to the question?
 
 4. Completeness
+
 Does the answer cover the important information required?
 
 5. Clarity and Coherence
+
 Is the answer clear and logically structured?
 
 6. Context Recall
+
 Does the retrieved context contain the information necessary
 to answer the question?
 
@@ -114,8 +125,26 @@ Return ONLY valid JSON:
     console.log("===== EVALUATION RESPONSE =====");
     console.log(llmResponse.content);
 
+    // Convert LLM output to string
+    const rawContent = String(llmResponse.content);
+
+    // Remove markdown code fences if the model adds them
+    const cleanedContent = rawContent
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    // Convert JSON string → JavaScript object
+    const evaluationResult = JSON.parse(cleanedContent);
+
+    console.log("Parsed evaluation result:", evaluationResult);
+    console.log(
+      "Answer relevance score:",
+      evaluationResult?.answerRelevance?.score,
+    );
+
     return {
-      evaluationResult: llmResponse.content,
+      evaluationResult,
     };
   } catch (err) {
     console.error("Error in evaluationNode:", err);

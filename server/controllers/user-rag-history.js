@@ -33,7 +33,7 @@ export const getFullRagHistory = async (req, res) => {
   try {
     const userId = req.user.id;
     const { rows } = await db.query(
-      `SELECT id, user_id, query, response, created_at, file_id, folder_id, timing, retrieved_documents, reranked_documents FROM ai_query_jobs WHERE user_id = $1 ORDER BY created_at DESC`,
+      `SELECT id, user_id, query, response, created_at, file_id, folder_id, timing, retrieved_documents, reranked_documents, hitl_request FROM ai_query_jobs WHERE user_id = $1 ORDER BY created_at DESC`,
       [userId],
     );
     return res.status(200).json({ ragHistory: rows });
@@ -48,7 +48,7 @@ export const getTracesOfQuery = async (req, res) => {
     const userId = req.user.id;
     const {queryId} = req.query;
     const { rows } = await db.query(
-      `SELECT id, query, timing, retrieved_documents, reranked_documents FROM ai_query_jobs WHERE user_id=$1 AND id=$2`,
+      `SELECT id, query, timing, retrieved_documents, reranked_documents, tavily_retrieved_sources FROM ai_query_jobs WHERE user_id=$1 AND id=$2`,
       [userId, queryId],
     );
     console.log(JSON.stringify(rows, null, 2));
@@ -58,3 +58,15 @@ export const getTracesOfQuery = async (req, res) => {
     return res.status(500).json({ error: err });
   }
 };
+
+
+export const getTavilyQuerySourceLinks = async (req, res) => {
+  try{
+    const userId = req.user.id 
+
+  }
+  catch(err){
+    console.log(err)
+    return res.status(500).json({error: err})
+  }
+}

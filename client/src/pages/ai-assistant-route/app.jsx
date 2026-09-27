@@ -33,8 +33,9 @@ const AiAssistant = () => {
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState("");
   const [ragHistory, setRagHistory] = useState([]);
-  const [historyQuery, setHistoryQuery] = useState("");
 
+  const [historyQuery, setHistoryQuery] = useState("");
+  const [hitlRequest, setHitlRequest] = useState(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("Ready to assist");
 
@@ -67,6 +68,12 @@ const AiAssistant = () => {
           withCredentials: true,
         },
       );
+
+      // const formattedResp = res.data.ragHistory.map((item) => ({
+      //   query: item.query,
+      //   response: item.response,
+
+      // }))
 
       setRagHistory(res.data.ragHistory || []);
 
@@ -123,6 +130,44 @@ const AiAssistant = () => {
     event.preventDefault();
     fetchResult();
   };
+
+  const handleHITLDecision = async (jobId, decision) => {
+  try {
+    setLoading(true);
+    setStatus("Processing approval...");
+
+    const res = await axios.post(
+      `${base_url}/ai-query-response/${jobId}/hitl`,
+      {
+        decision,
+      },
+      {
+        withCredentials: true,
+      }
+    );
+
+    console.log("HITL response:", res.data);
+
+    if (decision === "approved") {
+      toast.success("File movement approved");
+    } else {
+      toast.info("File movement rejected");
+    }
+
+    // Refresh history
+    await fetchFullRagHistory();
+
+  } catch (error) {
+    console.error("HITL decision error:", error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Failed to process HITL decision"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const displayAnswer =
     typeof answer === "string" && answer.trim()
@@ -275,11 +320,57 @@ const AiAssistant = () => {
                             })}
                           </span>
                         </div>
-                        <p>
-                          {item.response
-                            ? item.response
-                            : "Retrieving response..."}
-                        </p>
+                        {item.hitl_request ? (
+                          <div>
+                            <p>
+                              <strong>HITL Request: {item.hitl_request.message}</strong>{" "}
+                              {item.hitl_request.moves.map((i, index) => (
+                                <div key={index}>
+                                  <form>
+                                    <input
+                                      type="text"
+                                      value={i.fileName}
+                                      readOnly
+                                    />
+
+                                    <input
+                                      type="text"
+                                      value={i.destinationFolderName}
+                                      readOnly
+                                    />
+                                  </form>
+                                </div>
+                              ))}
+                            </p>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleHITLDecision(item.id, "approved")
+                              }
+                            >
+                              YES
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleHITLDecision(item.id, "rejected")
+                              }
+                            >
+                              NO
+                            </button>
+                          </div>
+                        ) : (
+                          <p>
+                            {item.response
+                              ? item.response
+                              : "Retrieving response..."}
+                          </p>
+                        )}
+
+                        
+
                         {item.file_id && item.folder_id && (
                           <button
                             type="button"

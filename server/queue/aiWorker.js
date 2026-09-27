@@ -10,11 +10,15 @@ import { db } from "../db.js";
 import ModelManager from "../ai/models/modelmanager.js";
 // import { evaluateRAG } from "../rag-evaluation/evaluationClient.js";
 
+import { initializeCheckpointer } from "../ai/memory/checkpointer.js";
+
+await initializeCheckpointer();
+
 // langsmith debug
 
-console.log("Tracing:", process.env.LANGCHAIN_TRACING_V2);
-console.log("Project:", process.env.LANGCHAIN_PROJECT);
-console.log("API Key exists:", !!process.env.LANGCHAIN_API_KEY);
+console.log("Tracing:", process.env.LANGSMITH_TRACING);
+console.log("Project:", process.env.LANGSMITH_PROJECT);
+console.log("API Key exists:", !!process.env.LANGSMITH_API_KEY);
 
 /* =========================================================
    ERROR HELPERS
@@ -60,7 +64,7 @@ const worker = new Worker(
     try {
       console.log(`Processing AI Job ${job.id}`);
 
-      const { jobId, userId, query } = job.data;
+      const { jobId, userId, query, mcpToken } = job.data;
 
       /* =====================================================
          1. MARK JOB AS PROCESSING
@@ -200,34 +204,77 @@ const worker = new Worker(
 
       // execute langraph
 
+      const threadId = `${userId}:${jobId}`;
+
       const result = await graph.invoke(
         {
           userId,
-
+          mcpToken,
           messages: [new HumanMessage(query)],
         },
-
         {
           configurable: {
-            thread_id: `${userId}:${jobId}`,
+            thread_id: threadId,
           },
-
           runName: "DocVault AI Query",
-
           metadata: {
             jobId,
             userId,
-
             queue: "ai-query-processing",
-
             source: "bullmq-worker",
-
             app: "docvault",
           },
-
           tags: ["docvault", "rag", "bullmq"],
         },
       );
+
+      if (result.__interrupt__) {
+        const interruptData = result.__interrupt__[0].value;
+
+        console.log("===== HUMAN APPROVAL REQUIRED =====");
+        console.log("Thread ID:", threadId);
+        console.log("Interrupt:", interruptData);
+
+        // Store HITL request in DB
+        await db.query(
+          `
+    UPDATE ai_query_jobs
+    SET
+      status = 'WAITING_FOR_APPROVAL',
+      hitl_request = $1::jsonb
+    WHERE id = $2
+      AND user_id = $3
+    `,
+          [JSON.stringify(interruptData), jobId, userId],
+        );
+
+        return;
+      }
+
+      console.log("Graph result:", result);
+
+      if (result.__interrupt__) {
+        console.log("===== HUMAN APPROVAL REQUIRED =====");
+
+        const interruptData = result.__interrupt__[0].value;
+
+        console.log("Interrupt data:", interruptData);
+
+        await db.query(
+          `
+    UPDATE ai_query_jobs
+    SET
+      status = 'WAITING_FOR_APPROVAL',
+      hitl_request = $1::jsonb
+      response = 'need your approval to proceed with file movement.'
+    WHERE id = $2
+      AND user_id = $3
+    `,
+          [JSON.stringify(interruptData), jobId, userId],
+        );
+
+        return;
+      }
 
       /* =====================================================
          8. EXTRACT FINAL RESPONSE

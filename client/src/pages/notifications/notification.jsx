@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom";
 import Header from "../../components/header/header.jsx";
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
@@ -196,6 +196,13 @@ const Notifications = () => {
                             <strong>{n?.text_notification}</strong>
                           </>
                         )}
+                        {n?.type === "ROOM_NOTIFICATION" && (
+                          <>
+                            <strong>
+                              {n?.sender_name} sent you a ROOM LINK{" "}
+                            </strong>
+                          </>
+                        )}
                       </p>
                     </div>
                     <span className="notification-badge">
@@ -227,6 +234,13 @@ const Notifications = () => {
                         </Link>
                       </div>
                     </>
+                  )}
+                  {n.type === "ROOM_NOTIFICATION" && (
+                    <div className="notification-actions">
+                      <Link to={`/room/${n.room_name}/${n.room_id}`}>
+                        <button className="btn btn-primary">VIEW</button>
+                      </Link>
+                    </div>
                   )}
                 </article>
               ))}

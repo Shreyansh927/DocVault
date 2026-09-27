@@ -14,6 +14,8 @@ const Connections = () => {
   const [allConnections, setAllConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [roomName, setRoomName] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,8 +66,6 @@ const Connections = () => {
     };
   }, [user, fetchConnections]);
 
-
-
   const revokeConnection = async (removeFriend) => {
     try {
       const res = await axios.post(
@@ -81,10 +81,34 @@ const Connections = () => {
     }
   };
 
+  const createRoom = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post(
+        `${base_url}/api/room/create-room`,
+        { roomName, selectedUsers },
+        {
+          withCredentials: true,
+        },
+      );
+
+      toast.success(res.data.message);
+
+      navigate(
+        `/room/${encodeURIComponent(res.data.room.name)}/${res.data.room.id}`,
+      );
+    } catch (e) {
+      console.log("CREATE ROOM ERROR:", e.response?.data);
+
+      toast.error(e.response?.data?.error || "Failed to create room");
+    }
+  };
+
   return (
     <div className="connections-page">
       <Header />
-<AskAi />
+      <AskAi />
       <main className="connections-shell">
         <section className="connections-hero">
           <div className="connections-copy">
@@ -182,6 +206,45 @@ const Connections = () => {
             </div>
           )}
         </section>
+
+        <form onSubmit={createRoom}>
+          <input
+            type="text"
+            placeholder="Enter room name..."
+            value={roomName}
+            onChange={(e) => setRoomName(e.target.value)}
+          />
+
+          <div>
+            <h4>Select people to invite</h4>
+
+            {allConnections.map((connection) => (
+              <label key={connection.id}>
+                <input
+                  type="checkbox"
+                  value={connection.id}
+                  checked={selectedUsers.includes(connection.id)}
+                  onChange={(e) => {
+                    const userId = Number(e.target.value);
+
+                    if (e.target.checked) {
+                      setSelectedUsers((prev) => [...prev, userId]);
+                    } else {
+                      setSelectedUsers((prev) =>
+                        prev.filter((id) => id !== userId),
+                      );
+                    }
+                  }}
+                />
+
+                {connection.name}
+              </label>
+            ))}
+          </div>
+
+          <button type="submit">Create Room & Send Invitations</button>
+        </form>
+        <div></div>
       </main>
     </div>
   );

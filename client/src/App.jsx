@@ -25,6 +25,7 @@ import "react-toastify/dist/ReactToastify.css";
 import AskAi from "./ask-ai/ask-ai.jsx";
 import AiAssistant from "./pages/ai-assistant-route/app.jsx";
 import TraceQiQuery from "./pages/trace-ai-query/trace-ai-query.jsx";
+import Room from "./pages/room-conversation/index.jsx";
 
 const App = () => {
   return (
@@ -60,6 +61,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <OtherUsers />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/room/:roomName/:roomId"
+          element={
+            <ProtectedRoute>
+              <Room />
             </ProtectedRoute>
           }
         />

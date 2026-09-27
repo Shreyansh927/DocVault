@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { redis } from "../redis.js";
+// import { redis } from "../redis.js";
 import supabase from "../supabase.js";
 import { uploadFilesToSupabase } from "../utils/supabase-cloud-storage-users-backup.js";
 import { fileProcessingQueue } from "../queue/queue.js";

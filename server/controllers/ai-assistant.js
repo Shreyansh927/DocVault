@@ -1,5 +1,6 @@
 import { db } from "../db.js";
 import { aiQueryQueue } from "../queue/aiQueryQueue.js";
+import jwt from "jsonwebtoken";
 
 export const getUnreadCount = async (req, res) => {
   try {
@@ -7,40 +8,56 @@ export const getUnreadCount = async (req, res) => {
 
     const countResult = await db.query(
       `
-  SELECT COUNT(*) AS count
-  FROM ai_query_jobs
-  WHERE
-    user_id = $1
-    AND status='COMPLETED'
-    AND is_seen=false
-  `,
+      SELECT COUNT(*) AS count
+      FROM ai_query_jobs
+      WHERE
+        user_id = $1
+        AND is_seen = false
+        AND status IN ('COMPLETED', 'WAITING_FOR_APPROVAL')
+      `,
       [userId],
     );
 
     const latestResult = await db.query(
       `
-  SELECT query, response, is_seen
-  FROM ai_query_jobs
-  WHERE
-    user_id = $1
-    AND status='COMPLETED'
-    AND is_seen=false
-  ORDER BY completed_at DESC
-  LIMIT 1
-  `,
+      SELECT
+        id,
+        query,
+        response,
+        hitl_request,
+        is_seen,
+        status
+      FROM ai_query_jobs
+      WHERE
+        user_id = $1
+        AND is_seen = false
+        AND status IN ('COMPLETED', 'WAITING_FOR_APPROVAL')
+      ORDER BY
+        CASE
+          WHEN status = 'WAITING_FOR_APPROVAL' THEN 0
+          ELSE 1
+        END,
+        COALESCE(completed_at, created_at) DESC
+      LIMIT 1
+      `,
       [userId],
     );
 
+    const latest = latestResult.rows[0];
+
     return res.json({
       count: Number(countResult.rows[0].count),
-      query: latestResult.rows[0]?.query ?? "",
-      response: latestResult.rows[0]?.response ?? "",
-      is_seen: latestResult.rows[0]?.is_seen ?? true,
+      id: latest?.id ?? null,
+      query: latest?.query ?? "",
+      response: latest?.response ?? "",
+      hitl_request: latest?.hitl_request ?? null,
+      is_seen: latest?.is_seen ?? true,
+      status: latest?.status ?? null,
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "Something went wrong",
     });
   }
@@ -53,14 +70,21 @@ export const markResponsesAsSeen = async (req, res) => {
     await db.query(
       `
       UPDATE ai_query_jobs
-      SET is_seen=true
-      WHERE user_id=$1 AND status='COMPLETED' AND is_seen=false
+      SET is_seen = true
+      WHERE user_id = $1
+        AND is_seen = false
+        AND status IN ('COMPLETED', 'WAITING_FOR_APPROVAL')
       `,
       [userId],
     );
+
+    return res.status(200).json({
+      success: true,
+    });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({
+    console.error(err);
+
+    return res.status(500).json({
       error: "Something went wrong",
     });
   }
@@ -95,10 +119,23 @@ export const aiQueryResponse = async (req, res) => {
 
     const jobId = jobEntry.rows[0].id;
 
+    // Create short-lived internal credential for MCP
+    const mcpToken = jwt.sign(
+      {
+        userId,
+        purpose: "docvault-mcp",
+      },
+      process.env.MCP_INTERNAL_SECRET,
+      {
+        expiresIn: "15m",
+      },
+    );
+
     const job = await aiQueryQueue.add("ai-query", {
       jobId,
       userId,
       query,
+      mcpToken,
     });
 
     console.log("Job Added:", job.id);

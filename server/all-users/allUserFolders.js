@@ -1,11 +1,11 @@
 import { db } from "../db.js";
-import { redis } from "../redis.js";
+// import { redis } from "../redis.js";
 
-const CACHE_TTL = 300; // 5 minutes
+// const CACHE_TTL = 300; // 5 minutes
 
 export const allUserFolders = async (req, res) => {
   const userId = req.user?.id;
-  const cacheKey = `userFolders:${userId}`;
+  // const cacheKey = `userFolders:${userId}`;
 
   if (!userId) {
     return res.status(401).json({ error: "Unauthorized" });

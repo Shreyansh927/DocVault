@@ -11,6 +11,10 @@ export const GraphState = Annotation.Root({
 
   toolResult: Annotation(),
 
+  proposedMoves: Annotation(),
+
+  hitlDecision: Annotation(),
+
   retrievedDocuments: Annotation(),
 
   retrievedContextFileId: Annotation(),
@@ -26,4 +30,13 @@ export const GraphState = Annotation.Root({
   finalResponse: Annotation(),
 
   evaluationResult: Annotation(),
+
+  mcpToken: Annotation(),
+
+  retryCount: Annotation({
+    reducer: (_, next) => next,
+    default: () => 0,
+  }),
+
+  retryReason: Annotation(),
 });

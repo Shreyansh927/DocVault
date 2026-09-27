@@ -1,3 +1,12 @@
-import { MemorySaver } from "@langchain/langgraph";
+// checkpointer.js
 
-export const checkPointer = new MemorySaver();
+import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
+
+export const checkPointer = PostgresSaver.fromConnString(
+  process.env.DATABASE_URL,
+);
+
+export async function initializeCheckpointer() {
+  await checkPointer.setup();
+  console.log("LangGraph checkpointer initialized");
+}

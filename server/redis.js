@@ -1,16 +1,22 @@
 import { createClient } from "redis";
+import { Redis } from "ioredis";
 
-export const redis = createClient({
-  url: process.env.REDIS_URL,
+export const redisPublisher = new Redis(process.env.REDIS_URL);
+
+export const redisSubscriber = new Redis(process.env.REDIS_URL);
+
+redisPublisher.on("connect", () => {
+  console.log("Redis publisher connected");
 });
 
-redis.on("connect", () => {
-  console.log("   Redis connected");
+redisSubscriber.on("connect", () => {
+  console.log("Redis subscriber connected");
 });
 
-redis.on("error", (err) => {
-  console.error("Redis error:", err);
+redisPublisher.on("error", (err) => {
+  console.log("Redis publisher error:", err);
 });
 
-// Connect to Redis immediately on server startup
-await redis.connect();
+redisSubscriber.on("error", (err) => {
+  console.log("Redis subscriber error:", err);
+});

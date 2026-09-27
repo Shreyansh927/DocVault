@@ -20,7 +20,9 @@ export const getNotifications = async (req, res) => {
         type,
         status,
         seen,
-        created_at
+        created_at,
+        room_name,
+        room_id
       FROM notifications
       WHERE user_id = $1
       ORDER BY created_at DESC
@@ -28,7 +30,12 @@ export const getNotifications = async (req, res) => {
       [authUuid],
     );
     console.log(req.user);
-    console.log("Notifications fetched for user:", authUuid, "Count:", result.rows.length);
+    console.log(
+      "Notifications fetched for user:",
+      authUuid,
+      "Count:",
+      result.rows.length,
+    );
     res.status(200).json({ notifications: result.rows });
   } catch (err) {
     console.error("GET NOTIFICATIONS ERROR:", err);

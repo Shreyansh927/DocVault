@@ -4,14 +4,17 @@ import os from "os";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import http from "node:http";
 dotenv.config();
 
-// if (process.env.NODE_ENV === "production") {
-//   await import("./queue/worker.js");
-//   await import("./queue/aiWorker.js");
-// }
+if (process.env.NODE_ENV === "production") {
+  await import("./queue/worker.js");
+  await import("./queue/aiWorker.js");
+}
 import { initDB } from "./db.js";
+
 import { authMiddleware } from "./middleware/authMiddleware.js";
+import { initializeCheckpointer } from "./ai/memory/checkpointer.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import folderRoutes from "./routes/folderRoutes.js";
@@ -21,6 +24,7 @@ import personalRoute from "./routes/personalInfoRoutes.js";
 import connectionRoutes from "./routes/connectionRoute.js";
 import messageRouter from "./routes/messagesRoutes.js";
 import { authLimiter, aiLimiter } from "./middleware/rateLimiter.js";
+import hitlRoutes from "./routes/hitlRoutes.js";
 import { db } from "./db.js";
 import { allUsers } from "./all-users/allUsers.js";
 import { allFiles, trashFiles } from "./all-users/all-folder-files.js";
@@ -30,6 +34,12 @@ import "./permanent-deletion-job.js";
 import helmet from "helmet";
 import connectionRouter from "./routes/connectionRoute.js";
 import googleDriveConnectRouter from "./routes/googleDriveConnect.js";
+import { initializeWebSocket } from "./websocket/websocketServer.js";
+import roomRouter from "./routes/room-managing-routes.js";
+import { createDocVaultMcpHandler } from "./mcp/server.js";
+import { toNodeHandler } from "@modelcontextprotocol/node";
+import { requireBearerAuth } from "@modelcontextprotocol/express";
+import { verifyMcpAccessToken } from "./mcp/auth/authMcp.js";
 
 const app = express();
 
@@ -59,6 +69,7 @@ app.use("/api/forgot", forgotPasswordRoute);
 app.use("/api/user-profile", authMiddleware, personalRoute);
 
 app.use("/ai-query-response", aiResponseRouter);
+app.use("/", hitlRoutes);
 
 app.get("/api/get-all-files/:folderId/:timeline", authMiddleware, allFiles);
 app.get("/api/get-all-trash-files", authMiddleware, trashFiles);
@@ -70,6 +81,8 @@ app.use("/api", connectionRouter);
 app.use("/api/google-drive", googleDriveConnectRouter);
 app.use("/api/messages", authMiddleware, messageRouter);
 app.get("/api/all-users", authMiddleware, allUsers);
+
+app.use("/api/room", roomRouter);
 // app.get("/test-db", async (req, res) => {
 //   try {
 //     const result = await db.query("SELECT NOW()");
@@ -86,10 +99,68 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+// -----------------------------------------
+// MCP
+// -----------------------------------------
+
+const mcpHandler = createDocVaultMcpHandler();
+
+const mcpNodeHandler = toNodeHandler(mcpHandler, {
+  onerror: (error) => {
+    console.error("========== MCP ERROR ==========");
+    console.error(error);
+    console.error("================================");
+  },
+});
+
+const mcpAuth = requireBearerAuth({
+  verifier: {
+    verifyAccessToken: verifyMcpAccessToken,
+  },
+  requiredScopes: ["mcp"],
+});
+
+app.all(
+  "/mcp",
+
+  (req, res, next) => {
+    console.log("=================================");
+    console.log("[MCP ROUTE HIT]");
+    console.log("Method:", req.method);
+    console.log("Authorization:", !!req.headers.authorization);
+    console.log("=================================");
+
+    next();
+  },
+
+  mcpAuth,
+
+  (req, res, next) => {
+    console.log("=================================");
+    console.log("[MCP AUTH PASSED]");
+    console.log("req.auth:", req.auth);
+    console.log("=================================");
+
+    next();
+  },
+
+  (req, res) => {
+    console.log("[MCP] Passing request to MCP handler");
+
+    return mcpNodeHandler(req, res, req.body);
+  },
+);
 // START
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
+await initializeCheckpointer();
+
+const server = http.createServer(app);
+
+initializeWebSocket(server);
+
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
 

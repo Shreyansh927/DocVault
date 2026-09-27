@@ -3,6 +3,8 @@ import { z } from "zod";
 import ModelManager from "../models/modelmanager.js";
 import { plannerPrompt } from "./prompt.js";
 
+// import { fileMovementRulesPrompt } from "./fileMovementRulesPrompt.js";
+
 const plannerSchema = z.object({
   route: z.enum(["folders", "documents", "permissions", "chat", "moveFile"]),
 

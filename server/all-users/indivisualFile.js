@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { redis } from "../redis.js";
+// import { redis } from "../redis.js";
 
 export const viewIndividualFile = async (req, res) => {
   try {
