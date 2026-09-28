@@ -218,7 +218,7 @@ export const deleteFile = async (req, res) => {
     const { folderId, fileId } = req.body;
     const userId = req.user.id;
 
-    await redis?.del(`folderFiles:${userId}:${folderId}`);
+    //await redis?.del(`folderFiles:${userId}:${folderId}`);
 
     const result = await db.query(
       `
@@ -253,7 +253,7 @@ export const deleteAllFiles = async (req, res) => {
     const { folderId } = req.body;
     const userId = req.user.id;
 
-    await redis?.del(`folderFiles:${userId}:${folderId}`);
+   //await redis?.del(`folderFiles:${userId}:${folderId}`);
 
     const result = await db.query(
       `
@@ -289,7 +289,7 @@ export const restoreFile = async (req, res) => {
     const { folderId, fileId } = req.body;
     const userId = req.user.id;
 
-    await redis?.del(`folderFiles:${userId}:${folderId}`);
+    //await redis?.del(`folderFiles:${userId}:${folderId}`);
 
     const result = await db.query(
       `
@@ -324,7 +324,7 @@ export const restoreAllFiles = async (req, res) => {
     const { folderId } = req.body;
     const userId = req.user.id;
 
-    await redis?.del(`folderFiles:${userId}:${folderId}`);
+    //await redis?.del(`folderFiles:${userId}:${folderId}`);
 
     await db.query(
       `

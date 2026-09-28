@@ -18,7 +18,7 @@ import { initializeCheckpointer } from "./ai/memory/checkpointer.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import folderRoutes from "./routes/folderRoutes.js";
-import fileRoutes from "./routes/fileRoutes.js";
+import fileRoutes from "./routes/fileRoutes.js";``
 import forgotPasswordRoute from "./routes/forgotPasswordRoute.js";
 import personalRoute from "./routes/personalInfoRoutes.js";
 import connectionRoutes from "./routes/connectionRoute.js";
