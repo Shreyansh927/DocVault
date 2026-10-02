@@ -10,6 +10,7 @@ import AskAi from "../../ask-ai/ask-ai";
 import { getUserFolders, saveUserFolders } from "../../utils/offlineDB";
 import api from "../../api-interceptor";
 import { toast } from "react-toastify";
+import GoogleDriveConnect from "../../components/gooogleDriveConnect.jsx";
 console.log("Home rendered");
 
 /* ================= CONSTANTS ================= */
@@ -172,6 +173,9 @@ const Home = () => {
             </div>
           </div>
         </section>
+        <div>
+          <GoogleDriveConnect />
+        </div>
 
         <section className="home-toolbar">
           <div className="search-wrapper">

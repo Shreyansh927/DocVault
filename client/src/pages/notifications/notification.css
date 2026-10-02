@@ -1,12 +1,12 @@
-:root {
-  --bg: #020617;
-  --surface: rgba(8, 10, 18, 0.96);
-  --surface-soft: rgba(14, 18, 34, 0.94);
-  --border: rgba(86, 146, 255, 0.18);
-  --accent: #5fa3ff;
-  --accent-strong: #2f6eff;
-  --text: #eff6ff;
-  --muted: #94a3b8;
+.notifications-page {
+  --bg: #070b12;
+  --surface: rgba(15, 22, 34, 0.82);
+  --surface-soft: #111a28;
+  --border: rgba(148, 163, 184, 0.14);
+  --accent: #72e4da;
+  --accent-strong: #71a7ff;
+  --text: #edf5ff;
+  --muted: #8492a7;
 }
 
 .notifications-page {
@@ -177,7 +177,7 @@
   gap: 12px;
 }
 
-.btn {
+.notifications-page .btn {
   min-width: 128px;
   padding: 14px 18px;
   border-radius: 18px;
@@ -191,11 +191,11 @@
     background 0.2s ease;
 }
 
-.btn:hover {
+.notifications-page .btn:hover {
   transform: translateY(-1px);
 }
 
-.btn-primary {
+.notifications-page .btn-primary {
   background: linear-gradient(
     135deg,
     rgba(38, 92, 241, 0.98),
@@ -206,17 +206,17 @@
   box-shadow: 0 18px 30px rgba(40, 100, 255, 0.24);
 }
 
-.btn-secondary {
+.notifications-page .btn-secondary {
   background: rgba(15, 23, 46, 0.94);
   color: #dbe6ff;
   border-color: rgba(95, 158, 255, 0.16);
 }
 
-.btn-primary:hover {
+.notifications-page .btn-primary:hover {
   box-shadow: 0 22px 34px rgba(45, 108, 236, 0.3);
 }
 
-.btn-secondary:hover {
+.notifications-page .btn-secondary:hover {
   background: rgba(26, 37, 63, 0.96);
 }
 
@@ -257,5 +257,263 @@
   .summary-pill,
   .notification-card {
     padding: 20px;
+  }
+}
+
+/* Trace-inspired notification feed */
+.notifications-page {
+  background:
+    radial-gradient(circle at 85% 8%, rgba(42, 111, 145, 0.18), transparent 25rem),
+    radial-gradient(circle at 10% 45%, rgba(38, 74, 124, 0.12), transparent 22rem),
+    var(--bg);
+  color: var(--text);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.notifications-shell {
+  width: min(1440px, 100%);
+  padding: 0 24px 64px;
+}
+
+.notifications-hero {
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.8fr);
+  align-items: end;
+  gap: 28px;
+  margin-bottom: 22px;
+  padding: 48px 0 30px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notifications-tag {
+  margin-bottom: 10px;
+  padding: 6px 9px;
+  color: var(--accent);
+  background: rgba(114, 228, 218, 0.07);
+  border: 1px solid rgba(114, 228, 218, 0.15);
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.notifications-title {
+  max-width: 760px;
+  color: var(--text);
+  font-size: clamp(2rem, 4vw, 3.1rem);
+}
+
+.notifications-description {
+  max-width: 600px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.notifications-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.notifications-page .summary-pill {
+  padding: 14px;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.9), var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.13);
+}
+
+.notifications-page .summary-pill.soft {
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.72), rgba(15, 22, 34, 0.76));
+}
+
+.notifications-page .summary-pill span {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.notifications-page .summary-pill strong {
+  color: var(--text);
+  font-size: 1.55rem;
+}
+
+.notifications-panel {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.notifications-list {
+  gap: 9px;
+}
+
+.notification-card {
+  padding: 18px 20px;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.9), var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.notification-card:hover {
+  border-color: rgba(114, 228, 218, 0.25);
+  transform: translateY(-1px);
+}
+
+.notification-header {
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.notification-type {
+  margin-bottom: 6px;
+  color: var(--accent);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.notification-body {
+  color: #dce7f5;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.notification-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.notification-badge {
+  padding: 5px 8px;
+  color: #b8c9dc;
+  background: rgba(113, 167, 255, 0.07);
+  border: 1px solid rgba(113, 167, 255, 0.14);
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.notification-actions {
+  gap: 8px;
+}
+
+.notifications-page .btn {
+  min-width: 92px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font: 700 0.78rem "DM Sans", "Segoe UI", sans-serif;
+}
+
+.notifications-page .btn-primary {
+  color: #031214;
+  background: var(--accent);
+  border: 1px solid rgba(114, 228, 218, 0.35);
+  box-shadow: 0 8px 20px rgba(114, 228, 218, 0.08);
+}
+
+.notifications-page .btn-primary:hover {
+  background: #a4fff3;
+  box-shadow: 0 10px 24px rgba(114, 228, 218, 0.13);
+}
+
+.notifications-page .btn-secondary {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
+}
+
+.notifications-page .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.notification-empty {
+  padding: 64px 24px;
+  color: var(--muted);
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.7), rgba(15, 22, 34, 0.55));
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+.notification-empty h2 {
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.notification-empty p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.notifications-page :focus-visible {
+  outline: 3px solid rgba(114, 228, 218, 0.42);
+  outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+  .notifications-shell {
+    padding: 0 24px 56px;
+  }
+
+  .notifications-hero {
+    align-items: start;
+    padding-top: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  .notifications-shell {
+    padding: 0 18px 50px;
+  }
+
+  .notifications-hero {
+    padding: 30px 0 22px;
+  }
+
+  .notifications-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .notification-actions {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 520px) {
+  .notifications-shell {
+    padding: 0 14px 42px;
+  }
+
+  .notifications-hero {
+    padding-top: 25px;
+  }
+
+  .notifications-summary {
+    gap: 7px;
+  }
+
+  .notifications-page .summary-pill,
+  .notification-card {
+    padding: 14px;
+  }
+
+  .notification-header {
+    gap: 10px;
+  }
+
+  .notification-actions {
+    flex-direction: column;
+  }
+
+  .notifications-page .notification-actions .btn {
+    width: 100%;
   }
 }

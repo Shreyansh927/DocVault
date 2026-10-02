@@ -140,7 +140,7 @@ export const toggleVisibiltyTool = tool(
     name: "toggle_visibilty_of_folders",
     description: "you have toggle the visiblity of folder as per user request",
     schema: z.object({
-      userId: z.number(),
+      userId: z.coerce.number(),
       folderNames: z.array(z.string()),
       category: z.enum(["Public", "Private"]),
     }),

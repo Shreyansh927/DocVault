@@ -208,13 +208,14 @@ const worker = new Worker(
 
       const result = await graph.invoke(
         {
-          userId,
+          userId: String(userId),
           mcpToken,
           messages: [new HumanMessage(query)],
         },
         {
           configurable: {
             thread_id: threadId,
+            userId: String(userId), // ADD THIS
           },
           runName: "DocVault AI Query",
           metadata: {

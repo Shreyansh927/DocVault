@@ -229,7 +229,7 @@ ${finalReRankedResponse}
       "you have to search for the query asked by user, taking files data as context ",
     schema: z.object({
       query: z.string(),
-      userId: z.number(),
+      userId: z.coerce.number(),
     }),
   },
 );
@@ -308,6 +308,6 @@ ${tavilyContext}
     name: "search_web_with_tavily",
     description:
       "Search the web using Tavily and answer the user question using the search results.",
-    schema: z.object({ query: z.string(), userId: z.number() }),
+    schema: z.object({ query: z.string(), userId: z.coerce.number() }),
   },
 );

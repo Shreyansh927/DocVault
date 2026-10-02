@@ -120,7 +120,7 @@ If multiple close matches exist, return them for clarification instead of guessi
 `,
 
     schema: z.object({
-      userId: z.number(),
+      userId: z.coerce.number(),
 
       permissions: z.array(
         z.object({

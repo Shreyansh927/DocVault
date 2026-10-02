@@ -14,6 +14,7 @@ import { evaluationNode } from "../nodes/evaluationNode.js";
 import { moveFileExecutionNode } from "../nodes/moveFileExecutionNode.js";
 import { evaluationRecoveryNode } from "../nodes/evaluationRecoveryNode.js";
 import { fallbackNode } from "../nodes/fallbackNode.js";
+import { googleDriveNode } from "../nodes/googleDriveNode.js";
 
 export const builder = new StateGraph(GraphState);
 
@@ -33,6 +34,8 @@ builder.addNode("moveFileExecution", moveFileExecutionNode);
 
 builder.addNode("permissions", permissionNode);
 
+builder.addNode("googleDrive", googleDriveNode);
+
 builder.addNode("response", responseNode);
 
 builder.addNode("evaluation", evaluationNode);
@@ -49,6 +52,7 @@ builder.addConditionalEdges("planner", routeIntent, {
   permissions: "permissions",
   chat: "chat",
   moveFile: "moveFile",
+  googleDrive: "googleDrive",
 });
 
 builder.addEdge("folders", "response");
@@ -61,10 +65,12 @@ builder.addEdge("chat", "response");
 
 builder.addEdge("moveFile", "hitlNode");
 
+builder.addEdge("googleDrive", "response");
+
 builder.addConditionalEdges(
   "hitlNode",
   (state) => {
-    console.log("===== HITL ROUTER =====");
+    console.log("== HITL ROUTER =");
     console.log("hitlDecision:", state.hitlDecision);
 
     return state.hitlDecision === "approved" ? "approved" : "rejected";

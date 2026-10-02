@@ -3,10 +3,15 @@ import { z } from "zod";
 import ModelManager from "../models/modelmanager.js";
 import { plannerPrompt } from "./prompt.js";
 
-// import { fileMovementRulesPrompt } from "./fileMovementRulesPrompt.js";
-
 const plannerSchema = z.object({
-  route: z.enum(["folders", "documents", "permissions", "chat", "moveFile"]),
+  route: z.enum([
+    "folders",
+    "documents",
+    "permissions",
+    "chat",
+    "moveFile",
+    "googleDrive",
+  ]),
 
   action: z.string(),
 
@@ -14,10 +19,6 @@ const plannerSchema = z.object({
     folderNames: z.array(z.string()).optional(),
 
     category: z.enum(["Public", "Private"]).nullable().optional(),
-
-    // movingFileName: z.string().optional(),
-
-    // destinationFolderName: z.string().optional(),
 
     permissions: z
       .array(
@@ -38,9 +39,69 @@ const plannerSchema = z.object({
         }),
       )
       .optional(),
+
     path: z.string().optional(),
+
+    trashed: z.boolean().optional(),
+
+    fields: z.string().optional(),
+
+    pageSize: z.number().int().min(1).max(1000).optional(),
   }),
 });
+
+/**
+ * Extract the first complete JSON object from the model response.
+ * Handles Markdown fences and explanatory text before or after the JSON.
+ */
+function extractJsonObject(content) {
+  if (typeof content !== "string") {
+    throw new Error(
+      `Expected planner content to be a string; received ${typeof content}.`,
+    );
+  }
+
+  const text = content.trim();
+  const start = text.indexOf("{");
+
+  if (start === -1) {
+    throw new Error("Planner response does not contain a JSON object.");
+  }
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+    } else if (char === "{") {
+      depth++;
+    } else if (char === "}") {
+      depth--;
+
+      if (depth === 0) {
+        return text.slice(start, i + 1);
+      }
+    }
+  }
+
+  throw new Error("Planner response contains incomplete JSON.");
+}
 
 export async function planner(messages) {
   const plannerModel = ModelManager.cohere();
@@ -53,20 +114,30 @@ export async function planner(messages) {
     ...messages,
   ]);
 
-  console.log("Full response:");
+  console.log("[Planner] Full response:");
   console.dir(response, { depth: null });
 
-  console.log("Type of content:", typeof response.content);
-  console.log("Raw content:", response.content);
-  console.log("Escaped content:", JSON.stringify(response.content));
+  const content = response.content;
 
-  const content = response.content
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/, "")
-    .trim();
+  console.log("[Planner] Content type:", typeof content);
+  console.log("[Planner] Raw content:", content);
 
-  console.log("Cleaned content:", JSON.stringify(content));
+  try {
+    const jsonText = extractJsonObject(content);
 
-  return plannerSchema.parse(JSON.parse(content));
+    console.log("[Planner] Extracted JSON:", jsonText);
+
+    const parsed = JSON.parse(jsonText);
+
+    // Validate the parsed object against your existing schema.
+    const validated = plannerSchema.parse(parsed);
+
+    console.log("[Planner] Validated route:", validated.route);
+    console.log("[Planner] Validated action:", validated.action);
+
+    return validated;
+  } catch (error) {
+    console.error("[Planner] Failed to parse or validate response:", error);
+    throw error;
+  }
 }

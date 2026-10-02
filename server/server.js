@@ -40,8 +40,15 @@ import { createDocVaultMcpHandler } from "./mcp/server.js";
 import { toNodeHandler } from "@modelcontextprotocol/node";
 import { requireBearerAuth } from "@modelcontextprotocol/express";
 import { verifyMcpAccessToken } from "./mcp/auth/authMcp.js";
-
+// import googleDriveIntegrationRoutes from "./routes/googleDriveIntegrationRoutes.js";
 const app = express();
+
+app.post("/debug-google-drive", (req, res) => {
+  res.json({
+    success: true,
+    message: "Correct Express server reached",
+  });
+});
 
 app.use(helmet());
 app.disable("x-powered-by");
@@ -76,9 +83,20 @@ app.get("/api/get-all-trash-files", authMiddleware, trashFiles);
 
 app.use("/api/folder-auth", authMiddleware, folderRoutes);
 app.use("/api/files", authMiddleware, fileRoutes);
+// app.use("/api/integrations/google-drive", googleDriveIntegrationRoutes);
 
-app.use("/api", connectionRouter);
+
+console.log(
+  "[Google Drive] Registered routes:",
+  googleDriveConnectRouter.stack.map((layer) => ({
+    path: layer.route?.path,
+    methods: layer.route?.methods,
+  })),
+);
+
+
 app.use("/api/google-drive", googleDriveConnectRouter);
+app.use("/api", connectionRouter);
 app.use("/api/messages", authMiddleware, messageRouter);
 app.get("/api/all-users", authMiddleware, allUsers);
 

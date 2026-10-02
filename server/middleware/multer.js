@@ -1,7 +1,8 @@
 import multer from "multer";
-// import fs from "fs";
-// import path from "path";
 
 export const upload = multer({
   storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 500 * 1024 * 1024, // 500 MB
+  },
 });

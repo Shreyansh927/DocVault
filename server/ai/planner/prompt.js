@@ -530,6 +530,74 @@ User:
   }
 }
 Return ONLY the JSON object.
+
+
+User:
+List all files in my connected Google Drive and return each file's name and file ID. Exclude trashed files and fetch all available pages.
+
+Output:
+{
+  "route": "googleDrive",
+  "action": "list",
+  "parameters": {
+    "trashed": false,
+    "fields": "nextPageToken,files(id,name)",
+    "pageSize": 1000
+  }
+}
+
+------------------------------------------------
+
+GOOGLE DRIVE LISTING RULES
+
+Use action "list" when the user asks to:
+- List all files in their connected Google Drive.
+- Show every file in Google Drive.
+- Return file names and file IDs.
+- Fetch all available pages of Drive results.
+
+For list requests:
+- Set "trashed": false unless the user explicitly asks to include trashed files.
+- Set fields to "nextPageToken,files(id,name)".
+- Set pageSize to 1000.
+- Do not require a filename or search query.
+- The execution node must follow nextPageToken until no token remains.
+- Return only the requested file metadata.
+
+
+
+GOOGLE DRIVE SEARCH RULES:
+
+1. When the user asks to find, locate, or search for a file,
+   set route to "googleDrive" and action to "search".
+
+2. ALWAYS extract the filename or search terms from the user's
+   original message and put them in parameters.query.
+
+3. Never omit parameters.query when action is "search".
+
+4. Do not replace the filename with fields, pageSize, or other
+   metadata parameters.
+
+5. Preserve the filename as written by the user, including
+   spaces, underscores, and file extensions.
+
+Example input:
+"Find the file named hostel_fun_video in my Google Drive
+and return its file name and file ID."
+
+Required output:
+{
+  "route": "googleDrive",
+  "action": "search",
+  "parameters": {
+    "query": "hostel_fun_video",
+    "fields": "files(id,name)",
+    "pageSize": 1000
+  }
+}
+
+------------------------------------------------
 `;
 
 export const rewritePrompt = `You are a conversational query rewriter.

@@ -1,238 +1,267 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
 
-* {
+.fileview-shell,
+.fileview-loading {
+  --fileview-bg: #070b12;
+  --fileview-panel: rgba(15, 22, 34, 0.82);
+  --fileview-panel-strong: #111a28;
+  --fileview-border: rgba(148, 163, 184, 0.14);
+  --fileview-text: #edf5ff;
+  --fileview-muted: #8492a7;
+  --fileview-faint: #536176;
+  --fileview-cyan: #72e4da;
+  --fileview-blue: #71a7ff;
+  --fileview-coral: #ff9d7b;
+  box-sizing: border-box;
+  min-height: 100vh;
+  color: var(--fileview-text);
+  background:
+    radial-gradient(circle at 85% 8%, rgba(42, 111, 145, 0.18), transparent 25rem),
+    radial-gradient(circle at 10% 45%, rgba(38, 74, 124, 0.12), transparent 22rem),
+    var(--fileview-bg);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.fileview-shell *,
+.fileview-shell *::before,
+.fileview-shell *::after,
+.fileview-loading *,
+.fileview-loading *::before,
+.fileview-loading *::after {
   box-sizing: border-box;
 }
 
-html,
-body {
-  overflow-x: hidden;
-  font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+.fileview-shell {
+  padding: 0 24px 64px;
 }
 
-.fileview-shell {
-  min-height: 100vh;
-  padding: 28px;
-  background:
-    radial-gradient(
-      900px 480px at 100% 0%,
-      rgba(99, 102, 241, 0.24),
-      transparent 60%
-    ),
-    radial-gradient(
-      700px 360px at 0% 100%,
-      rgba(34, 211, 238, 0.18),
-      transparent 65%
-    ),
-    linear-gradient(135deg, #020617 0%, #0f172a 45%, #111827 100%);
-  color: #f8fafc;
+.fileview-hero,
+.fileview-grid {
+  width: min(100%, 1440px);
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .fileview-hero {
-  max-width: 1240px;
-  margin: 0 auto 24px;
-  padding: 28px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 28px;
-  background: rgba(15, 23, 42, 0.74);
-  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.42);
-  backdrop-filter: blur(24px);
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  gap: 24px;
+  gap: 32px;
+  padding: 52px 0 34px;
+  border-bottom: 1px solid var(--fileview-border);
 }
 
 .fileview-hero__copy {
   flex: 1;
+  min-width: 0;
 }
 
 .fileview-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: rgba(99, 102, 241, 0.16);
-  color: #c7d2fe;
-  font-size: 0.78rem;
+  margin-bottom: 4px;
+  padding: 6px 9px;
+  color: var(--fileview-cyan);
+  background: rgba(114, 228, 218, 0.07);
+  border: 1px solid rgba(114, 228, 218, 0.16);
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 12px;
 }
 
 .fileview-title {
-  margin: 0 0 10px;
-  font-family: "Manrope", "Inter", sans-serif;
-  font-size: clamp(1.5rem, 3vw, 2.3rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  word-break: break-word;
+  max-width: 900px;
+  margin: 12px 0 9px;
+  color: var(--fileview-text);
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.08;
   overflow-wrap: anywhere;
 }
 
 .fileview-subtitle {
+  max-width: 620px;
   margin: 0;
-  max-width: 720px;
-  color: #cbd5e1;
-  font-size: 0.98rem;
-  line-height: 1.75;
+  color: var(--fileview-muted);
+  font-size: 0.94rem;
+  line-height: 1.65;
 }
 
 .fileview-hero__actions {
   display: flex;
-  gap: 12px;
+  flex: 0 0 auto;
   flex-wrap: wrap;
+  gap: 9px;
 }
 
 .fileview-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 12px 18px;
-  font-weight: 700;
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 15px;
+  border: 1px solid transparent;
+  border-radius: 7px;
   cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+  font: 700 0.82rem "DM Sans", "Segoe UI", sans-serif;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
 
 .fileview-btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .fileview-btn--primary {
-  background: linear-gradient(135deg, #6366f1, #22d3ee);
-  color: #020617;
-  box-shadow: 0 12px 28px rgba(56, 189, 248, 0.22);
+  color: #031214;
+  background: var(--fileview-cyan);
+  border-color: rgba(114, 228, 218, 0.35);
+  box-shadow: 0 10px 30px rgba(114, 228, 218, 0.1);
+}
+
+.fileview-btn--primary:hover {
+  background: #a4fff3;
 }
 
 .fileview-btn--ghost {
-  background: rgba(255, 255, 255, 0.06);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--fileview-text);
+  background: rgba(255, 255, 255, 0.035);
+  border-color: var(--fileview-border);
+}
+
+.fileview-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(148, 163, 184, 0.25);
 }
 
 .fileview-grid {
-  max-width: 1240px;
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 24px;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: start;
+  gap: 12px;
+  padding-top: 22px;
 }
 
 .fileview-panel {
-  padding: 24px;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  backdrop-filter: blur(22px);
-  box-shadow: 0 18px 45px rgba(2, 6, 23, 0.3);
-}
-
-.fileview-panel--primary {
-  background: linear-gradient(
-    145deg,
-    rgba(15, 23, 42, 0.88),
-    rgba(30, 41, 59, 0.8)
-  );
+  min-width: 0;
+  padding: 23px;
+  border: 1px solid var(--fileview-border);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.9), var(--fileview-panel));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .fileview-panel--accent {
-  background: linear-gradient(
-    145deg,
-    rgba(30, 27, 75, 0.9),
-    rgba(15, 23, 42, 0.86)
-  );
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.94), rgba(15, 22, 34, 0.86));
 }
 
 .fileview-panel__header {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 13px;
   margin-bottom: 20px;
 }
 
 .fileview-icon-badge {
-  width: 44px;
-  height: 44px;
   display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
   place-items: center;
-  border-radius: 14px;
-  background: rgba(99, 102, 241, 0.2);
-  font-size: 1.1rem;
+  color: var(--fileview-blue);
+  background: rgba(113, 167, 255, 0.1);
+  border: 1px solid rgba(113, 167, 255, 0.16);
+  border-radius: 8px;
+  font-size: 1.05rem;
 }
 
 .fileview-icon-badge--accent {
-  background: rgba(34, 211, 238, 0.16);
+  color: var(--fileview-cyan);
+  background: rgba(114, 228, 218, 0.08);
+  border-color: rgba(114, 228, 218, 0.16);
 }
 
 .fileview-panel__eyebrow {
-  margin: 0 0 4px;
-  color: #94a3b8;
-  font-size: 0.75rem;
+  margin: 0 0 5px;
+  color: var(--fileview-cyan);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
 }
 
 .fileview-panel__title {
   margin: 0;
-  font-size: 1.08rem;
+  color: var(--fileview-text);
+  font-size: 1.04rem;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .fileview-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .fileview-stat {
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 8px;
 }
 
 .fileview-stat__label {
   display: block;
   margin-bottom: 8px;
-  color: #94a3b8;
-  font-size: 0.76rem;
+  color: var(--fileview-muted);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 
 .fileview-stat strong,
 .fileview-meta-row strong {
-  color: #f8fafc;
-  font-size: 0.96rem;
+  color: var(--fileview-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .fileview-meta-stack {
   display: grid;
-  gap: 10px;
+  gap: 0;
 }
 
 .fileview-meta-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #cbd5e1;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 48px;
+  padding: 10px 2px;
+  color: var(--fileview-muted);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  font-size: 0.83rem;
+}
+
+.fileview-meta-row:last-child {
+  border-bottom: 0;
 }
 
 .fileview-summary-card {
   min-height: 240px;
-  padding: 18px;
-  border-radius: 20px;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
-    rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  padding: 17px;
+  background: rgba(7, 11, 18, 0.38);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 .fileview-summary-card__header {
@@ -240,115 +269,154 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .fileview-summary-card__eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
+  gap: 7px;
+  color: var(--fileview-blue);
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #93c5fd;
 }
 
 .fileview-summary-card__status {
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 0.74rem;
-  background: rgba(34, 211, 238, 0.12);
-  color: #bae6fd;
+  padding: 5px 8px;
+  color: var(--fileview-cyan);
+  background: rgba(114, 228, 218, 0.08);
+  border: 1px solid rgba(114, 228, 218, 0.12);
+  border-radius: 5px;
+  font-size: 0.67rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .fileview-summary-body {
   display: grid;
-  gap: 12px;
+  gap: 13px;
+}
+
+.fileview-summary,
+.fileview-summary-list,
+.fileview-summary-list li {
+  color: #dce7f5;
+  font-size: 0.88rem;
+  line-height: 1.75;
 }
 
 .fileview-summary {
   margin: 0;
-  color: #e2e8f0;
-  line-height: 1.85;
-  font-size: 0.98rem;
 }
 
 .fileview-summary-list {
-  margin: 0;
-  padding-left: 1.1rem;
   display: grid;
-  gap: 10px;
-  color: #e2e8f0;
+  gap: 9px;
+  margin: 0;
+  padding-left: 1.15rem;
 }
 
-.fileview-summary-list li {
-  line-height: 1.7;
-  color: #e2e8f0;
+.fileview-summary-list li::marker {
+  color: var(--fileview-cyan);
 }
 
 .fileview-summary-note {
-  margin-top: 12px;
+  margin-top: 4px;
   padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(99, 102, 241, 0.12);
-  color: #dbeafe;
-  font-size: 0.84rem;
+  color: var(--fileview-muted);
+  background: rgba(113, 167, 255, 0.06);
+  border-left: 2px solid rgba(113, 167, 255, 0.55);
+  border-radius: 0 5px 5px 0;
+  font-size: 0.76rem;
+  line-height: 1.5;
 }
 
 .fileview-empty {
   margin: 0;
-  color: #94a3b8;
-  font-style: italic;
+  padding: 28px 4px;
+  color: var(--fileview-muted);
+  font-size: 0.86rem;
+  font-style: normal;
+  text-align: center;
 }
 
 .fileview-highlights {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 7px;
+  margin-top: 13px;
 }
 
 .fileview-pill {
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(34, 211, 238, 0.12);
-  color: #bae6fd;
-  font-size: 0.84rem;
+  padding: 6px 9px;
+  color: #b8c9dc;
+  background: rgba(113, 167, 255, 0.06);
+  border: 1px solid rgba(113, 167, 255, 0.12);
+  border-radius: 5px;
+  font-size: 0.72rem;
 }
 
 .fileview-loading {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  color: #cbd5e1;
-  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--fileview-muted);
+  font-size: 0.9rem;
+}
+
+.fileview-loading::before {
+  width: 22px;
+  height: 22px;
+  margin-bottom: 12px;
+  border: 2px solid rgba(114, 228, 218, 0.18);
+  border-top-color: var(--fileview-cyan);
+  border-radius: 50%;
+  content: "";
+  animation: fileview-spin 800ms linear infinite;
+}
+
+.fileview-shell :focus-visible {
+  outline: 3px solid rgba(114, 228, 218, 0.5);
+  outline-offset: 3px;
+}
+
+@keyframes fileview-spin {
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 920px) {
   .fileview-hero {
     flex-direction: column;
     align-items: flex-start;
+    gap: 20px;
   }
 
   .fileview-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 640px) {
   .fileview-shell {
-    padding: 16px;
+    padding: 0 15px 40px;
   }
 
-  .fileview-hero,
-  .fileview-panel {
-    padding: 18px;
-    border-radius: 20px;
+  .fileview-hero {
+    padding: 34px 0 24px;
   }
 
-  .fileview-stats {
-    grid-template-columns: 1fr;
+  .fileview-title {
+    font-size: 1.85rem;
+  }
+
+  .fileview-subtitle {
+    font-size: 0.88rem;
   }
 
   .fileview-hero__actions {
@@ -357,6 +425,34 @@ body {
 
   .fileview-btn {
     flex: 1;
-    justify-content: center;
+    padding: 0 10px;
+  }
+
+  .fileview-grid {
+    gap: 10px;
+    padding-top: 15px;
+  }
+
+  .fileview-panel {
+    padding: 17px;
+  }
+
+  .fileview-stats {
+    gap: 8px;
+  }
+
+  .fileview-stat {
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fileview-shell *,
+  .fileview-shell *::before,
+  .fileview-shell *::after,
+  .fileview-loading::before {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

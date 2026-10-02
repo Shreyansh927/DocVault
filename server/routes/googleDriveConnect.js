@@ -1,91 +1,125 @@
-// GET /api/google-drive/connect
-import express from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
-import { oauth2Client } from "../config/googleDrive.js";
+import { Router } from "express";
 import { db } from "../db.js";
-import { auth } from "googleapis/build/src/apis/abusiveexperiencereport/index.js";
-import { getGoogleDriveFiles, importGoogleDriveFiles } from "../controllers/googleDrive.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { composio } from "../utils/composioClient.js";
 
-const googleDriveConnectRouter = express.Router();
+const router = Router();
 
-googleDriveConnectRouter.get("/connect", authMiddleware, (req, res) => {
-  const authUrl = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: ["https://www.googleapis.com/auth/drive.readonly"],
+const authConfigId = process.env.COMPOSIO_GOOGLE_DRIVE_AUTH_CONFIG_ID;
 
-    state: req.user.id.toString(),
-  });
+if (!authConfigId) {
+  throw new Error("COMPOSIO_GOOGLE_DRIVE_AUTH_CONFIG_ID is missing");
+}
 
-  res.redirect(authUrl);
-});
-googleDriveConnectRouter.get("/callback", async (req, res) => {
+// Initiate Google Drive authorization for the logged-in user.
+router.post("/connect", authMiddleware, async (req, res) => {
   try {
-    const { code, state } = req.query;
+    const userId = String(req.user.id);
 
-    const userId = Number(state);
+    if (!process.env.CLIENT_URL) {
+      throw new Error("CLIENT_URL is missing");
+    }
 
-    const { tokens } = await oauth2Client.getToken(code);
+    const callbackUrl = new URL(
+      "/settings/integrations",
+      process.env.CLIENT_URL,
+    ).toString();
 
-    console.log("TOKENS:", tokens);
+    const connectionRequest = await composio.connectedAccounts.link(
+      userId,
+      authConfigId,
+      {
+        callbackUrl,
+        alias: "docvault-google-drive",
+      },
+    );
 
-    if (!tokens.refresh_token) {
-      return res.status(400).json({
-        error: "No refresh token received from Google",
-      });
+    const connectedAccountId = connectionRequest.id;
+
+    if (!connectedAccountId || !connectionRequest.redirectUrl) {
+      throw new Error(
+        "Composio did not return the expected connection details",
+      );
     }
 
     await db.query(
-      `
-      INSERT INTO google_drive_accounts (
-        user_id,
-        refresh_token
-      )
-      VALUES ($1, $2)
-      ON CONFLICT (user_id)
-      DO UPDATE SET
-        refresh_token = EXCLUDED.refresh_token,
-        connected_at = NOW()
-      `,
-      [userId, tokens.refresh_token],
+      `INSERT INTO user_integrations
+         (user_id, provider, connected_account_id, status)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (user_id, provider)
+       DO UPDATE SET
+         connected_account_id = EXCLUDED.connected_account_id,
+         status = EXCLUDED.status,
+         updated_at = NOW()`,
+      [req.user.id, "google_drive", connectedAccountId, "INITIATED"],
     );
 
-    res.redirect("http://localhost:5173/google-drive");
+    return res.json({
+      success: true,
+      redirectUrl: connectionRequest.redirectUrl,
+    });
   } catch (error) {
-    console.error("GOOGLE ERROR:", error);
-
-    res.status(500).json({
+    console.error("Google Drive connection initiation failed:", {
       message: error.message,
-      error: error.response?.data || error,
+      status: error.status,
+      code: error.code,
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: "Could not start Google Drive connection.",
     });
   }
 });
 
-googleDriveConnectRouter.get("/files", authMiddleware, getGoogleDriveFiles);
-
-googleDriveConnectRouter.post(
-  "/import",
-  authMiddleware,
-  importGoogleDriveFiles,
-);
-
-googleDriveConnectRouter.get("/status", authMiddleware, async (req, res) => {
+// Check the connection belonging to the logged-in user.
+router.get("/status", authMiddleware, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT 1
-   FROM google_drive_accounts
-   WHERE user_id = $1`,
-      [req.user.id],
+      `SELECT connected_account_id
+       FROM user_integrations
+       WHERE user_id = $1 AND provider = $2`,
+      [req.user.id, "google_drive"],
     );
-    console.log(result.rows.length);
 
-    res.json({
-      connected: result.rows.length > 0,
+    const integration = result.rows[0];
+
+    if (!integration?.connected_account_id) {
+      return res.json({
+        connected: false,
+        status: "DISCONNECTED",
+      });
+    }
+
+    const account = await composio.connectedAccounts.get(
+      integration.connected_account_id,
+    );
+
+    const connected = account.status === "ACTIVE" && !account.isDisabled;
+
+    await db.query(
+      `UPDATE user_integrations
+       SET status = $1, updated_at = NOW()
+       WHERE user_id = $2 AND provider = $3`,
+      [account.status, req.user.id, "google_drive"],
+    );
+
+    return res.json({
+      connected,
+      status: account.status,
     });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ error: err });
+  } catch (error) {
+    console.error("Google Drive status check failed:", {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+    });
+
+    return res.status(500).json({
+      connected: false,
+      message: "Could not verify Google Drive connection.",
+    });
   }
 });
 
-export default googleDriveConnectRouter;
+export default router;

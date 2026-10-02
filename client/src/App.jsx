@@ -26,6 +26,7 @@ import AskAi from "./ask-ai/ask-ai.jsx";
 import AiAssistant from "./pages/ai-assistant-route/app.jsx";
 import TraceQiQuery from "./pages/trace-ai-query/trace-ai-query.jsx";
 import Room from "./pages/room-conversation/index.jsx";
+import GoogleDriveConnect from "./components/gooogleDriveConnect.jsx";
 
 const App = () => {
   return (
@@ -181,6 +182,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/settings/integrations" element={<GoogleDriveConnect />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

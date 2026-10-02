@@ -359,5 +359,20 @@ export const initDB = async () => {
   );
 `);
 
+    // composio integration
+
+  await db.query(`
+  CREATE TABLE IF NOT EXISTS user_integrations (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider VARCHAR(50) NOT NULL,
+    connected_account_id VARCHAR(255),
+    status VARCHAR(30) NOT NULL DEFAULT 'DISCONNECTED',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, provider)
+);
+  `);
+
   console.log(" PostgreSQL connected & tables initialized (pgvector enabled)");
 };

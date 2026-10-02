@@ -16,7 +16,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/genai": "^1.41.0",
+    "@composio/core": "^0.22.0",
+    "@google/genai": "^2.26.0",
     "@google/generative-ai": "^0.24.1",
     "@langchain/cohere": "^1.1.0",
     "@langchain/core": "^1.1.48",
@@ -24,6 +25,7 @@
     "@langchain/groq": "^1.2.1",
     "@langchain/langgraph": "^1.4.7",
     "@langchain/langgraph-checkpoint-postgres": "^1.0.5",
+    "@langchain/mcp-adapters": "^1.1.4",
     "@langchain/ollama": "^1.2.7",
     "@modelcontextprotocol/client": "^2.0.0",
     "@modelcontextprotocol/express": "^2.0.0",

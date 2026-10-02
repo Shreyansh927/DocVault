@@ -131,7 +131,7 @@ LIMIT 5;
       "Move one or more files into destination folders for the authenticated user.",
 
     schema: z.object({
-      userId: z.number(),
+      userId: z.coerce.number(),
       query: z.string(),
       moves: z.array(
         z.object({
