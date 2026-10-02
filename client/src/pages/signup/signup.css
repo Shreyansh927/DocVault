@@ -77,7 +77,7 @@
 /* ===============================
    INPUTS
 ================================ */
-.input {
+.signup-page .input {
   width: 100%;
   padding: 12px 14px;
   border-radius: 10px;
@@ -89,11 +89,11 @@
   transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
-.input::placeholder {
+.signup-page .input::placeholder {
   color: #9ca3af;
 }
 
-.input:focus {
+.signup-page .input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
@@ -101,7 +101,7 @@
 /* ===============================
    BUTTON
 ================================ */
-.glow-btn {
+.signup-page .glow-btn {
   margin-top: 6px;
   padding: 12px;
   border-radius: 10px;
@@ -115,25 +115,25 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.glow-btn:hover {
+.signup-page .glow-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 40px rgba(37, 99, 235, 0.6);
 }
 
-.glow-btn:active {
+.signup-page .glow-btn:active {
   transform: scale(0.97);
 }
 
 /* ===============================
    FOOTER TEXT
 ================================ */
-.card span {
+.signup-page .card span {
   color: #60a5fa;
   cursor: pointer;
   font-weight: 500;
 }
 
-.card span:hover {
+.signup-page .card span:hover {
   text-decoration: underline;
 }
 
@@ -165,5 +165,223 @@
 
   .signup-left h2 {
     font-size: 26px;
+  }
+}
+
+/* Premium authentication layout */
+.signup-page {
+  --auth-bg: #0a100f;
+  --auth-panel: #101a17;
+  --auth-border: rgba(188, 207, 184, 0.15);
+  --auth-ink: #f3f1e8;
+  --auth-muted: #9da99e;
+  --auth-accent: #c3d98a;
+  min-height: 100vh;
+  min-height: 100svh;
+  grid-template-columns: minmax(380px, 0.88fr) minmax(0, 1fr);
+  background: var(--auth-bg);
+  color: var(--auth-ink);
+  font-family: "DM Sans", sans-serif;
+}
+
+.signup-left {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  padding: clamp(30px, 5vw, 72px);
+  color: #f2f1e6;
+  background:
+    linear-gradient(90deg, rgba(224, 240, 201, 0.045) 1px, transparent 1px),
+    linear-gradient(rgba(224, 240, 201, 0.045) 1px, transparent 1px),
+    linear-gradient(145deg, #214e3d, #17382f 53%, #122920);
+  background-size: 42px 42px, 42px 42px, auto;
+  border-right: 1px solid rgba(225, 239, 197, 0.12);
+}
+
+.signup-left::before {
+  position: absolute;
+  inset: 18px;
+  content: "";
+  border: 1px solid rgba(225, 239, 197, 0.12);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.signup-left-content {
+  position: relative;
+  z-index: 1;
+  max-width: 390px;
+  text-align: left;
+}
+
+.signup-left h2 {
+  margin: 0 0 12px;
+  color: #f2f1e6;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(2.3rem, 4vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.signup-left p {
+  max-width: 340px;
+  margin: 0;
+  color: rgba(238, 241, 220, 0.72);
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.signup-right {
+  min-width: 0;
+  padding: clamp(24px, 5vw, 76px);
+  background:
+    linear-gradient(90deg, rgba(195, 217, 138, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(195, 217, 138, 0.025) 1px, transparent 1px),
+    radial-gradient(ellipse at 90% 10%, rgba(64, 109, 78, 0.12), transparent 54%),
+    #0a100f;
+  background-size: 34px 34px, 34px 34px, auto, auto;
+}
+
+.signup-page .card {
+  max-width: 430px;
+  padding: clamp(25px, 3vw, 36px);
+  color: var(--auth-ink);
+  background: linear-gradient(150deg, rgba(25, 36, 31, 0.96), rgba(15, 23, 20, 0.98));
+  border: 1px solid var(--auth-border);
+  border-radius: 13px;
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.38), inset 0 1px rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(18px);
+}
+
+.signup-page .card h2 {
+  margin: 0 0 7px;
+  color: var(--auth-ink);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.signup-page .card > p {
+  margin: 0 0 21px;
+  color: var(--auth-muted);
+  font-size: 0.88rem;
+}
+
+.signup-page form {
+  gap: 10px !important;
+}
+
+.signup-page .input {
+  min-height: 46px;
+  padding: 11px 13px;
+  color: var(--auth-ink);
+  background: rgba(5, 10, 8, 0.55);
+  border: 1px solid rgba(188, 207, 184, 0.17);
+  border-radius: 7px;
+  font: 0.87rem "DM Sans", sans-serif;
+}
+
+.signup-page .input::placeholder {
+  color: #87948a;
+}
+
+.signup-page .input:focus {
+  border-color: rgba(195, 217, 138, 0.62);
+  background: rgba(5, 10, 8, 0.76);
+  box-shadow: 0 0 0 3px rgba(195, 217, 138, 0.1);
+}
+
+.signup-page .glow-btn {
+  min-height: 46px;
+  margin-top: 5px;
+  color: #172015;
+  background: linear-gradient(110deg, #d5e5a0, #b6d17d 62%, #d9b078);
+  border: 1px solid rgba(232, 242, 194, 0.4);
+  border-radius: 7px;
+  box-shadow: 0 9px 22px rgba(160, 190, 104, 0.14);
+  font: 700 0.87rem "DM Sans", sans-serif;
+}
+
+.signup-page .glow-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 12px 27px rgba(160, 190, 104, 0.22);
+}
+
+.signup-page .glow-btn:disabled {
+  opacity: 0.62;
+  cursor: wait;
+}
+
+.signup-page form > p {
+  margin: 5px 0 0;
+  color: var(--auth-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.signup-page .card span {
+  color: var(--auth-accent);
+  font-weight: 600;
+  transition: color 140ms ease;
+}
+
+.signup-page .card span:hover {
+  color: #e0e9b8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.signup-page :focus-visible {
+  outline: 3px solid rgba(195, 217, 138, 0.6);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .signup-page {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-left {
+    min-height: 220px;
+    justify-content: flex-start;
+    padding: 38px 32px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(225, 239, 197, 0.12);
+  }
+
+  .signup-left::before {
+    inset: 12px;
+  }
+
+  .signup-left h2 {
+    font-size: 2.5rem;
+  }
+
+  .signup-right {
+    padding: 32px 20px 46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-left {
+    min-height: 172px;
+    padding: 29px 24px;
+  }
+
+  .signup-left h2 {
+    font-size: 2rem;
+  }
+
+  .signup-left p {
+    font-size: 0.86rem;
+  }
+
+  .signup-right {
+    padding: 22px 14px 34px;
+  }
+
+  .signup-page .card {
+    padding: 23px 19px;
   }
 }
