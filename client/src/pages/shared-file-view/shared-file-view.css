@@ -8,7 +8,7 @@
   color: #e5e7eb;
 }
 
-.file-card {
+.file-view-page .file-card {
   width: 100%;
   max-width: 560px;
   background: rgba(15, 23, 42, 0.7);
@@ -19,52 +19,52 @@
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
 }
 
-.file-header {
+.file-view-page .file-header {
   display: flex;
   gap: 16px;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.file-icon {
+.file-view-page .file-icon {
   font-size: 40px;
 }
 
-.file-header h1 {
+.file-view-page .file-header h1 {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 4px;
 }
 
-.meta {
+.file-view-page .meta {
   font-size: 13px;
   color: #9ca3af;
 }
 
-.file-details {
+.file-view-page .file-details {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   margin-bottom: 22px;
 }
 
-.file-details div {
+.file-view-page .file-details div {
   background: rgba(255, 255, 255, 0.06);
   padding: 12px;
   border-radius: 12px;
 }
 
-.file-details span {
+.file-view-page .file-details span {
   font-size: 12px;
   color: #9ca3af;
 }
 
-.file-details p {
+.file-view-page .file-details p {
   font-size: 14px;
   margin-top: 4px;
 }
 
-.ai-summary {
+.file-view-page .ai-summary {
   background: rgba(99, 102, 241, 0.08);
   border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 14px;
@@ -72,18 +72,18 @@
   margin-bottom: 20px;
 }
 
-.ai-summary h3 {
+.file-view-page .ai-summary h3 {
   font-size: 14px;
   margin-bottom: 6px;
   color: #c7d2fe;
 }
 
-.ai-summary p {
+.file-view-page .ai-summary p {
   font-size: 14px;
   color: #e5e7eb;
 }
 
-.open-btn {
+.file-view-page .open-btn {
   display: block;
   width: 100%;
   text-align: center;
@@ -96,29 +96,29 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.open-btn:hover {
+.file-view-page .open-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 30px rgba(99, 102, 241, 0.45);
 }
 
 /* ---------- Skeleton ---------- */
-.skeleton {
-  animation: pulse 1.3s infinite ease-in-out;
+.file-view-page .skeleton {
+  animation: shared-view-pulse 1.3s infinite ease-in-out;
 }
 
-.skeleton-line {
+.file-view-page .skeleton-line {
   height: 14px;
   background: #1e293b;
   border-radius: 6px;
   margin-bottom: 10px;
 }
 
-.skeleton-line.title {
+.file-view-page .skeleton-line.title {
   width: 70%;
   height: 18px;
 }
 
-@keyframes pulse {
+@keyframes shared-view-pulse {
   0% {
     opacity: 0.5;
   }
@@ -132,11 +132,169 @@
 
 /* ---------- Responsive ---------- */
 @media (max-width: 480px) {
-  .file-card {
+  .file-view-page .file-card {
     padding: 20px;
   }
 
-  .file-details {
+  .file-view-page .file-details {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Trace-inspired shared file detail */
+.file-view-page {
+  --view-bg: #070b12;
+  --view-border: rgba(148, 163, 184, 0.14);
+  --view-text: #edf5ff;
+  --view-muted: #8492a7;
+  min-height: 100vh;
+  padding: 32px 20px;
+  color: var(--view-text);
+  background:
+    radial-gradient(circle at 85% 8%, rgba(42, 111, 145, 0.18), transparent 25rem),
+    radial-gradient(circle at 10% 45%, rgba(38, 74, 124, 0.12), transparent 22rem),
+    var(--view-bg);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.file-view-page .file-card {
+  max-width: 680px;
+  padding: 24px;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.94), rgba(15, 22, 34, 0.88));
+  border: 1px solid var(--view-border);
+  border-radius: 10px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+}
+
+.file-view-page .file-header {
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 18px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--view-border);
+}
+
+.file-view-page .file-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #71a7ff;
+  background: rgba(113, 167, 255, 0.09);
+  border: 1px solid rgba(113, 167, 255, 0.16);
+  border-radius: 7px;
+  font-size: 1rem;
+}
+
+.file-view-page .file-header h1 {
+  margin: 0 0 5px;
+  color: var(--view-text);
+  font-size: 1.25rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.file-view-page .meta {
+  margin: 0;
+  color: var(--view-muted);
+  font-size: 0.76rem;
+}
+
+.file-view-page .file-details {
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.file-view-page .file-details div {
+  padding: 12px;
+  background: rgba(7, 11, 18, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 7px;
+}
+
+.file-view-page .file-details span {
+  color: var(--view-muted);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.file-view-page .file-details p {
+  margin: 5px 0 0;
+  color: var(--view-text);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.file-view-page .ai-summary {
+  margin-bottom: 15px;
+  padding: 14px;
+  background: rgba(113, 167, 255, 0.055);
+  border: 1px solid rgba(113, 167, 255, 0.14);
+  border-radius: 7px;
+}
+
+.file-view-page .ai-summary h3 {
+  margin: 0 0 7px;
+  color: #9bc2ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.file-view-page .ai-summary p {
+  margin: 0;
+  color: #d5e1ef;
+  font-size: 0.83rem;
+  line-height: 1.65;
+}
+
+.file-view-page .open-btn,
+.file-view-page .primary-btn {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  color: #031214;
+  background: #72e4da;
+  border: 1px solid rgba(114, 228, 218, 0.34);
+  border-radius: 6px;
+  box-shadow: 0 8px 22px rgba(114, 228, 218, 0.1);
+  cursor: pointer;
+  font: 700 0.78rem "DM Sans", "Segoe UI", sans-serif;
+  text-decoration: none;
+}
+
+.file-view-page .open-btn:hover,
+.file-view-page .primary-btn:hover {
+  background: #a4fff3;
+  transform: translateY(-1px);
+}
+
+.file-view-page .skeleton-line {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 4px;
+}
+
+.file-view-page .empty-text {
+  color: var(--view-muted);
+  font-size: 0.9rem;
+}
+
+.file-view-page :focus-visible {
+  outline: 3px solid rgba(114, 228, 218, 0.42);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .file-view-page {
+    padding: 20px 14px;
+  }
+
+  .file-view-page .file-card {
+    padding: 17px;
   }
 }

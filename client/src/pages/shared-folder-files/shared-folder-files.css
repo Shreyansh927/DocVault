@@ -29,27 +29,27 @@
 }
 
 /* ================= EMPTY ================= */
-.shared-empty {
+.shared-files-page .shared-empty {
   margin-top: 80px;
   text-align: center;
   color: #9ca3af;
 }
 
-.shared-empty span {
+.shared-files-page .shared-empty span {
   font-size: 42px;
   display: block;
   margin-bottom: 10px;
 }
 
 /* ================= GRID ================= */
-.files-grid {
+.shared-files-page .files-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 18px;
 }
 
 /* ================= FILE CARD ================= */
-.file-card {
+.shared-files-page .file-card {
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(148, 163, 184, 0.15);
@@ -63,25 +63,25 @@
     border-color 0.25s ease;
 }
 
-.file-card:hover {
+.shared-files-page .file-card:hover {
   transform: translateY(-4px);
   border-color: rgba(59, 130, 246, 0.5);
   box-shadow: 0 20px 40px rgba(37, 99, 235, 0.35);
 }
 
 /* ================= ICON ================= */
-.file-icon {
+.shared-files-page .file-icon {
   font-size: 28px;
   flex-shrink: 0;
 }
 
 /* ================= INFO ================= */
-.file-info {
+.shared-files-page .file-info {
   flex: 1;
   min-width: 0;
 }
 
-.file-info h3 {
+.shared-files-page .file-info h3 {
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
@@ -89,31 +89,31 @@
   text-overflow: ellipsis;
 }
 
-.file-info small {
+.shared-files-page .file-info small {
   color: #9ca3af;
   font-size: 12px;
 }
 
 /* ================= ARROW ================= */
-.file-arrow {
+.shared-files-page .file-arrow {
   font-size: 18px;
   color: #9ca3af;
   transition: transform 0.2s ease;
 }
 
-.file-card:hover .file-arrow {
+.shared-files-page .file-card:hover .file-arrow {
   transform: translateX(4px);
   color: #c7d2fe;
 }
 
 /* ================= SKELETON ================= */
-.files-skeleton-grid {
+.shared-files-page .files-skeleton-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 18px;
 }
 
-.file-skeleton {
+.shared-files-page .file-skeleton {
   height: 70px;
   border-radius: 16px;
   background: #1e293b;
@@ -121,7 +121,7 @@
   overflow: hidden;
 }
 
-.file-skeleton::after {
+.shared-files-page .file-skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -135,7 +135,7 @@
   animation: shimmer 1.4s infinite;
 }
 
-@keyframes shimmer {
+@keyframes shared-files-shimmer {
   100% {
     transform: translateX(100%);
   }
@@ -143,7 +143,7 @@
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 600px) {
-  .shared-files-header h1 {
+  .shared-files-page .shared-files-header h1 {
     font-size: 22px;
   }
 }
@@ -151,26 +151,172 @@
   .shared-files-page {
     padding: 16px;
   }
-  .files-grid {
+  .shared-files-page .files-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 320px) {
-  .file-card {
+  .shared-files-page .file-card {
     padding: 14px;
     gap: 10px;
   }
-  .file-icon {
+  .shared-files-page .file-icon {
     font-size: 24px;
   }
-  .file-info h3 {
+  .shared-files-page .file-info h3 {
     font-size: 13px;
   }
-  .file-info small {
+  .shared-files-page .file-info small {
     font-size: 11px;
   }
-  .file-arrow {
+  .shared-files-page .file-arrow {
     font-size: 16px;
+  }
+}
+
+/* Trace-inspired shared files workspace */
+.shared-files-page {
+  min-height: 100vh;
+  padding: 0 24px 54px;
+  color: #edf5ff;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(42, 111, 145, 0.18), transparent 25rem),
+    radial-gradient(circle at 10% 45%, rgba(38, 74, 124, 0.12), transparent 22rem),
+    #070b12;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.shared-files-page > .app-header {
+  margin: 0 -24px;
+}
+
+.shared-files-container {
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding-top: 34px;
+}
+
+.shared-files-page .shared-files-header {
+  margin-bottom: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.shared-files-page .shared-files-header h1 {
+  margin: 0 0 7px;
+  color: #edf5ff;
+  font-size: clamp(1.8rem, 3.5vw, 2.7rem);
+  font-weight: 600;
+}
+
+.shared-files-page .shared-files-header p {
+  margin: 0;
+  color: #8492a7;
+  font-size: 0.9rem;
+}
+
+.shared-files-page .files-grid,
+.shared-files-page .files-skeleton-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 10px;
+}
+
+.shared-files-page .file-card {
+  min-width: 0;
+  min-height: 78px;
+  padding: 14px;
+  color: #edf5ff;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.9), rgba(15, 22, 34, 0.84));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.shared-files-page .file-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(114, 228, 218, 0.25);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+}
+
+.shared-files-page .file-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: #71a7ff;
+  background: rgba(113, 167, 255, 0.09);
+  border: 1px solid rgba(113, 167, 255, 0.15);
+  border-radius: 7px;
+  font-size: 1rem;
+}
+
+.shared-files-page .file-info h3 {
+  margin: 0 0 5px;
+  color: #edf5ff;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.shared-files-page .file-info small,
+.shared-files-page .file-arrow {
+  color: #8492a7;
+  font-size: 0.7rem;
+}
+
+.shared-files-page .file-card:hover .file-arrow {
+  color: #72e4da;
+}
+
+.shared-files-page .file-card > p {
+  margin: 0;
+  color: #536176;
+  font: 0.65rem ui-monospace, Consolas, monospace;
+}
+
+.shared-files-page .shared-empty {
+  margin-top: 22px;
+  padding: 48px 20px;
+  color: #8492a7;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.7), rgba(15, 22, 34, 0.55));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 9px;
+}
+
+.shared-files-page .shared-empty p {
+  margin: 0;
+  color: #edf5ff;
+  font-size: 0.95rem;
+}
+
+.shared-files-page .file-skeleton {
+  height: 72px;
+  background: rgba(30, 41, 59, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 8px;
+}
+
+.shared-files-page .file-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation-name: shared-files-shimmer;
+}
+
+.shared-files-page :focus-visible {
+  outline: 3px solid rgba(114, 228, 218, 0.4);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .shared-files-page {
+    padding: 0 14px 40px;
+  }
+
+  .shared-files-page > .app-header {
+    margin: 0 -14px;
+  }
+
+  .shared-files-container {
+    padding-top: 24px;
   }
 }

@@ -29,13 +29,13 @@
 }
 
 /* ================= EMPTY ================= */
-.shared-empty {
+.shared-folders-page .shared-empty {
   margin-top: 80px;
   text-align: center;
   color: #9ca3af;
 }
 
-.shared-empty span {
+.shared-folders-page .shared-empty span {
   font-size: 42px;
   display: block;
   margin-bottom: 10px;
@@ -49,7 +49,7 @@
 }
 
 /* ================= CARD ================= */
-.shared-folder-card {
+.shared-folders-page .shared-folder-card {
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(148, 163, 184, 0.15);
@@ -63,25 +63,25 @@
     border-color 0.25s ease;
 }
 
-.shared-folder-card:hover {
+.shared-folders-page .shared-folder-card:hover {
   transform: translateY(-4px);
   border-color: rgba(59, 130, 246, 0.5);
   box-shadow: 0 20px 40px rgba(37, 99, 235, 0.35);
 }
 
 /* ================= ICON ================= */
-.folder-icon {
+.shared-folders-page .folder-icon {
   font-size: 28px;
   flex-shrink: 0;
 }
 
 /* ================= INFO ================= */
-.folder-info {
+.shared-folders-page .folder-info {
   flex: 1;
   min-width: 0;
 }
 
-.folder-info h3 {
+.shared-folders-page .folder-info h3 {
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
@@ -89,31 +89,31 @@
   text-overflow: ellipsis;
 }
 
-.folder-info small {
+.shared-folders-page .folder-info small {
   font-size: 12px;
   color: #9ca3af;
 }
 
 /* ================= ARROW ================= */
-.folder-arrow {
+.shared-folders-page .folder-arrow {
   font-size: 18px;
   color: #9ca3af;
   transition: transform 0.2s ease;
 }
 
-.shared-folder-card:hover .folder-arrow {
+.shared-folders-page .shared-folder-card:hover .folder-arrow {
   transform: translateX(4px);
   color: #c7d2fe;
 }
 
 /* ================= SKELETON ================= */
-.folders-skeleton-grid {
+.shared-folders-page .folders-skeleton-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 18px;
 }
 
-.folder-skeleton {
+.shared-folders-page .folder-skeleton {
   height: 70px;
   border-radius: 16px;
   background: #1e293b;
@@ -121,7 +121,7 @@
   overflow: hidden;
 }
 
-.folder-skeleton::after {
+.shared-folders-page .folder-skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -135,7 +135,7 @@
   animation: shimmer 1.4s infinite;
 }
 
-@keyframes shimmer {
+@keyframes shared-folders-shimmer {
   100% {
     transform: translateX(100%);
   }
@@ -143,7 +143,143 @@
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 600px) {
-  .shared-header h1 {
+  .shared-folders-page .shared-header h1 {
     font-size: 22px;
+  }
+}
+
+/* Trace-inspired shared workspace */
+.shared-folders-page {
+  min-height: 100vh;
+  padding: 0 24px 54px;
+  color: #edf5ff;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(42, 111, 145, 0.18), transparent 25rem),
+    radial-gradient(circle at 10% 45%, rgba(38, 74, 124, 0.12), transparent 22rem),
+    #070b12;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.shared-folders-page > .app-header {
+  margin: 0 -24px;
+}
+
+.shared-folders-container {
+  width: min(100%, 1440px);
+  padding-top: 34px;
+}
+
+.shared-folders-page .shared-header {
+  margin-bottom: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.shared-folders-page .shared-header h1 {
+  margin: 0 0 7px;
+  color: #edf5ff;
+  font-size: clamp(1.8rem, 3.5vw, 2.7rem);
+  font-weight: 600;
+}
+
+.shared-folders-page .shared-header p {
+  margin: 0;
+  color: #8492a7;
+  font-size: 0.9rem;
+}
+
+.shared-folders-page .shared-grid,
+.shared-folders-page .folders-skeleton-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 10px;
+}
+
+.shared-folders-page .shared-folder-card {
+  min-height: 78px;
+  padding: 14px;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.9), rgba(15, 22, 34, 0.84));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.shared-folders-page .shared-folder-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(114, 228, 218, 0.25);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+}
+
+.shared-folders-page .folder-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: #72e4da;
+  background: rgba(114, 228, 218, 0.08);
+  border: 1px solid rgba(114, 228, 218, 0.14);
+  border-radius: 7px;
+  font-size: 1rem;
+}
+
+.shared-folders-page .folder-info h3 {
+  margin: 0 0 5px;
+  color: #edf5ff;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.shared-folders-page .folder-info small {
+  color: #8492a7;
+  font-size: 0.7rem;
+}
+
+.shared-folders-page .folder-arrow {
+  color: #8492a7;
+  font-size: 1rem;
+}
+
+.shared-folders-page .shared-folder-card:hover .folder-arrow {
+  color: #72e4da;
+}
+
+.shared-folders-page .shared-empty {
+  margin-top: 22px;
+  padding: 48px 20px;
+  color: #8492a7;
+  background: linear-gradient(145deg, rgba(24, 35, 52, 0.7), rgba(15, 22, 34, 0.55));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 9px;
+}
+
+.shared-folders-page .shared-empty p {
+  margin: 0;
+  color: #edf5ff;
+  font-size: 0.95rem;
+}
+
+.shared-folders-page .folder-skeleton {
+  height: 72px;
+  background: rgba(30, 41, 59, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 8px;
+}
+
+.shared-folders-page .folder-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation-name: shared-folders-shimmer;
+}
+
+@media (max-width: 600px) {
+  .shared-folders-page {
+    padding: 0 14px 40px;
+  }
+
+  .shared-folders-page > .app-header {
+    margin: 0 -14px;
+  }
+
+  .shared-folders-container {
+    padding-top: 24px;
   }
 }
