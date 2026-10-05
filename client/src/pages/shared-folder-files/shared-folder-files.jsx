@@ -14,7 +14,7 @@ const SharedFiles = () => {
 
   useEffect(() => {
     fetchSharedFiles();
-    // eslint-disable-next-line
+                               
   }, []);
 
   const fetchSharedFiles = async () => {

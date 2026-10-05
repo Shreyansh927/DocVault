@@ -23,7 +23,7 @@ const OtpField = () => {
     updatedOtp[index] = value;
     setOtp(updatedOtp);
 
-    // auto-focus next input
+                            
     if (value && index < 3) {
       document.getElementById(`otp-${index + 1}`).focus();
     }

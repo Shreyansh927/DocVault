@@ -2,10 +2,12 @@ import { db } from "../db.js";
 
 export const getNotifications = async (req, res) => {
   try {
-    const authUuid = req.user?.auth_uuid;
+    const userId = Number(req.user?.id);
 
-    if (!authUuid) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (!userId) {
+      return res.status(401).json({
+        error: "Unauthorized",
+      });
     }
 
     const result = await db.query(
@@ -27,18 +29,26 @@ export const getNotifications = async (req, res) => {
       WHERE user_id = $1
       ORDER BY created_at DESC
       `,
-      [authUuid],
+      [userId],
     );
-    console.log(req.user);
+
+    console.log("REQ.USER:", req.user);
+
     console.log(
       "Notifications fetched for user:",
-      authUuid,
+      userId,
       "Count:",
       result.rows.length,
     );
-    res.status(200).json({ notifications: result.rows });
+
+    return res.status(200).json({
+      notifications: result.rows,
+    });
   } catch (err) {
     console.error("GET NOTIFICATIONS ERROR:", err);
-    res.status(500).json({ error: "Failed to fetch notifications" });
+
+    return res.status(500).json({
+      error: "Failed to fetch notifications",
+    });
   }
 };

@@ -34,7 +34,7 @@ const ResetEmail = () => {
 
   return (
     <div className="reset-page">
-      {/* ---------- Card ---------- */}
+                                        
       <div className="reset-card">
         <h2>Reset your password</h2>
         <p>

@@ -4,110 +4,183 @@ import { db } from "../db.js";
 
 export const sendRequest = async (req, res) => {
   try {
-    const senderId = req.user.id;
+    const senderId = Number(req.user.id);
     const receiverId = Number(req.body.receiverId);
+
+    if (!senderId || !receiverId || senderId === receiverId) {
+      return res.status(400).json({
+        error: "Invalid request",
+      });
+    }
 
     await db.query("BEGIN");
 
-    if (!receiverId || senderId === receiverId) {
-      return res.status(400).json({ error: "Invalid request" });
-    }
-
+    // Create connection request
     await db.query(
       `
       INSERT INTO connections (sender_id, receiver_id)
-      VALUES ($1,$2)
+      VALUES ($1, $2)
       ON CONFLICT DO NOTHING
       `,
       [senderId, receiverId],
     );
 
+    // Create chat
     await db.query(
-      `INSERT INTO chats (user1_id, user2_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      `
+      INSERT INTO chats (user1_id, user2_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+      `,
       [senderId, receiverId],
     );
 
-    const sender = (
-      await db.query(`SELECT name, profile_image FROM users WHERE id=$1`, [
-        senderId,
-      ])
-    ).rows[0];
+    // Get sender information
+    const senderResult = await db.query(
+      `
+      SELECT name, profile_image
+      FROM users
+      WHERE id = $1
+      `,
+      [senderId],
+    );
 
-    const receiverAuthUUID = (
-      await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [receiverId])
-    ).rows[0].auth_uuid;
+    if (!senderResult.rows.length) {
+      await db.query("ROLLBACK");
 
-    const result = await db.query(
+      return res.status(404).json({
+        error: "Sender not found",
+      });
+    }
+
+    const sender = senderResult.rows[0];
+
+    // Create notification for receiver
+    await db.query(
       `
       INSERT INTO notifications
-      (user_id, sender_id, sender_name, sender_profile_image, type, status)
-      VALUES ($1,$2,$3,$4,'FRIEND_REQUEST','PENDING')
+      (
+        user_id,
+        sender_id,
+        sender_name,
+        sender_profile_image,
+        type,
+        status
+      )
+      VALUES ($1, $2, $3, $4, 'FRIEND_REQUEST', 'PENDING')
       ON CONFLICT DO NOTHING
-      
       `,
-      [receiverAuthUUID, senderId, sender.name, sender.profile_image],
+      [receiverId, senderId, sender.name, sender.profile_image],
     );
 
     await db.query("COMMIT");
 
-    console.log("REQ.USER:", req.user);
-    res.json({ success: true });
+    console.log("SEND REQUEST:", {
+      senderId,
+      receiverId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Friend request sent successfully",
+    });
   } catch (err) {
-    await db.query("ROLLBACK")
+    await db.query("ROLLBACK");
+
     console.error("SEND REQUEST ERROR:", err.message);
-    res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
 // ACCEPT FRIEND REQUEST
 export const acceptRequest = async (req, res) => {
-  const receiverId = req.user.id; 
+  const receiverId = Number(req.user.id);
   const senderId = Number(req.body.senderId);
+
+  if (!receiverId || !senderId || receiverId === senderId) {
+    return res.status(400).json({
+      error: "Invalid request",
+    });
+  }
 
   try {
     await db.query("BEGIN");
 
-    // fetching user
-    const receiver = await db.query(
-      `SELECT auth_uuid, name, profile_image FROM users WHERE id=$1`,
+    // Get receiver information
+    const receiverResult = await db.query(
+      `
+      SELECT name, profile_image
+      FROM users
+      WHERE id = $1
+      `,
       [receiverId],
     );
 
-    
-    const sender = await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [
-      senderId,
-    ]);
+    if (!receiverResult.rows.length) {
+      await db.query("ROLLBACK");
 
-    // UPDATE RECEIVER NOTIFICATION
+      return res.status(404).json({
+        error: "Receiver not found",
+      });
+    }
+
+    const receiver = receiverResult.rows[0];
+
+    // Verify sender exists
+    const senderResult = await db.query(
+      `
+      SELECT id
+      FROM users
+      WHERE id = $1
+      `,
+      [senderId],
+    );
+
+    if (!senderResult.rows.length) {
+      await db.query("ROLLBACK");
+
+      return res.status(404).json({
+        error: "Sender not found",
+      });
+    }
+
+    // Update receiver's original notification
     await db.query(
       `
       UPDATE notifications
-      SET status='ACCEPTED'
-      WHERE user_id=$1 AND sender_id=$2 AND type='FRIEND_REQUEST'
+      SET status = 'ACCEPTED'
+      WHERE user_id = $1
+        AND sender_id = $2
+        AND type = 'FRIEND_REQUEST'
       `,
-      [receiver.rows[0].auth_uuid, senderId],
+      [receiverId, senderId],
     );
 
-    /* ---------- INSERT SENDER NOTIFICATION ---------- */
+    // Notify sender that request was accepted
     await db.query(
       `
       INSERT INTO notifications
-      (user_id, sender_id, sender_name, sender_profile_image, type, status)
-      VALUES ($1,$2,$3,$4,'FRIEND_REQUEST_ACCEPTED','ACCEPTED')
+      (
+        user_id,
+        sender_id,
+        sender_name,
+        sender_profile_image,
+        type,
+        status
+      )
+      VALUES ($1, $2, $3, $4, 'FRIEND_REQUEST_ACCEPTED', 'ACCEPTED')
       `,
-      [
-        sender.rows[0].auth_uuid,
-        receiverId,
-        receiver.rows[0].name,
-        receiver.rows[0].profile_image,
-      ],
+      [senderId, receiverId, receiver.name, receiver.profile_image],
     );
 
-    /* ---------- FRIEND RELATION ---------- */
+    // Create friendship in both directions
     await db.query(
       `
       INSERT INTO friends (user_id, friend_id)
-      VALUES ($1,$2), ($2,$1)
+      VALUES ($1, $2), ($2, $1)
       ON CONFLICT DO NOTHING
       `,
       [receiverId, senderId],
@@ -115,112 +188,167 @@ export const acceptRequest = async (req, res) => {
 
     await db.query("COMMIT");
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({
+      success: true,
+      message: "Friend request accepted",
+    });
   } catch (err) {
     await db.query("ROLLBACK");
+
     console.error("ACCEPT ERROR:", err.message);
-    return res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
 /* ================= DENY FRIEND REQUEST ================= */
 export const denyRequest = async (req, res) => {
-  const receiverId = req.user.id;
+  const receiverId = Number(req.user.id);
   const senderId = Number(req.body.senderId);
 
+  if (!receiverId || !senderId || receiverId === senderId) {
+    return res.status(400).json({
+      error: "Invalid request",
+    });
+  }
+
   try {
-    const receiver = await db.query(
-      `SELECT auth_uuid, name, profile_image FROM users WHERE id=$1`,
+    // Get receiver information
+    const receiverResult = await db.query(
+      `
+      SELECT name, profile_image
+      FROM users
+      WHERE id = $1
+      `,
       [receiverId],
     );
 
-    const sender = await db.query(`SELECT auth_uuid FROM users WHERE id=$1`, [
-      senderId,
-    ]);
+    if (!receiverResult.rows.length) {
+      return res.status(404).json({
+        error: "Receiver not found",
+      });
+    }
 
+    const receiver = receiverResult.rows[0];
+
+    // Verify sender exists
+    const senderResult = await db.query(
+      `
+      SELECT id
+      FROM users
+      WHERE id = $1
+      `,
+      [senderId],
+    );
+
+    if (!senderResult.rows.length) {
+      return res.status(404).json({
+        error: "Sender not found",
+      });
+    }
+
+    // Remove original friend request notification
     await db.query(
       `
       DELETE FROM notifications
-      WHERE user_id=$1 AND sender_id=$2 AND type='FRIEND_REQUEST'
+      WHERE user_id = $1
+        AND sender_id = $2
+        AND type = 'FRIEND_REQUEST'
       `,
-      [receiver.rows[0].auth_uuid, senderId],
+      [receiverId, senderId],
     );
 
+    // Notify sender that request was rejected
     await db.query(
       `
       INSERT INTO notifications
-      (user_id, sender_id, sender_name, sender_profile_image, type, status)
-      VALUES ($1,$2,$3,$4,'FRIEND_REQUEST_REJECTED','REJECTED')
+      (
+        user_id,
+        sender_id,
+        sender_name,
+        sender_profile_image,
+        type,
+        status
+      )
+      VALUES ($1, $2, $3, $4, 'FRIEND_REQUEST_REJECTED', 'REJECTED')
       `,
-      [
-        sender.rows[0].auth_uuid,
-        receiverId,
-        receiver.rows[0].name,
-        receiver.rows[0].profile_image,
-      ],
+      [senderId, receiverId, receiver.name, receiver.profile_image],
     );
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({
+      success: true,
+      message: "Friend request rejected",
+    });
   } catch (err) {
     console.error("DENY ERROR:", err.message);
-    return res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
 export const removeFriend = async (req, res) => {
   try {
-    const removeFriendId = Number(req.body.removeFriend);
     const currentUserId = Number(req.user.id);
+    const removeFriendId = Number(req.body.removeFriend);
 
-    const currentUserResult = await db.query(
-      `SELECT auth_uuid FROM users WHERE id = $1`,
-      [currentUserId],
-    );
+    if (!currentUserId || !removeFriendId) {
+      return res.status(400).json({
+        error: "Invalid user ID",
+      });
+    }
 
-    const friendResult = await db.query(
-      `SELECT auth_uuid FROM users WHERE id = $1`,
-      [removeFriendId],
-    );
+    if (currentUserId === removeFriendId) {
+      return res.status(400).json({
+        error: "Cannot remove yourself",
+      });
+    }
 
-    const currentUserUUID = currentUserResult.rows[0]?.auth_uuid;
-
-    const friendUUID = friendResult.rows[0]?.auth_uuid;
-
+    // Delete notifications between both users
     await db.query(
       `
       DELETE FROM notifications
       WHERE
-          (user_id = $1 AND sender_id = $2)
-       OR (user_id = $3 AND sender_id = $4)
-      `,
-      [friendUUID, currentUserId, currentUserUUID, removeFriendId],
-    );
-
-    await db.query(
-      `
-      DELETE FROM connections
-      WHERE
-          (sender_id = $1 AND receiver_id = $2)
-       OR (sender_id = $2 AND receiver_id = $1)
+        (user_id = $1 AND sender_id = $2)
+        OR
+        (user_id = $2 AND sender_id = $1)
       `,
       [currentUserId, removeFriendId],
     );
 
+    // Delete connection
+    await db.query(
+      `
+      DELETE FROM connections
+      WHERE
+        (sender_id = $1 AND receiver_id = $2)
+        OR
+        (sender_id = $2 AND receiver_id = $1)
+      `,
+      [currentUserId, removeFriendId],
+    );
+
+    // Delete friendship in both directions
     await db.query(
       `
       DELETE FROM friends
       WHERE
-          (user_id = $1 AND friend_id = $2)
-       OR (user_id = $2 AND friend_id = $1)
+        (user_id = $1 AND friend_id = $2)
+        OR
+        (user_id = $2 AND friend_id = $1)
       `,
       [currentUserId, removeFriendId],
     );
 
     return res.status(200).json({
+      success: true,
       message: "Friend removed from connection list successfully",
     });
   } catch (err) {
-    console.error(err);
+    console.error("REMOVE FRIEND ERROR:", err.message);
 
     return res.status(500).json({
       error: "Error removing friend",

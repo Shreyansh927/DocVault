@@ -1,12 +1,9 @@
 // utils/getCurrentQuery.js
 
 export function getCurrentQuery(state) {
-  const messages = state.messages ?? [];
-
-  if (messages.length === 0) {
-    throw new Error("No messages found in graph state");
+  if (!state.currentQuery) {
+    throw new Error("No current query found");
   }
 
-  const latestMessage = messages[messages.length - 1];
-  return latestMessage.content;
+  return state.currentQuery;
 }

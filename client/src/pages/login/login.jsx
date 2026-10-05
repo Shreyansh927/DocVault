@@ -66,20 +66,20 @@ export default function Login() {
     }
   };
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       await axios.get(`${API_BASE_URL}/api/auth/me`, {
-  //         withCredentials: true,
-  //       });
-  //       navigate("/home", { replace: true });
-  //     } catch {
-  //       // Not logged in → stay on login page
-  //     }
-  //   };
+                      
+                                      
+              
+                                                           
+                                   
+              
+                                                
+                  
+                                                
+          
+         
 
-  //   checkAuth();
-  // }, [navigate]);
+                   
+                    
 
   const submit = async (e) => {
     e.preventDefault();

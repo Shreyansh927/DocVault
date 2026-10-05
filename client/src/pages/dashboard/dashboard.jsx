@@ -121,7 +121,7 @@ const fetchCurrentSessions = useCallback(async () => {
   useEffect(() => {
     const f = async () => {
       await api.get("/api/auth/refresh");
-      // toast.info("session re-created");
+                                          
     };
     f();
     fetchUserPersonalInfo();
@@ -184,7 +184,7 @@ const fetchCurrentSessions = useCallback(async () => {
       <AskAi />
       <div className="dashboard-wrapper">
         <main className="dashboard-shell">
-          {/* Hero Section */}
+                              
           <section className="dashboard-hero">
             <div>
               <p className="dashboard-tag">Dashboard</p>
@@ -201,11 +201,11 @@ const fetchCurrentSessions = useCallback(async () => {
             </button>
           </section>
 
-          {/* Profile Card */}
+                              
           <div className="dashboard-content">
             {!editMode ? (
               <section className="profile-section">
-                {/* User Info Card */}
+                                      
                 <div className="profile-card">
                   <div className="profile-identity">
                     <div className="profile-avatar">
@@ -246,7 +246,7 @@ const fetchCurrentSessions = useCallback(async () => {
                   </div>
                 </div>
 
-                {/* Sessions */}
+                                
                 <div className="sessions-section">
                   <h2 className="sessions-title">Active sessions</h2>
                   {loading ? (

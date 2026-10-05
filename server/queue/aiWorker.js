@@ -254,29 +254,6 @@ const worker = new Worker(
 
       console.log("Graph result:", result);
 
-      if (result.__interrupt__) {
-        console.log("===== HUMAN APPROVAL REQUIRED =====");
-
-        const interruptData = result.__interrupt__[0].value;
-
-        console.log("Interrupt data:", interruptData);
-
-        await db.query(
-          `
-    UPDATE ai_query_jobs
-    SET
-      status = 'WAITING_FOR_APPROVAL',
-      hitl_request = $1::jsonb
-      response = 'need your approval to proceed with file movement.'
-    WHERE id = $2
-      AND user_id = $3
-    `,
-          [JSON.stringify(interruptData), jobId, userId],
-        );
-
-        return;
-      }
-
       /* =====================================================
          8. EXTRACT FINAL RESPONSE
       ===================================================== */

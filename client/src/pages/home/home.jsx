@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import GoogleDriveConnect from "../../components/gooogleDriveConnect.jsx";
 console.log("Home rendered");
 
-/* ================= CONSTANTS ================= */
+                                                   
 const CATEGORIES = ["PUBLIC", "PRIVATE"];
 
 const Home = () => {
@@ -36,11 +36,11 @@ const Home = () => {
 
   const navigate = useNavigate();
 
-  /* ================= FETCH FOLDERS ================= */
+                                                         
   useEffect(() => {
     const f = async () => {
       await api.get("/api/auth/refresh");
-      // toast.info("session re-created");
+                                          
     };
     f();
 
@@ -62,28 +62,28 @@ const Home = () => {
       console.error(err);
       const indexedDbCachedFolders = await getUserFolders();
       setAllFolders(indexedDbCachedFolders);
-      // setAllFolders([]);
+                           
     }
   };
 
-  // /* ================= FILTER ================= */
-  // useEffect(() => {
-  //   let data = [...sorted];
+                                                     
+                      
+                              
 
-  //   if (activeCategory !== "All") {
-  //     data = data.filter((f) => f.category === activeCategory);
-  //   }
+                                      
+                                                                  
+        
 
-  //   if (search.trim()) {
-  //     data = data.filter((f) =>
-  //       f.folder_name.toLowerCase().includes(search.toLowerCase()),
-  //     );
-  //   }
+                           
+                                  
+                                                                      
+           
+        
 
-  //   setAllFolders(data);
-  // }, [search, activeCategory, sorted]);
+                           
+                                          
 
-  /* ================= CREATE FOLDER ================= */
+                                                         
   const submit = async (e) => {
     e.preventDefault();
     if (!folderName.trim()) return;
@@ -104,7 +104,7 @@ const Home = () => {
     }
   };
 
-  /* ================= UPDATE FOLDER ================= */
+                                                         
   const updateFolder = async (e) => {
     e.preventDefault();
     if (!folderToUpdate) return;
@@ -130,7 +130,7 @@ const Home = () => {
     }
   };
 
-  /* ================= DELETE FOLDER ================= */
+                                                         
   const confirmDeleteFolder = async () => {
     try {
       await axios.post(

@@ -15,7 +15,7 @@ const SharedFolders = () => {
 
   useEffect(() => {
     fetchSharedFolders();
-    // eslint-disable-next-line
+                               
   }, []);
 
   const fetchSharedFolders = async () => {

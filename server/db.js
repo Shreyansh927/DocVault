@@ -120,22 +120,35 @@ export const initDB = async () => {
 
   /* ---------- NOTIFICATIONS ---------- */
   await db.query(`
-    CREATE TABLE IF NOT EXISTS notifications (
-      id SERIAL PRIMARY KEY,
+  CREATE TABLE IF NOT EXISTS notifications (
+    id SERIAL PRIMARY KEY,
 
-      user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-      sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL
+      REFERENCES users(id)
+      ON DELETE CASCADE,
 
-      sender_name TEXT ,
-      sender_profile_image TEXT,
-      type TEXT ,
-      status TEXT DEFAULT 'PENDING',
-      seen BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMP DEFAULT NOW(),
+    sender_id INTEGER NOT NULL
+      REFERENCES users(id)
+      ON DELETE CASCADE,
 
-      UNIQUE (user_id, sender_id, type)
-    );
-  `);
+    sender_name TEXT,
+    sender_profile_image TEXT,
+
+    text_notification TEXT,
+    file_route TEXT,
+
+    type TEXT,
+    status TEXT DEFAULT 'PENDING',
+    seen BOOLEAN DEFAULT FALSE,
+
+    room_name TEXT,
+    room_id UUID,
+
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    UNIQUE (user_id, sender_id, type)
+  );
+`);
 
   await db.query(`
     CREATE TABLE IF NOT EXISTS chats (
@@ -359,7 +372,7 @@ export const initDB = async () => {
   );
 `);
 
-    // composio integration
+  // composio integration
 
   await db.query(`
   CREATE TABLE IF NOT EXISTS user_integrations (

@@ -26,10 +26,6 @@ import AskAi from "../../ask-ai/ask-ai.jsx";
 
 const base_url = import.meta.env.VITE_API_BASE_URL;
 
-/* =========================================================
-   MARK RESPONSES AS SEEN
-========================================================= */
-
 export const markResponsesAsSeen = async () => {
   try {
     await axios.get(`${base_url}/ai-query-response/mark-as-seen`, {
@@ -40,16 +36,11 @@ export const markResponsesAsSeen = async () => {
   }
 };
 
-/* =========================================================
-   SAFE RESPONSE PARSER
-========================================================= */
-
 const parseResponse = (response) => {
   if (response === null || response === undefined) {
     return null;
   }
 
-  // Already an object
   if (typeof response === "object") {
     return response;
   }
@@ -64,8 +55,6 @@ const parseResponse = (response) => {
     return null;
   }
 
-  // Remove markdown JSON fences if the model/backend
-  // wrapped the JSON inside ```json ... ```
   const cleaned = trimmed
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
@@ -79,10 +68,6 @@ const parseResponse = (response) => {
   }
 };
 
-/* =========================================================
-   FIND STRUCTURED DATA INSIDE RESPONSE
-========================================================= */
-
 const extractDriveResponse = (response) => {
   const parsed = parseResponse(response);
 
@@ -90,20 +75,10 @@ const extractDriveResponse = (response) => {
     return null;
   }
 
-  // Direct:
-  // {
-  //   files: [...]
-  // }
   if (Array.isArray(parsed.files)) {
     return parsed;
   }
 
-  // Possible:
-  // {
-  //   toolResult: {
-  //     files: [...]
-  //   }
-  // }
   if (
     parsed.toolResult &&
     typeof parsed.toolResult === "object" &&
@@ -112,12 +87,6 @@ const extractDriveResponse = (response) => {
     return parsed.toolResult;
   }
 
-  // Possible:
-  // {
-  //   data: {
-  //     files: [...]
-  //   }
-  // }
   if (
     parsed.data &&
     typeof parsed.data === "object" &&
@@ -126,12 +95,6 @@ const extractDriveResponse = (response) => {
     return parsed.data;
   }
 
-  // Possible:
-  // {
-  //   result: {
-  //     files: [...]
-  //   }
-  // }
   if (
     parsed.result &&
     typeof parsed.result === "object" &&
@@ -142,10 +105,6 @@ const extractDriveResponse = (response) => {
 
   return null;
 };
-
-/* =========================================================
-   RESPONSE TO SEARCHABLE TEXT
-========================================================= */
 
 const responseToText = (response) => {
   if (!response) {
@@ -162,10 +121,6 @@ const responseToText = (response) => {
     return "";
   }
 };
-
-/* =========================================================
-   GOOGLE DRIVE FILE TYPE
-========================================================= */
 
 const getFileType = (mimeType = "") => {
   const type = mimeType.toLowerCase();
@@ -213,10 +168,6 @@ const getFileType = (mimeType = "") => {
   return "Drive file";
 };
 
-/* =========================================================
-   GOOGLE DRIVE ICON
-========================================================= */
-
 const getFileIcon = (mimeType = "") => {
   const type = mimeType.toLowerCase();
 
@@ -239,10 +190,6 @@ const getFileIcon = (mimeType = "") => {
   return <FiFile />;
 };
 
-/* =========================================================
-   GOOGLE DRIVE RESULTS COMPONENT
-========================================================= */
-
 const GoogleDriveResults = ({ data }) => {
   const files = Array.isArray(data?.files) ? data.files : [];
 
@@ -252,7 +199,6 @@ const GoogleDriveResults = ({ data }) => {
 
   return (
     <div className="drive-results">
-      {/* Header */}
       <div className="drive-results-header">
         <div className="drive-results-title">
           <div className="drive-results-icon">
@@ -275,7 +221,6 @@ const GoogleDriveResults = ({ data }) => {
         </div>
       </div>
 
-      {/* Files */}
       {files.length > 0 ? (
         <div className="drive-file-list">
           {files.map((file, index) => {
@@ -298,17 +243,14 @@ const GoogleDriveResults = ({ data }) => {
                 className="drive-file-card"
                 key={file?.id || `${fileName}-${index}`}
               >
-                {/* Icon */}
                 <div className="drive-file-icon">{getFileIcon(mimeType)}</div>
 
-                {/* Information */}
                 <div className="drive-file-info">
                   <h5 title={fileName}>{fileName}</h5>
 
                   <span>{getFileType(mimeType)}</span>
                 </div>
 
-                {/* Open button */}
                 {url && (
                   <a
                     href={url}
@@ -335,10 +277,6 @@ const GoogleDriveResults = ({ data }) => {
   );
 };
 
-/* =========================================================
-   NORMAL AI RESPONSE
-========================================================= */
-
 const NormalAiResponse = ({ response }) => {
   if (response === null || response === undefined || response === "") {
     return <p className="response-loading">Retrieving response...</p>;
@@ -361,10 +299,6 @@ const NormalAiResponse = ({ response }) => {
   }
 };
 
-/* =========================================================
-   UNIVERSAL RESPONSE RENDERER
-========================================================= */
-
 const ResponseRenderer = ({ response }) => {
   if (response === null || response === undefined || response === "") {
     return <p className="response-loading">Retrieving response...</p>;
@@ -372,18 +306,12 @@ const ResponseRenderer = ({ response }) => {
 
   const driveData = extractDriveResponse(response);
 
-  // Google Drive structured response
   if (driveData) {
     return <GoogleDriveResults data={driveData} />;
   }
 
-  // Normal AI text response
   return <NormalAiResponse response={response} />;
 };
-
-/* =========================================================
-   MAIN COMPONENT
-========================================================= */
 
 const AiAssistant = () => {
   const navigate = useNavigate();
@@ -401,10 +329,6 @@ const AiAssistant = () => {
 
   const hasQuery = query.trim().length > 0;
 
-  /* =======================================================
-     PAGE INITIALIZATION
-  ======================================================= */
-
   useEffect(() => {
     console.log("pathname:", location.pathname);
 
@@ -417,10 +341,6 @@ const AiAssistant = () => {
     }
   }, [location.pathname]);
 
-  /* =======================================================
-     FILTER HISTORY
-  ======================================================= */
-
   const filteredHistory = useMemo(() => {
     const term = historyQuery.trim().toLowerCase();
 
@@ -432,10 +352,6 @@ const AiAssistant = () => {
       return !term || queryText.includes(term) || responseText.includes(term);
     });
   }, [ragHistory, historyQuery]);
-
-  /* =======================================================
-     FETCH HISTORY
-  ======================================================= */
 
   const fetchFullRagHistory = useCallback(async () => {
     try {
@@ -452,10 +368,6 @@ const AiAssistant = () => {
     }
   }, []);
 
-  /* =======================================================
-     POLL HISTORY
-  ======================================================= */
-
   useEffect(() => {
     fetchFullRagHistory();
 
@@ -465,10 +377,6 @@ const AiAssistant = () => {
 
     return () => clearInterval(interval);
   }, [fetchFullRagHistory, answer]);
-
-  /* =======================================================
-     SUBMIT QUERY
-  ======================================================= */
 
   const fetchResult = async () => {
     if (!hasQuery) {
@@ -498,7 +406,6 @@ const AiAssistant = () => {
 
       setStatus("Answer delivered");
 
-      // Immediately refresh history
       await fetchFullRagHistory();
     } catch (error) {
       console.error("AI query error:", error);
@@ -511,19 +418,11 @@ const AiAssistant = () => {
     }
   };
 
-  /* =======================================================
-     FORM SUBMIT
-  ======================================================= */
-
   const handleSubmit = (event) => {
     event.preventDefault();
 
     fetchResult();
   };
-
-  /* =======================================================
-     HITL DECISION
-  ======================================================= */
 
   const handleHITLDecision = async (jobId, decision) => {
     try {
@@ -565,10 +464,6 @@ const AiAssistant = () => {
     }
   };
 
-  /* =======================================================
-     VOICE INPUT
-  ======================================================= */
-
   const startListening = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -609,20 +504,12 @@ const AiAssistant = () => {
     };
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
-
   return (
     <>
       <Header />
 
       <div className="assistant-page">
         <div className="assistant-shell">
-          {/* =================================================
-              HERO
-          ================================================= */}
-
           <section className="assistant-hero glass-card">
             <div className="hero-copy">
               <div className="hero-pills">
@@ -678,15 +565,7 @@ const AiAssistant = () => {
             </div>
           </section>
 
-          {/* =================================================
-              MAIN ASSISTANT PANEL
-          ================================================= */}
-
           <section className="assistant-panel">
-            {/* =================================================
-                LEFT SIDEBAR
-            ================================================= */}
-
             <aside className="assistant-sidebar">
               <div className="glass-card prompt-card">
                 <div className="card-heading">
@@ -736,10 +615,6 @@ const AiAssistant = () => {
               </div>
             </aside>
 
-            {/* =================================================
-                RIGHT HISTORY
-            ================================================= */}
-
             <main className="assistant-main">
               <div className="glass-card history-card">
                 <div className="card-heading">
@@ -754,8 +629,6 @@ const AiAssistant = () => {
                   </div>
                 </div>
 
-                {/* HISTORY SEARCH */}
-
                 <label className="history-search">
                   <FiSearch />
 
@@ -767,8 +640,6 @@ const AiAssistant = () => {
                   />
                 </label>
 
-                {/* HISTORY LIST */}
-
                 <ul className="history-list">
                   {filteredHistory.length > 0 ? (
                     filteredHistory.map((item, index) => (
@@ -776,10 +647,6 @@ const AiAssistant = () => {
                         key={`${item?.created_at || "history"}-${index}`}
                         className="history-item"
                       >
-                        {/* ===================================
-                              QUERY HEADER
-                          =================================== */}
-
                         <div className="history-item-top">
                           <strong>{item?.query || "Untitled query"}</strong>
 
@@ -794,10 +661,6 @@ const AiAssistant = () => {
                               : ""}
                           </span>
                         </div>
-
-                        {/* ===================================
-                              HITL
-                          =================================== */}
 
                         {item?.hitl_request ? (
                           <div className="hitl-container">
@@ -867,16 +730,8 @@ const AiAssistant = () => {
                             </div>
                           </div>
                         ) : (
-                          /* =================================
-                               NORMAL RESPONSE
-                            ================================= */
-
                           <ResponseRenderer response={item?.response} />
                         )}
-
-                        {/* ===================================
-                              SOURCE / TRACE ACTIONS
-                          =================================== */}
 
                         <div className="history-actions">
                           {item?.file_id && item?.folder_id && (

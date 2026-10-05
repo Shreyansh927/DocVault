@@ -16,15 +16,25 @@ import { evaluationRecoveryNode } from "../nodes/evaluationRecoveryNode.js";
 import { fallbackNode } from "../nodes/fallbackNode.js";
 import { googleDriveNode } from "../nodes/googleDriveNode.js";
 
+import { queryDecomposerNode } from "../nodes/queryDecomposerNode.js";
+import { queryExtractorNode } from "../nodes/queryExtractorNode.js";
+import { advanceQueryNode } from "../nodes/advanceQueryNode.js";
+
 export const builder = new StateGraph(GraphState);
+
+// ==========================================
+// NODES
+// ==========================================
+
+builder.addNode("queryDecomposer", queryDecomposerNode);
+
+builder.addNode("queryExtractor", queryExtractorNode);
 
 builder.addNode("planner", plannerNode);
 
 builder.addNode("folders", folderNode);
 
 builder.addNode("chat", chatNode);
-
-// builder.addNode("documents", async (state) => state);
 
 builder.addNode("moveFile", moveFileNode);
 
@@ -36,6 +46,8 @@ builder.addNode("permissions", permissionNode);
 
 builder.addNode("googleDrive", googleDriveNode);
 
+builder.addNode("advanceQuery", advanceQueryNode);
+
 builder.addNode("response", responseNode);
 
 builder.addNode("evaluation", evaluationNode);
@@ -44,73 +56,163 @@ builder.addNode("evaluationRecovery", evaluationRecoveryNode);
 
 builder.addNode("fallback", fallbackNode);
 
-builder.addEdge(START, "planner");
+// ==========================================
+// START
+// ==========================================
+
+builder.addEdge(START, "queryDecomposer");
+
+// ==========================================
+// DECOMPOSER → EXTRACTOR
+// ==========================================
+
+builder.addEdge("queryDecomposer", "queryExtractor");
+
+// ==========================================
+// EXTRACTOR → PLANNER
+// ==========================================
+
+builder.addEdge("queryExtractor", "planner");
+
+// ==========================================
+// PLANNER → ROUTER
+// ==========================================
 
 builder.addConditionalEdges("planner", routeIntent, {
   folders: "folders",
-  // documents: "documents",
   permissions: "permissions",
   chat: "chat",
   moveFile: "moveFile",
   googleDrive: "googleDrive",
 });
 
-builder.addEdge("folders", "response");
+// ==========================================
+// FOLDERS → ADVANCE
+// ==========================================
 
-// builder.addEdge("documents", END);
+builder.addEdge("folders", "advanceQuery");
 
-builder.addEdge("permissions", "response");
+// ==========================================
+// PERMISSIONS → ADVANCE
+// ==========================================
 
-builder.addEdge("chat", "response");
+builder.addEdge("permissions", "advanceQuery");
+
+// ==========================================
+// CHAT → ADVANCE
+// ==========================================
+
+builder.addEdge("chat", "advanceQuery");
+
+// ==========================================
+// MOVE FILE → HITL
+// ==========================================
 
 builder.addEdge("moveFile", "hitlNode");
 
-builder.addEdge("googleDrive", "response");
+// ==========================================
+// GOOGLE DRIVE → ADVANCE
+// ==========================================
+
+builder.addEdge("googleDrive", "advanceQuery");
+
+// ==========================================
+// HITL
+// ==========================================
 
 builder.addConditionalEdges(
   "hitlNode",
+
   (state) => {
-    console.log("== HITL ROUTER =");
-    console.log("hitlDecision:", state.hitlDecision);
+    console.log("=================================");
+    console.log("HITL ROUTER");
+    console.log("Decision:", state.hitlDecision);
+    console.log("=================================");
 
     return state.hitlDecision === "approved" ? "approved" : "rejected";
   },
+
   {
     approved: "moveFileExecution",
-    rejected: "response",
+
+    // IMPORTANT:
+    // Rejected task should not terminate
+    // the entire multi-task request.
+    rejected: "advanceQuery",
   },
 );
 
-builder.addEdge("moveFileExecution", "response");
+// ==========================================
+// MOVE EXECUTION → ADVANCE
+// ==========================================
+
+builder.addEdge("moveFileExecution", "advanceQuery");
+
+// ==========================================
+// ADVANCE QUERY → NEXT OR DONE
+// ==========================================
+
+builder.addConditionalEdges(
+  "advanceQuery",
+
+  (state) => {
+    const nextIndex = state.nextQueryIndex ?? 0;
+
+    const totalQueries = state.queries?.length ?? 0;
+
+    console.log("=================================");
+    console.log("QUERY PROGRESS");
+    console.log("Next Index:", nextIndex);
+    console.log("Total Queries:", totalQueries);
+    console.log("=================================");
+
+    if (nextIndex < totalQueries) {
+      return "next";
+    }
+
+    return "done";
+  },
+
+  {
+    next: "queryExtractor",
+    done: "response",
+  },
+);
+
+// ==========================================
+// RESPONSE → EVALUATION
+// ==========================================
 
 builder.addEdge("response", "evaluation");
 
+// ==========================================
+// EVALUATION
+// ==========================================
+
 builder.addConditionalEdges(
   "evaluation",
+
   (state) => {
     const score = Number(state.evaluationResult?.answerRelevance?.score);
 
     console.log("Evaluation score:", score);
     console.log("Retry count:", state.retryCount);
 
-    // Evaluation data is invalid
     if (!Number.isFinite(score)) {
       return "failed";
     }
 
-    // Good answer
     if (score >= 5) {
       return "success";
     }
 
-    // One retry allowed
     if ((state.retryCount ?? 0) < 1) {
       return "retry";
     }
 
-    // Retry already consumed
     return "failed";
   },
+
   {
     success: END,
     retry: "evaluationRecovery",
@@ -118,6 +220,14 @@ builder.addConditionalEdges(
   },
 );
 
+// ==========================================
+// EVALUATION RECOVERY
+// ==========================================
+
 builder.addEdge("evaluationRecovery", "planner");
+
+// ==========================================
+// FALLBACK
+// ==========================================
 
 builder.addEdge("fallback", END);

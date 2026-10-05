@@ -33,9 +33,9 @@ const Chats = () => {
 
   const chatID = connectionId;
 
-  // -----------------------------
-  // Fetch messages
-  // -----------------------------
+                                  
+                   
+                                  
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -55,9 +55,9 @@ const Chats = () => {
     }
   }, [API_BASE_URL, connectionId]);
 
-  // -----------------------------
-  // Get logged-in user
-  // -----------------------------
+                                  
+                       
+                                  
 
   useEffect(() => {
     axios
@@ -72,9 +72,9 @@ const Chats = () => {
       });
   }, [API_BASE_URL]);
 
-  // -----------------------------
-  // WebSocket
-  // -----------------------------
+                                  
+              
+                                  
 
   useEffect(() => {
     if (!user?.id) return;
@@ -123,9 +123,9 @@ const Chats = () => {
     };
   }, [user, connectionId, fetchMessages, WS_URL]);
 
-  // -----------------------------
-  // Auto scroll
-  // -----------------------------
+                                  
+                
+                                  
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -134,9 +134,9 @@ const Chats = () => {
     }
   }, [messages]);
 
-  // -----------------------------
-  // Send message
-  // -----------------------------
+                                  
+                 
+                                  
 
   const sendMessage = async () => {
     const message = newMessage.trim();
@@ -164,9 +164,9 @@ const Chats = () => {
     }
   };
 
-  // -----------------------------
-  // Edit message
-  // -----------------------------
+                                  
+                 
+                                  
 
   const editChat = async (messageId) => {
     try {
@@ -192,9 +192,9 @@ const Chats = () => {
     }
   };
 
-  // -----------------------------
-  // Delete message
-  // -----------------------------
+                                  
+                   
+                                  
 
   const deleteChat = async (messageId) => {
     try {
@@ -213,9 +213,9 @@ const Chats = () => {
     }
   };
 
-  // -----------------------------
-  // Helpers
-  // -----------------------------
+                                  
+            
+                                  
 
   const isOwnMessage = (senderId) =>
     Number(senderId) === Number(loggedInUser?.id);
@@ -229,9 +229,9 @@ const Chats = () => {
     });
   };
 
-  // -----------------------------
-  // UI
-  // -----------------------------
+                                  
+       
+                                  
 
   return (
     <div className="chat-wrapper">

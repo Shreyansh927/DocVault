@@ -105,7 +105,7 @@ const Header = () => {
 
       <div className="header-separator" />
 
-      {/* ---------- Logout Modal ---------- */}
+                                                
       {showLogoutModal && (
         <div
           className="logout-overlay"

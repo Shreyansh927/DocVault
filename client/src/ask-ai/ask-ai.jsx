@@ -53,8 +53,8 @@ const AskAi = () => {
       const recognition =
         new window.SpeechRecognition() || new window.webkitSpeechRecognition();
       recognition.lang = "en-US";
-      // recognition.continuous = true; // Keep listening
-      recognition.interimResults = true; // Live transcript
+                                                         
+      recognition.interimResults = true;                   
       recognition.onresult = (e) => {
         const transcript = e.results[0][0].transcript;
         setTranscript(transcript);
@@ -87,7 +87,7 @@ const AskAi = () => {
 
     const interval = setInterval(() => {
       fetchUnseenAiResponsesCounts();
-    }, 5000); // every 5 seconds
+    }, 5000);                   
 
     return () => clearInterval(interval);
   }, []);

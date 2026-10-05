@@ -28,7 +28,7 @@ const SetPassword = () => {
       const res = await axios.post(
         `${API_BASE_URL}/api/forgot/set-new-password`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       alert(res.data.message);

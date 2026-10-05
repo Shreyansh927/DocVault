@@ -30,11 +30,12 @@ export const summarizeFileWithAI = async (file) => {
   try {
     if (!file) return null;
 
+    // PDF
     if (file.mimetype === "application/pdf") {
       const base64PDF = file.buffer.toString("base64");
 
       const result = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
 
         contents: [
           {
@@ -48,7 +49,6 @@ export const summarizeFileWithAI = async (file) => {
               {
                 inlineData: {
                   mimeType: "application/pdf",
-
                   data: base64PDF,
                 },
               },
@@ -60,9 +60,10 @@ export const summarizeFileWithAI = async (file) => {
       return result.text;
     }
 
+    // Images
     if (file.mimetype.startsWith("image/")) {
       const result = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
 
         contents: [
           {
@@ -76,7 +77,6 @@ export const summarizeFileWithAI = async (file) => {
               {
                 inlineData: {
                   mimeType: file.mimetype,
-
                   data: file.buffer.toString("base64"),
                 },
               },
@@ -88,20 +88,19 @@ export const summarizeFileWithAI = async (file) => {
       return result.text;
     }
 
+    // Text-based files
     const extracted = await extractTextFromFile(file);
 
     if (!extracted) return null;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
-
+      model: "gemini-3.8-flash",
       contents: `Summarize\n\n${extracted}`,
     });
 
     return result.text;
   } catch (err) {
     console.error(err);
-
     return null;
   }
 };

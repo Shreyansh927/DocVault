@@ -59,9 +59,9 @@ const Files = () => {
     }
   }, [API_BASE_URL]);
 
-  // const selectFile = (f) => {
-  //   setSelectedFiles((prev) => [...prev, f.id]);
-  // };
+                                
+                                                   
+       
 
   const uploadSelectedDriveFileToDocvault = async () => {
     try {
@@ -83,7 +83,7 @@ const Files = () => {
     }
   };
 
-  /* ---------- Derived ---------- */
+                                     
   const filteredFiles = useMemo(() => {
     if (!searchFile.trim()) return allFiles;
     return allFiles.filter(
@@ -115,7 +115,7 @@ const Files = () => {
     setView(true);
   };
 
-  /* ---------- Fetch ---------- */
+                                   
   useEffect(() => {
     trashMode ? fetchAllTrashFiles() : fetchAllFiles();
     localStorage.setItem("trash", JSON.stringify(trashMode));
@@ -131,16 +131,16 @@ const Files = () => {
         },
       );
       setAllFiles(res.data.allFiles || []);
-      // await saveUserIndivisualFolder(res.data.allFiles, folderId);
+                                                                     
     } catch (err) {
       console.error(err);
-      // toast.info("Serving offline data");
-      // const indexedDbFolderFiles = await getFolder(folderId);
-      // if (indexedDbFolderFiles.length > 0) {
-      //   setAllFiles(indexedDbFolderFiles);
-      // } else {
-      //   setAllFiles([]);
-      // }
+                                            
+                                                                
+                                               
+                                             
+                 
+                           
+          
     } finally {
       setLoading(false);
     }
@@ -166,7 +166,7 @@ const Files = () => {
     }
   }, [API_BASE_URL, folderId]);
 
-  // upload
+           
  const uploadFiles = async () => {
    if (!selectedFiles.length) return;
 
@@ -198,12 +198,12 @@ const Files = () => {
        },
      );
 
-     // Success toast
+                     
      if (res.data.uploadedCount > 0) {
        toast.success(`${res.data.uploadedCount} file(s) uploaded successfully`);
      }
 
-     // Duplicate toast
+                       
      if (res.data.duplicateCount > 0) {
        toast.warning(
          `Skipped duplicate file(s): ${res.data.duplicatesSkipped.join(", ")}`,
@@ -222,7 +222,7 @@ const Files = () => {
    }
  };
 
-  /* ---------- Delete ---------- */
+                                    
   const deleteFile = async () => {
     await axios.post(
       `${API_BASE_URL}/api/files/delete-file`,
@@ -242,7 +242,7 @@ const Files = () => {
     fetchAllFiles();
   };
 
-  /* ---------- Restore ---------- */
+                                     
   const restoreFile = async (file) => {
     await axios.post(
       `${API_BASE_URL}/api/files/restore-file`,
@@ -468,7 +468,7 @@ const Files = () => {
           </div>
         </section>
 
-        {/* ===== Files Grid ===== */}
+                                      
         <div className="files-grid">
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
@@ -542,7 +542,7 @@ const Files = () => {
           )}
         </div>
 
-        {/* ===== Upload Modal ===== */}
+                                        
         {showUploadModal && (
           <div
             className="upload-overlay"
@@ -585,7 +585,7 @@ const Files = () => {
           </div>
         )}
 
-        {/* ===== Delete Modal ===== */}
+                                        
         {showDeleteModal && (
           <div
             className="upload-overlay"
@@ -610,7 +610,7 @@ const Files = () => {
           </div>
         )}
 
-        {/* ===== Footer ===== */}
+                                  
         <div className="files-footer">
           <button
             className="files-footer__btn"

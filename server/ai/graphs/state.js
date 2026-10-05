@@ -8,6 +8,20 @@ export const GraphState = Annotation.Root({
   route: Annotation(),
 
   intent: Annotation(),
+  queries: Annotation({
+    reducer: (_, next) => next,
+    default: () => [],
+  }),
+
+  nextQueryIndex: Annotation({
+    reducer: (_, next) => next,
+    default: () => 0,
+  }),
+
+  currentQuery: Annotation({
+    reducer: (_, next) => next,
+    default: () => null,
+  }),
 
   toolResult: Annotation(),
 

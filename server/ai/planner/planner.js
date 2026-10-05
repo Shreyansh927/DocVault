@@ -103,15 +103,20 @@ function extractJsonObject(content) {
   throw new Error("Planner response contains incomplete JSON.");
 }
 
-export async function planner(messages) {
+export async function planner(query) {
   const plannerModel = ModelManager.cohere();
+
+  console.log("[Planner] Query received:", query);
 
   const response = await plannerModel.invoke([
     {
       role: "system",
       content: plannerPrompt,
     },
-    ...messages,
+    {
+      role: "user",
+      content: query,
+    },
   ]);
 
   console.log("[Planner] Full response:");
@@ -129,7 +134,6 @@ export async function planner(messages) {
 
     const parsed = JSON.parse(jsonText);
 
-    // Validate the parsed object against your existing schema.
     const validated = plannerSchema.parse(parsed);
 
     console.log("[Planner] Validated route:", validated.route);
@@ -138,6 +142,7 @@ export async function planner(messages) {
     return validated;
   } catch (error) {
     console.error("[Planner] Failed to parse or validate response:", error);
+
     throw error;
   }
 }
