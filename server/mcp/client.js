@@ -14,7 +14,7 @@ export async function callMcpTool(name, args, mcpToken) {
   console.log("=================================");
 
   const transport = new StreamableHTTPClientTransport(
-    new URL("http://localhost:5000/mcp"),
+    new URL(process.env.MCP_SERVER_URL),
     {
       requestInit: {
         headers: {
