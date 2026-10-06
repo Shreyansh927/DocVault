@@ -275,7 +275,7 @@ export const getAllCurrentSessions = async (req, res) => {
     const userId = req.user.id;
     const { rows } = await db.query(
       `SELECT id as "refreshTokenId", user_agent as "userAgent", ip_address as "deviceIpAddress", ip_location as "deviceIpLocation", session_uuid as "sessionUuid" FROM refresh_tokens WHERE user_id = $1`,
-      [userId, req.cookies.refreshToken],
+      [userId],
     );
 
     const getCurrentActiveDevice = await db.query(

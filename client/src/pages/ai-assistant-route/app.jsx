@@ -277,9 +277,31 @@ const GoogleDriveResults = ({ data }) => {
   );
 };
 
+const ResponseLoading = () => (
+  <div className="response-loading" role="status" aria-live="polite">
+    <span className="response-loader" aria-hidden="true">
+      <span className="response-loader-orbit" />
+      <span className="response-loader-core">
+        <FiCpu />
+      </span>
+      <span className="response-loader-spark response-loader-spark-one" />
+      <span className="response-loader-spark response-loader-spark-two" />
+    </span>
+    <span className="response-loading-copy">
+      <strong>Retrieving response</strong>
+      <span>Putting the pieces together...</span>
+    </span>
+    <span className="response-loader-dots" aria-hidden="true">
+      <i />
+      <i />
+      <i />
+    </span>
+  </div>
+);
+
 const NormalAiResponse = ({ response }) => {
   if (response === null || response === undefined || response === "") {
-    return <p className="response-loading">Retrieving response...</p>;
+    return <ResponseLoading />;
   }
 
   if (typeof response === "string") {
@@ -301,7 +323,7 @@ const NormalAiResponse = ({ response }) => {
 
 const ResponseRenderer = ({ response }) => {
   if (response === null || response === undefined || response === "") {
-    return <p className="response-loading">Retrieving response...</p>;
+    return <ResponseLoading />;
   }
 
   const driveData = extractDriveResponse(response);

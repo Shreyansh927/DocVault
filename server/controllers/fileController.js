@@ -16,6 +16,9 @@ export const uploadFiles = async (req, res) => {
   try {
     const { folderId } = req.body;
     const files = req.files;
+
+    // After the OAuth UID migration:
+    // req.user.id = normal INTEGER users.id
     const userId = req.user.id;
 
     if (!folderId || !files?.length) {
@@ -24,22 +27,27 @@ export const uploadFiles = async (req, res) => {
       });
     }
 
-    // Get user
-    const user = await db.query(`SELECT auth_uuid FROM users WHERE id = $1`, [
-      userId,
-    ]);
+    // Convert folderId from request body string -> integer
+    const parsedFolderId = Number(folderId);
 
-    const auth_uuid = user.rows[0]?.auth_uuid;
+    if (!Number.isInteger(parsedFolderId)) {
+      return res.status(400).json({
+        error: "Invalid folder ID",
+      });
+    }
 
-    // Validate folder ownership
+    // ----------------------------------------------------
+    // 1. Validate folder ownership
+    // ----------------------------------------------------
+
     const folder = await db.query(
       `
-      SELECT id
-      FROM folders
-      WHERE id = $1
-      AND user_id = $2
+        SELECT id
+        FROM folders
+        WHERE id = $1
+          AND user_id = $2
       `,
-      [folderId, userId],
+      [parsedFolderId, userId],
     );
 
     if (!folder.rows.length) {
@@ -53,20 +61,22 @@ export const uploadFiles = async (req, res) => {
 
     for (const file of files) {
       // ----------------------------------------------------
-      // 1. Fast filename duplicate check
+      // 2. Fast filename duplicate check
       // ----------------------------------------------------
+
       const checkDuplicate = await db.query(
         `
-        SELECT 1
-        FROM files f
-        JOIN folders fo ON f.folder_id = fo.id
-        WHERE f.folder_id = $1
-          AND fo.user_id = $2
-          AND LOWER(f.filename) = LOWER($3)
-          AND f.is_deleted = FALSE
-        LIMIT 1
+          SELECT 1
+          FROM files f
+          JOIN folders fo
+            ON f.folder_id = fo.id
+          WHERE f.folder_id = $1
+            AND fo.user_id = $2
+            AND LOWER(f.filename) = LOWER($3)
+            AND f.is_deleted = FALSE
+          LIMIT 1
         `,
-        [folderId, userId, file.originalname],
+        [parsedFolderId, userId, file.originalname],
       );
 
       if (checkDuplicate.rows.length > 0) {
@@ -79,40 +89,42 @@ export const uploadFiles = async (req, res) => {
       }
 
       // ----------------------------------------------------
-      // 2. Upload to Supabase
+      // 3. Upload to Supabase Storage
       // ----------------------------------------------------
+
       const { storagePath } = await uploadFilesToSupabase(
         userId,
-        folderId,
+        parsedFolderId,
         file,
       );
 
       // ----------------------------------------------------
-      // 3. Insert into database
+      // 4. Insert file into PostgreSQL
       // ----------------------------------------------------
+
       const dbRes = await db.query(
         `
-        INSERT INTO files
-        (
-          folder_id,
-          filename,
-          encrypted_name,
-          encrypted_link,
-          file_type,
-          size,
-          storage,
-          ai_summary,
-          tessract_extracted_text,
-          new_embedding,
-          is_duplicate,
-          duplicate_of
-        )
-        VALUES
-        ($1,$2,$3,$4,$5,$6,$7,NULL,NULL,NULL,FALSE,NULL)
-        RETURNING *
+          INSERT INTO files
+          (
+            folder_id,
+            filename,
+            encrypted_name,
+            encrypted_link,
+            file_type,
+            size,
+            storage,
+            ai_summary,
+            tessract_extracted_text,
+            new_embedding,
+            is_duplicate,
+            duplicate_of
+          )
+          VALUES
+          ($1, $2, $3, $4, $5, $6, $7, NULL, NULL, NULL, FALSE, NULL)
+          RETURNING *
         `,
         [
-          folderId,
+          parsedFolderId,
           file.originalname,
           `${Date.now()}_${file.originalname}`,
           storagePath,
@@ -125,20 +137,22 @@ export const uploadFiles = async (req, res) => {
       const savedFile = dbRes.rows[0];
 
       // ----------------------------------------------------
-      // 4. Add background AI processing job
+      // 5. Add background AI processing job
       // ----------------------------------------------------
+
       await fileProcessingQueue.add("process-file", {
         fileId: savedFile.id,
         folderId: savedFile.folder_id,
-        userId,
+        userId, // INTEGER users.id
       });
 
       uploadedFiles.push(savedFile);
     }
 
     // ----------------------------------------------------
-    // 5. Send a single notification
+    // 6. Send notification
     // ----------------------------------------------------
+
     if (uploadedFiles.length > 0) {
       const allUploadedFileNames = uploadedFiles
         .map((f) => f.filename)
@@ -146,28 +160,33 @@ export const uploadFiles = async (req, res) => {
 
       await db.query(
         `
-        INSERT INTO notifications
-        (
-          user_id,
-          sender_id,
-          type,
-          text_notification,
-          file_route,
-          sender_name,
-          sender_profile_image,
-          status,
-          created_at
-        )
-        VALUES
-        ($1, NULL, 'FILE_UPLOAD', $2, $3, NULL, NULL, 'UNREAD', NOW())
-        `,
+    INSERT INTO notifications
+    (
+      user_id,
+      sender_id,
+      type,
+      text_notification,
+      file_route,
+      sender_name,
+      sender_profile_image,
+      status,
+      created_at
+    )
+    VALUES
+    ($1, $1, 'FILE_UPLOAD', $2, $3, NULL, NULL, 'UNREAD', NOW())
+  `,
         [
-          auth_uuid,
+          userId,
           `Files ${allUploadedFileNames} uploaded successfully.`,
-          `/files/${folderId}`,
+          `/files/${parsedFolderId}`,
         ],
       );
+      
     }
+
+    // ----------------------------------------------------
+    // 7. Response
+    // ----------------------------------------------------
 
     return res.status(201).json({
       success: true,
@@ -253,7 +272,7 @@ export const deleteAllFiles = async (req, res) => {
     const { folderId } = req.body;
     const userId = req.user.id;
 
-   //await redis?.del(`folderFiles:${userId}:${folderId}`);
+    //await redis?.del(`folderFiles:${userId}:${folderId}`);
 
     const result = await db.query(
       `
@@ -495,6 +514,8 @@ export const accessFile = async (req, res) => {
       .from("project2-bucket")
       .download(file.encrypted_link);
 
+    console.log(data);
+
     if (error) {
       throw error;
     }
@@ -502,6 +523,7 @@ export const accessFile = async (req, res) => {
     const arrayBuffer = await data.arrayBuffer();
 
     const buffer = Buffer.from(arrayBuffer);
+    console.log(buffer);
 
     res.setHeader("Content-Type", file.file_type);
 
